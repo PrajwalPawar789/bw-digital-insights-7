@@ -1,5 +1,5 @@
 
-import { CircularNotch } from "lucide-react";
+import { CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
@@ -17,7 +17,7 @@ export function LoadingSpinner({ className, size = "md", text }: LoadingSpinnerP
 
   return (
     <div className={cn("flex flex-col items-center justify-center", className)}>
-      <CircularNotch className={cn("animate-spin text-primary", sizeClasses[size])} />
+      <CircleDashed className={cn("animate-spin text-primary", sizeClasses[size])} />
       {text && <p className="mt-2 text-sm text-muted-foreground">{text}</p>}
     </div>
   );
