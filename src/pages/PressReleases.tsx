@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { pressReleaseData } from '../data/pressReleaseData';
@@ -23,7 +22,8 @@ import { toast } from "@/components/ui/use-toast";
 
 const PressReleases = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
   // Get all unique categories
   const categories = ['all', ...Array.from(new Set(pressReleaseData.map(pr => pr.category)))];
   
@@ -45,17 +45,61 @@ const PressReleases = () => {
   };
 
   return (
-    <div className="min-h-screen py-12 bg-gradient-to-b from-white to-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero Section with Animation */}
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-insightBlack mb-4 relative inline-block group">
-            Press Releases
-            <span className="absolute -bottom-2 left-0 w-full h-1 bg-insightRed transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></span>
-          </h1>
-          <p className="max-w-3xl mx-auto text-gray-600 text-lg md:text-xl leading-relaxed">
-            Stay up-to-date with the latest announcements, partnerships, and innovations from InsightsBW.
-          </p>
+        {/* Enhanced Hero Section */}
+        <div className="relative bg-insightBlack text-white py-20 mb-12 rounded-b-3xl overflow-hidden">
+          <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1557425955-df376b5903c8?ixlib=rb-1.2.1&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+          <div className="relative max-w-4xl mx-auto text-center px-4">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in">
+              Press Releases
+            </h1>
+            <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-200 leading-relaxed">
+              Stay informed about the latest developments, partnerships, and innovations 
+              from the world's leading technology executives and organizations.
+            </p>
+          </div>
+        </div>
+
+        {/* Enhanced Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+          {[
+            { label: "Global Coverage", value: "500K+" },
+            { label: "Executive Features", value: "1000+" },
+            { label: "Industry Leaders", value: "250+" },
+            { label: "Markets Reached", value: "120+" },
+          ].map((stat, index) => (
+            <div 
+              key={index} 
+              className="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
+            >
+              <div className="text-2xl md:text-3xl font-bold text-insightRed mb-2">{stat.value}</div>
+              <div className="text-sm text-gray-600">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Enhanced Category Filter */}
+        <div className="bg-white p-8 rounded-xl shadow-sm mb-10">
+          <h2 className="text-xl font-semibold mb-6 text-insightBlack">Browse by Category</h2>
+          <div className="flex flex-wrap gap-3">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => {
+                  setSelectedCategory(category);
+                  setCurrentPage(1);
+                }}
+                className={`px-6 py-3 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
+                  selectedCategory === category
+                    ? 'bg-insightRed text-white shadow-md'
+                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                }`}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Featured Carousel */}
@@ -124,34 +168,12 @@ const PressReleases = () => {
           </Carousel>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-          <span className="font-medium text-gray-700 flex items-center mr-2">
-            <Tag className="h-4 w-4 mr-1" /> Filter by:
-          </span>
-          {categories.map((category) => (
-            <Button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              variant={selectedCategory === category ? "default" : "outline"}
-              size="sm"
-              className={`${
-                selectedCategory === category
-                  ? "bg-insightRed hover:bg-insightRed/90 transform hover:scale-105"
-                  : "hover:bg-gray-100"
-              } transition-all duration-300`}
-            >
-              {category.charAt(0).toUpperCase() + category.slice(1)}
-            </Button>
-          ))}
-        </div>
-
         {/* Press Release List */}
         <div className="space-y-8">
           {filteredPressReleases.map((pressRelease) => (
             <div 
               key={pressRelease.id} 
-              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/3 h-48 md:h-auto overflow-hidden relative group">
