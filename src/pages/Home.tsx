@@ -262,9 +262,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Publications Section - Enhanced */}
-      <section className="py-16 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Publications Section - Enhanced with 3D effect and parallax */}
+      <section className="py-16 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05')] bg-cover bg-fixed bg-center opacity-5"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex items-center justify-between mb-12">
             <div className="max-w-2xl">
               <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
@@ -283,16 +284,19 @@ const Home = () => {
               loop: true,
               dragFree: true,
             }}
-            className="w-full"
+            className="w-full perspective-[1000px]"
           >
             <CarouselContent className="-ml-4">
               {magazineData.map((magazine) => (
                 <CarouselItem 
                   key={magazine.id} 
-                  className="pl-4 basis-[280px] md:basis-[320px] lg:basis-[400px] transition-all duration-300 data-[center=true]:scale-110"
+                  className="pl-4 basis-[280px] md:basis-[320px] lg:basis-[400px] transition-all duration-500"
                 >
-                  <Link to={`/magazine/${magazine.id}`} className="block group perspective-1000">
-                    <div className="relative transform transition-all duration-500 group-hover:rotate-y-6 preserve-3d">
+                  <Link 
+                    to={`/magazine/${magazine.id}`} 
+                    className="block group perspective-[1000px] transform-style-3d"
+                  >
+                    <div className="relative transform transition-all duration-700 group-hover:rotate-y-12 preserve-3d">
                       <div className="overflow-hidden rounded-xl shadow-2xl bg-white">
                         <div className="relative aspect-[3/4]">
                           <img
@@ -300,29 +304,30 @@ const Home = () => {
                             alt={magazine.title}
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                           <div className="absolute top-0 right-0 m-4">
-                            <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-insightBlack text-sm font-semibold rounded-full">
+                            <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-insightBlack text-sm font-semibold rounded-full shadow-lg">
                               {magazine.publicationDate}
                             </span>
                           </div>
-                          <div className="absolute bottom-0 left-0 p-6 text-white transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                          <div className="absolute bottom-0 left-0 p-6 text-white transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                             <h3 className="text-xl font-bold mb-2">{magazine.title}</h3>
                             <p className="text-sm text-gray-200 line-clamp-2 mb-4">{magazine.description}</p>
-                            <span className="inline-flex items-center text-sm font-medium text-white">
+                            <span className="inline-flex items-center text-sm font-medium text-white bg-insightRed/90 px-4 py-2 rounded-md backdrop-blur-sm">
                               Read Issue <ChevronRight className="ml-1 h-4 w-4" />
                             </span>
                           </div>
                         </div>
                       </div>
+                      <div className="absolute inset-0 transform translate-z-[-100px] rotate-y-180 bg-black/20 rounded-xl blur-md"></div>
                     </div>
                   </Link>
                 </CarouselItem>
               ))}
             </CarouselContent>
             <div className="flex justify-center mt-12 space-x-4">
-              <CarouselPrevious className="relative static bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl transition-all" />
-              <CarouselNext className="relative static bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl transition-all" />
+              <CarouselPrevious className="relative static transform hover:scale-110 transition-transform bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl" />
+              <CarouselNext className="relative static transform hover:scale-110 transition-transform bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl" />
             </div>
           </Carousel>
         </div>
