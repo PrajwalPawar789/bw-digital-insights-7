@@ -33,32 +33,35 @@ const Home = () => {
   // Top executives from testimonials (using them as featured executives)
   const featuredExecutives = testimonialData.slice(0, 3);
 
-  // Sample upcoming editions data
+  // Sample upcoming editions data - enhanced with more descriptive content
   const upcomingEditions = [
     {
       id: 1,
       title: "Tech Disruption 2026",
-      description: "How emerging technologies are reshaping global industries",
+      description: "How emerging technologies are reshaping global industries and transforming business models across sectors",
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-      releaseDate: "January 2026"
+      releaseDate: "January 2026",
+      status: "In Production"
     },
     {
       id: 2,
       title: "Sustainable Business Leaders",
-      description: "The executives pioneering the green revolution in corporate America",
+      description: "The executives pioneering environmental innovation and sustainable practices in the corporate landscape",
       image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e",
-      releaseDate: "March 2026"
+      releaseDate: "March 2026",
+      status: "Content Development"
     },
     {
       id: 3,
       title: "AI & Human Capital",
-      description: "How artificial intelligence is transforming the workforce",
+      description: "Exploring the balance between artificial intelligence advancement and workforce development strategies",
       image: "https://images.unsplash.com/photo-1482938289607-e9573fc25ebb",
-      releaseDate: "May 2026"
+      releaseDate: "May 2026",
+      status: "Initial Planning"
     }
   ];
   
-  // Sample prestigious clients data
+  // Sample prestigious clients data with enhanced descriptions
   const prestigiousClients = [
     {
       id: 1,
@@ -395,7 +398,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* UPCOMING EDITIONS - NEW SECTION */}
+      {/* UPCOMING EDITIONS - ENHANCED WITH BLUR EFFECTS */}
       <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -409,37 +412,42 @@ const Home = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {upcomingEditions.map((edition) => (
-              <div key={edition.id} className="group relative overflow-hidden rounded-xl shadow-lg">
-                <div className="absolute inset-0 bg-black/40 z-10"></div>
+            {upcomingEditions.map((edition, index) => (
+              <div 
+                key={edition.id} 
+                className="group relative overflow-hidden rounded-xl shadow-lg transform transition-all duration-500 hover:-translate-y-2"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 z-10 group-hover:from-black/80"></div>
                 
-                {/* Blurred image background */}
+                {/* Enhanced blurred image background */}
                 <img
                   src={edition.image}
                   alt={edition.title}
-                  className="w-full h-80 object-cover filter blur-sm scale-105 group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-80 object-cover filter blur-[8px] scale-110 group-hover:scale-125 group-hover:blur-[12px] transition-all duration-1000"
                 />
                 
-                {/* Content overlay */}
+                {/* Content overlay with improved typography and spacing */}
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
                   <div className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-3 w-fit">
                     <span className="animate-pulse mr-2 h-2 w-2 bg-insightRed rounded-full"></span>
                     {edition.releaseDate}
                   </div>
-                  <h3 className="text-2xl font-bold mb-2 group-hover:text-insightRed transition-colors">
+                  <h3 className="text-2xl font-bold mb-3 tracking-tight group-hover:text-insightRed transition-colors">
                     {edition.title}
                   </h3>
-                  <p className="text-gray-200 mb-4">
+                  <p className="text-gray-200 mb-5 line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
                     {edition.description}
                   </p>
-                  <div className="flex items-center text-sm font-medium">
-                    <span className="border-b border-white/50 pb-0.5">Coming Soon</span>
+                  <div className="flex items-center text-sm font-medium border-t border-white/20 pt-3">
+                    <span className="pb-0.5">In Development</span>
                   </div>
                 </div>
                 
+                {/* Status badge with pulsing effect */}
                 <div className="absolute top-4 right-4 z-30">
-                  <span className="inline-flex items-center px-3 py-1 bg-insightRed/90 backdrop-blur-sm text-white text-sm font-bold rounded-full">
-                    In Production
+                  <span className="inline-flex items-center px-3 py-1 bg-insightRed/90 backdrop-blur-sm text-white text-sm font-bold rounded-full group-hover:shadow-glow animate-pulse">
+                    {edition.status}
                   </span>
                 </div>
               </div>
@@ -522,10 +530,13 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Our Prestigious Clients - NEW SECTION */}
-      <section className="py-16 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
+      {/* Our Prestigious Clients - ENHANCED WITH ANIMATIONS */}
+      <section className="py-16 bg-white relative overflow-hidden">
+        {/* Subtle background pattern */}
+        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
               <Building className="w-4 h-4 mr-2" /> Trusted By Leaders
             </div>
@@ -535,26 +546,30 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 md:gap-12">
-            {prestigiousClients.map((client) => (
-              <div 
-                key={client.id} 
-                className="flex flex-col items-center group"
-              >
-                <div className="p-6 rounded-full bg-white/80 shadow-lg mb-4 transition-all duration-300 group-hover:shadow-xl group-hover:bg-white group-hover:scale-105 w-32 h-32 flex items-center justify-center">
-                  <img 
-                    src={client.logo} 
-                    alt={client.name}
-                    className="max-w-full max-h-16 object-contain opacity-90 group-hover:opacity-100 transition-opacity" 
-                  />
+          {/* Client logos with left-to-right animation on scroll */}
+          <div className="client-logos-container overflow-hidden">
+            <div className="client-logos-wrapper flex items-center gap-16 animate-marquee">
+              {[...prestigiousClients, ...prestigiousClients].map((client, index) => (
+                <div 
+                  key={`${client.id}-${index}`} 
+                  className="flex flex-col items-center group min-w-[200px]"
+                >
+                  <div className="p-8 rounded-xl bg-white border border-gray-100 shadow-lg mb-4 transition-all duration-300 group-hover:shadow-xl group-hover:border-gray-200 w-36 h-36 flex items-center justify-center">
+                    <img 
+                      src={client.logo} 
+                      alt={client.name}
+                      className="max-w-full max-h-20 object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
+                    />
+                  </div>
+                  <h3 className="text-lg font-bold text-insightBlack mb-1">{client.name}</h3>
+                  <div className="relative">
+                    <p className="text-sm text-gray-600 text-center">{client.description}</p>
+                    {/* Enhanced animated underline effect */}
+                    <div className="absolute -bottom-2 left-0 w-0 h-0.5 bg-insightRed group-hover:w-full transition-all duration-500 ease-out"></div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-insightBlack mb-1">{client.name}</h3>
-                <div className="relative">
-                  <p className="text-sm text-gray-600 text-center">{client.description}</p>
-                  <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-insightRed/70 scale-x-0 group-hover:scale-x-100 transition-transform origin-center duration-300"></div>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
