@@ -137,4 +137,20 @@
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+  
+  /* Slower scroll animation for better visibility */
+  @keyframes slowScroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  .animate-slow-scroll {
+    animation: slowScroll 60s linear infinite;
+    display: flex;
+    width: max-content;
+  }
 }

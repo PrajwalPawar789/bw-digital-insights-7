@@ -13,6 +13,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
+import ClientLogos from '@/components/ClientLogos';
 
 const Home = () => {
   const featuredNews = newsData.filter(news => news.isFeatured).slice(0, 10);
@@ -61,59 +62,6 @@ const Home = () => {
     }
   ];
   
-  // Updated client logo URLs
-  const clientLogos = [
-    "https://insightscare.in/wp-content/uploads/2025/03/12.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/13.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/14.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/2-1.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/1-1.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/15.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/16.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/4.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/5.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/6.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/7.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/8.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/9.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/10.png",
-    "https://insightscare.in/wp-content/uploads/2025/03/11.png"
-  ];
-  
-  // Sample prestigious clients data with client names (keeping original structure but updating logos)
-  const prestigiousClients = [
-    {
-      id: 1,
-      name: "Technovate",
-      description: "Global Technology Leader",
-      logo: clientLogos[0]
-    },
-    {
-      id: 2,
-      name: "EcoSphere",
-      description: "Sustainable Solutions Provider",
-      logo: clientLogos[1]
-    },
-    {
-      id: 3,
-      name: "Quantum Financial",
-      description: "Global Investment Leadership",
-      logo: clientLogos[2]
-    },
-    {
-      id: 4,
-      name: "Atlas Healthcare",
-      description: "Transforming Patient Care",
-      logo: clientLogos[3]
-    },
-    {
-      id: 5,
-      name: "Nexus Partners",
-      description: "Strategic Business Consulting",
-      logo: clientLogos[4]
-    }
-  ];
-
   // Carousel auto-play for top picks
   useEffect(() => {
     const interval = setInterval(() => {
@@ -549,62 +497,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Our Prestigious Clients - COMPLETELY REDESIGNED WITH NEW IMAGES */}
-      <section className="py-16 bg-white relative overflow-hidden">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
-              <Building className="w-4 h-4 mr-2" /> Trusted By Leaders
-            </div>
-            <h2 className="text-4xl font-bold text-insightBlack mb-4">Our Prestigious Clients</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Global enterprises that trust InsightsBW for their executive marketing needs
-            </p>
-          </div>
-          
-          {/* Client logos carousel based on provided design */}
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="overflow-x-auto">
-              <div className="flex space-x-6 animate-marquee">
-                {clientLogos.map((logo, index) => (
-                  <div key={index} className="group flex flex-col items-center">
-                    <div className="h-20 min-w-48 flex items-center justify-center mb-3 bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all duration-300">
-                      <img 
-                        src={logo} 
-                        alt={`Client ${index + 1}`}
-                        className="h-full w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
-                      />
-                    </div>
-                    {/* Adding animated line below images as requested in previous conversation */}
-                    <div className="relative">
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-insightRed group-hover:w-full group-hover:left-0 group-hover:transform-none transition-all duration-500 ease-out"></div>
-                    </div>
-                  </div>
-                ))}
-                {/* Duplicate logos to create continuous effect */}
-                {clientLogos.slice(0, 5).map((logo, index) => (
-                  <div key={`dup-${index}`} className="group flex flex-col items-center">
-                    <div className="h-20 min-w-48 flex items-center justify-center mb-3 bg-white border border-gray-100 rounded-lg p-4 hover:shadow-md transition-all duration-300">
-                      <img 
-                        src={logo} 
-                        alt={`Client ${index + 1}`}
-                        className="h-full w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity" 
-                      />
-                    </div>
-                    {/* Adding animated line below images as requested in previous conversation */}
-                    <div className="relative">
-                      <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-insightRed group-hover:w-full group-hover:left-0 group-hover:transform-none transition-all duration-500 ease-out"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Our Prestigious Clients - Using the new Component */}
+      <ClientLogos />
 
       {/* Executive Spotlight - NEW SECTION */}
       <section className="py-16 bg-insightBlack text-white">
