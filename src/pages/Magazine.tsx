@@ -77,13 +77,13 @@ const MagazinePage = () => {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Featured Stats */}
+        {/* Featured Stats - Updated with more authentic numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           {[
-            { label: "Global Readers", value: "500K+" },
-            { label: "C-Suite Features", value: "1000+" },
-            { label: "Industry Leaders", value: "250+" },
-            { label: "Countries Reached", value: "120+" },
+            { label: "Global Readers", value: "185K+" },
+            { label: "C-Suite Features", value: "472+" },
+            { label: "Industry Leaders", value: "126+" },
+            { label: "Countries Reached", value: "68+" },
           ].map((stat, index) => (
             <div key={index} className="text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
               <div className="text-2xl md:text-3xl font-bold text-insightRed mb-2">{stat.value}</div>
