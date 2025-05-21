@@ -1,4 +1,5 @@
-import { useParams, Link } from 'react-router-dom';
+
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { newsData } from '../data/newsData';
 import { ChevronLeft, Calendar, User, Clock, Share2, Bookmark, MessageSquare, Tag } from 'lucide-react';
@@ -7,6 +8,7 @@ import { toast } from "@/components/ui/use-toast";
 
 const ArticleDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [article, setArticle] = useState(newsData.find(article => article.id === Number(id)));
   const [loading, setLoading] = useState(true);
   const [relatedArticles, setRelatedArticles] = useState<typeof newsData>([]);
@@ -54,6 +56,13 @@ const ArticleDetail = () => {
       description: "This article has been saved to your bookmarks",
       duration: 3000,
     });
+  };
+
+  const handleRelatedArticleClick = (articleId: number) => {
+    // Navigate to the selected article and force a reload of the component
+    navigate(`/article/${articleId}`);
+    setArticle(newsData.find(a => a.id === articleId));
+    window.scrollTo(0, 0);
   };
 
   if (loading) {
@@ -184,10 +193,10 @@ const ArticleDetail = () => {
             <h2 className="text-2xl font-bold text-insightBlack mb-6">Related Articles</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedArticles.map(relatedArticle => (
-                <Link 
-                  key={relatedArticle.id} 
-                  to={`/article/${relatedArticle.id}`}
-                  className="group"
+                <div 
+                  key={relatedArticle.id}
+                  onClick={() => handleRelatedArticleClick(relatedArticle.id)}
+                  className="cursor-pointer group"
                 >
                   <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="h-40 overflow-hidden">
@@ -204,7 +213,7 @@ const ArticleDetail = () => {
                       <p className="text-sm text-gray-600 line-clamp-2">{relatedArticle.excerpt}</p>
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </div>
           </div>

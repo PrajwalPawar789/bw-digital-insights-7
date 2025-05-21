@@ -62,13 +62,13 @@ const PressReleases = () => {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Stats Section */}
+        {/* Enhanced Stats Section - Updated with more realistic numbers */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           {[
-            { label: "Global Coverage", value: "500K+" },
-            { label: "Executive Features", value: "1000+" },
-            { label: "Industry Leaders", value: "250+" },
-            { label: "Markets Reached", value: "120+" },
+            { label: "Global Readers", value: "185K+" },
+            { label: "C-Suite Features", value: "472+" },
+            { label: "Industry Leaders", value: "126+" },
+            { label: "Countries Reached", value: "68+" },
           ].map((stat, index) => (
             <div 
               key={index} 
@@ -221,7 +221,7 @@ const PressReleases = () => {
                         </Button>
                         <span className="flex items-center text-sm text-gray-500">
                           <Eye className="h-4 w-4 mr-1" />
-                          {Math.floor(Math.random() * 1000) + 100} views
+                          {Math.floor(Math.random() * 400) + 50} views
                         </span>
                       </div>
                     </div>
