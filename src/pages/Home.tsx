@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { newsData, NewsItem } from '../data/newsData';
+import { newsData, Article as NewsItem } from '../data/newsData';
 import { magazineData } from '../data/magazineData';
 import { testimonialData } from '../data/testimonialsData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ClientLogos from '@/components/ClientLogos';
 
 const Home = () => {
-  const featuredNews = newsData.filter(news => news.isFeatured).slice(0, 10);
+  const featuredNews = newsData.filter(news => news.isFeatured || false).slice(0, 10);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const latestMagazine = magazineData[0]; // Most recent magazine

@@ -34,6 +34,18 @@ export interface Leader {
   }[];
 }
 
+export interface LeadershipArticle {
+  id: number;
+  title: string;
+  author: string;
+  date: string;
+  excerpt: string;
+  image: string;
+  type: 'philosophy' | 'interview' | 'feature';
+  content?: string;
+  url?: string;
+}
+
 export const leadershipData: Leader[] = [
   {
     id: 1,
@@ -391,6 +403,67 @@ export const leadershipData: Leader[] = [
         slug: "financial-strategies-global-expansion"
       }
     ]
+  }
+];
+
+// Create arrays for profile and article sections
+export const leaderProfiles: Leader[] = leadershipData;
+
+export const leadershipArticles: LeadershipArticle[] = [
+  {
+    id: 1,
+    title: "Leadership in the Digital Age",
+    author: "Maria Rodriguez",
+    date: "May 1, 2025",
+    excerpt: "How technology is transforming leadership practices and creating new opportunities for innovation.",
+    image: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "philosophy"
+  },
+  {
+    id: 2,
+    title: "Building Resilient Teams",
+    author: "James Wilson",
+    date: "April 15, 2025",
+    excerpt: "Strategies for developing teams that can thrive in uncertainty and adapt to rapid change.",
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "philosophy"
+  },
+  {
+    id: 3,
+    title: "Inclusive Leadership Strategies",
+    author: "Sarah Johnson",
+    date: "March 22, 2025",
+    excerpt: "How diversity and inclusion initiatives are transforming organizational culture and performance.",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "philosophy"
+  },
+  {
+    id: 4,
+    title: "Interview: Michael Chen on Supply Chain Innovation",
+    author: "Emily Brown",
+    date: "April 5, 2025",
+    excerpt: "An exclusive conversation with InsightsBW's CSO about supply chain resilience and strategic partnerships.",
+    image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "interview",
+    url: "https://www.example.com/interview/michael-chen-supply-chain"
+  },
+  {
+    id: 5,
+    title: "The Evolution of Corporate Strategy",
+    author: "David Patel",
+    date: "March 8, 2025",
+    excerpt: "How finance leaders are reshaping strategic planning for sustainable growth.",
+    image: "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "feature"
+  },
+  {
+    id: 6,
+    title: "Women in Leadership: Breaking Barriers",
+    author: "Jennifer Martinez",
+    date: "February 28, 2025",
+    excerpt: "How female executives are transforming corporate leadership and fostering diversity.",
+    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+    type: "feature"
   }
 ];
 

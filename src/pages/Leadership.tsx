@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { leaderProfiles, leadershipArticles } from '../data/leadershipData';
 import { ExternalLink, Award, TrendingUp, Users, BookOpen, ArrowRight } from 'lucide-react';

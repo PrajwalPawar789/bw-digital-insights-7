@@ -1,4 +1,3 @@
-
 import { slugify } from "../lib/slugify";
 
 export interface Article {
@@ -11,7 +10,10 @@ export interface Article {
   excerpt: string;
   content: string;
   slug: string;
+  isFeatured?: boolean;
 }
+
+export type NewsItem = Article; // Alias for backward compatibility
 
 export const newsData: Article[] = [
   {
@@ -23,7 +25,8 @@ export const newsData: Article[] = [
     category: "Technology",
     excerpt: "How artificial intelligence and machine learning are revolutionizing business processes and decision-making across industries.",
     content: "Artificial intelligence and machine learning technologies are fundamentally changing how businesses operate, analyze data, and make strategic decisions. From automating routine tasks to uncovering insights in vast datasets, these technologies are helping companies across sectors increase efficiency and gain competitive advantages.\n\nIn manufacturing, predictive maintenance powered by machine learning algorithms is reducing downtime and extending equipment lifespans. Retail companies are leveraging AI for personalized marketing and inventory optimization. Financial institutions are employing these technologies for fraud detection and risk assessment with unprecedented accuracy.\n\nPerhaps most significantly, AI tools are enhancing decision-making processes at executive levels. By analyzing historical data and market trends, advanced algorithms can provide recommendations that help leaders navigate complex challenges and identify new opportunities.",
-    slug: "ai-machine-learning-transforming-business-operations"
+    slug: "ai-machine-learning-transforming-business-operations",
+    isFeatured: true
   },
   {
     id: 2,
