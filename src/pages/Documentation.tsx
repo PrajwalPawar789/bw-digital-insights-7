@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Copy, Check } from 'lucide-react';
 import { useState } from 'react';
@@ -257,7 +256,7 @@ const Documentation = () => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => copyToClipboard(`${baseUrl}${route.path.replace(/:[^/]+/g, (m) => `{${m.substring(1)}}`)}`), `${endpoint.id}-${index}`}
+                              onClick={() => copyToClipboard(`${baseUrl}${route.path.replace(/:[^/]+/g, (m) => `{${m.substring(1)}}`)}`, `${endpoint.id}-${index}`)}
                             >
                               {copiedEndpoint === `${endpoint.id}-${index}` ? 
                                 <><Check className="h-4 w-4 mr-1" /> Copied</> : 
