@@ -13,6 +13,7 @@ import LeadershipProfile from "./pages/LeadershipProfile";
 import PressReleases from "./pages/PressReleases";
 import PressReleaseDetail from "./pages/PressReleaseDetail";
 import ArticleDetail from "./pages/ArticleDetail";
+import CategoryPage from "./pages/CategoryPage";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/press-releases" element={<PressReleases />} />
             <Route path="/press-releases/:slug" element={<PressReleaseDetail />} />
             <Route path="/article/:slug" element={<ArticleDetail />} />
+            <Route path="/category/:categoryName" element={<CategoryPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/documentation" element={<Documentation />} />

@@ -28,9 +28,22 @@ const ArticleDetail = () => {
     return () => clearTimeout(timer);
   }, [article]);
 
+  // Reset scroll position when navigating to a new article
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    
+    // Find article based on slug
+    const currentArticle = newsData.find(a => a.slug === slug);
+    setArticle(currentArticle);
+    
+    if (currentArticle) {
+      // Update related articles when article changes
+      const related = newsData
+        .filter(a => a.slug !== slug && a.category === currentArticle.category)
+        .slice(0, 3);
+      setRelatedArticles(related);
+    }
+  }, [slug]);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -59,10 +72,8 @@ const ArticleDetail = () => {
   };
 
   const handleRelatedArticleClick = (articleSlug: string) => {
-    // Navigate to the selected article and force a reload of the component
+    // Navigate to the selected article
     navigate(`/article/${articleSlug}`);
-    setArticle(newsData.find(a => a.slug === articleSlug));
-    window.scrollTo(0, 0);
   };
 
   if (loading) {
@@ -78,7 +89,7 @@ const ArticleDetail = () => {
       <div className="min-h-screen py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-3xl font-bold text-insightBlack mb-4">Article Not Found</h1>
-          <p className="mb-6">The article you're looking for doesn't exist.</p>
+          <p className="mb-6">The article you're looking for doesn't exist or has been removed.</p>
           <Link
             to="/"
             className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"

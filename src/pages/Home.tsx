@@ -4,7 +4,7 @@ import { newsData, Article as NewsItem } from '../data/newsData';
 import { magazineData } from '../data/magazineData';
 import { testimonialData } from '../data/testimonialsData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronRight, ChevronLeft, BookOpen, Star, Award, TrendingUp, Building } from 'lucide-react';
+import { ChevronRight, ChevronLeft, BookOpen, Star, Award, TrendingUp } from 'lucide-react';
 import {
   Carousel,
   CarouselContent,
@@ -16,7 +16,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import ClientLogos from '@/components/ClientLogos';
 
 const Home = () => {
-  const featuredNews = newsData.filter(news => news.isFeatured || false).slice(0, 10);
+  // Get featured news articles, ensuring there are multiple for the slider
+  const featuredNews = newsData.filter(news => news.isFeatured || false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const latestMagazine = magazineData[0]; // Most recent magazine
@@ -26,6 +27,13 @@ const Home = () => {
   
   // Function to get news by category
   const getNewsByCategory = (category: string) => {
+    if (category === 'Trending') {
+      // For trending, we'll show a mix of featured articles or recent ones
+      return newsData
+        .filter(news => news.isFeatured || new Date(news.date) > new Date('2025-02-01'))
+        .slice(0, 6);
+    }
+    
     return newsData
       .filter(news => news.category === category)
       .slice(0, 6);
@@ -92,7 +100,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* New Hero Section with Magazine Brand Statement */}
+      {/* Hero Section with Magazine Brand Statement */}
       <section className="bg-gradient-to-r from-insightBlack to-gray-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
@@ -208,7 +216,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Top Picks Carousel - More Focused */}
+      {/* Top Picks Carousel - More Focused (Editor's Picks) */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
@@ -274,9 +282,9 @@ const Home = () => {
               <ChevronRight className="h-6 w-6" />
             </button>
             
-            {/* Indicators */}
+            {/* Indicators - display indicators for all featured news items */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-              {featuredNews.slice(0, 5).map((_, index) => (
+              {featuredNews.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveSlide(index)}
