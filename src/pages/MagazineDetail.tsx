@@ -1,47 +1,26 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { magazineData, Magazine, MagazineArticle } from '../data/magazineData';
+import { useMagazineBySlug } from '@/hooks/useMagazines';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { ChevronLeft, ChevronRight, Download, FileWarning, Maximize, ZoomIn, ZoomOut, RefreshCw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileWarning, Maximize, ZoomIn, ZoomOut, RefreshCw, Loader2 } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Set up PDF.js worker with a consistent version that works with our react-pdf version
+// Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 const MagazineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const [magazine, setMagazine] = useState<Magazine | null>(null);
+  const { data: magazine, isLoading, error } = useMagazineBySlug(slug || '');
+  
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(true);
   const [pdfError, setPdfError] = useState<boolean>(false);
   const [loadRetry, setLoadRetry] = useState<number>(0);
   const [scale, setScale] = useState<number>(1.0);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Find the magazine by slug
-    const foundMagazine = magazineData.find(mag => mag.slug === slug);
-    if (foundMagazine) {
-      setMagazine(foundMagazine);
-      // Reset state when magazine changes
-      setNumPages(null);
-      setPageNumber(1);
-      setPdfError(false);
-      setLoadRetry(0);
-      setScale(1.0);
-    }
-    
-    // Simulate loading delay
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, [slug]);
 
   // Retry loading PDF if there was an error
   useEffect(() => {
@@ -97,7 +76,6 @@ const MagazineDetail = () => {
   
   const toggleFullScreen = () => setFullScreen(!fullScreen);
 
-  // Manual retry function
   const retryPdfLoad = () => {
     setPdfError(false);
     setLoadRetry(0);
@@ -109,15 +87,18 @@ const MagazineDetail = () => {
     });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-insightRed"></div>
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-8 w-8 animate-spin text-insightRed" />
+          <span className="text-lg">Loading magazine...</span>
+        </div>
       </div>
     );
   }
 
-  if (!magazine) {
+  if (error || !magazine) {
     return (
       <div className="min-h-screen py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -134,8 +115,8 @@ const MagazineDetail = () => {
     );
   }
 
-  // Using a reliable PDF source - this is a sample PDF that's commonly used for testing
-  const pdfUrl = "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf";
+  // Use the sample PDF for demo purposes
+  const pdfUrl = magazine.pdf_url || "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf";
 
   return (
     <div className="min-h-screen py-12">
@@ -144,7 +125,7 @@ const MagazineDetail = () => {
         <div className="flex flex-col md:flex-row items-start gap-8 mb-12">
           <div className="md:w-1/3">
             <img
-              src={magazine.coverImage}
+              src={magazine.cover_image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800'}
               alt={magazine.title}
               className="w-full rounded-lg shadow-md hover:shadow-lg transition-shadow"
             />
@@ -159,12 +140,16 @@ const MagazineDetail = () => {
               </Link>
             </div>
             <h1 className="text-3xl font-bold text-insightBlack mb-3">{magazine.title}</h1>
-            <span className="inline-block px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-md mb-4">
-              {magazine.category}
-            </span>
+            {magazine.issue_number && (
+              <span className="inline-block px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-md mb-4">
+                Issue {magazine.issue_number}
+              </span>
+            )}
             <p className="text-gray-600 mb-6">{magazine.description}</p>
             <div className="flex items-center justify-between mb-6">
-              <span className="text-sm text-gray-500">Published: {magazine.publicationDate}</span>
+              <span className="text-sm text-gray-500">
+                Published: {new Date(magazine.publish_date).toLocaleDateString()}
+              </span>
               <a
                 href={pdfUrl}
                 download
@@ -305,27 +290,26 @@ const MagazineDetail = () => {
           )}
         </div>
 
-        {/* Articles Section */}
+        {/* Related Articles Section */}
         <div>
-          <h2 className="text-2xl font-bold text-insightBlack mb-6">Featured Articles</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {magazine.articles.map((article: MagazineArticle) => (
-              <div key={article.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
-                <img
-                  src={article.thumbnailImage}
-                  alt={article.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-2 hover:text-insightRed transition-colors">{article.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{article.excerpt}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">By {article.author}</span>
-                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">Page {article.pageNumber}</span>
-                  </div>
-                </div>
+          <h2 className="text-2xl font-bold text-insightBlack mb-6">About This Issue</h2>
+          <div className="bg-white p-6 rounded-lg shadow-sm">
+            <p className="text-gray-700 leading-relaxed">
+              {magazine.description || "This magazine issue contains cutting-edge insights and analysis from industry leaders and technology experts."}
+            </p>
+            <div className="mt-4 flex items-center justify-between">
+              <div className="text-sm text-gray-500">
+                <p><strong>Issue:</strong> {magazine.issue_number || 'Latest'}</p>
+                <p><strong>Published:</strong> {new Date(magazine.publish_date).toLocaleDateString()}</p>
               </div>
-            ))}
+              <a
+                href={pdfUrl}
+                download
+                className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                <Download className="mr-2 h-4 w-4" /> Download PDF
+              </a>
+            </div>
           </div>
         </div>
       </div>

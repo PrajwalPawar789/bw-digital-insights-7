@@ -35,12 +35,16 @@ export const useImageUpload = () => {
 
   const deleteImage = async (url: string) => {
     try {
-      const fileName = url.split('/').pop();
-      if (!fileName) throw new Error("Invalid file URL");
+      // Extract filename from URL
+      const urlParts = url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const folderParts = url.split('website-images/')[1];
+      
+      if (!folderParts) throw new Error("Invalid file URL");
 
       const { error } = await supabase.storage
         .from('website-images')
-        .remove([fileName]);
+        .remove([folderParts]);
 
       if (error) throw error;
       toast.success("Image deleted successfully");
