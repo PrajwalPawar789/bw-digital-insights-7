@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -55,6 +56,7 @@ const MagazineManager = () => {
       setPublishDate(selectedMagazine.publish_date);
       setIssueNumber(selectedMagazine.issue_number);
       setFeatured(selectedMagazine.featured);
+      setOpen(true);
     } else {
       setEditMode(false);
       setTitle('');
@@ -67,6 +69,19 @@ const MagazineManager = () => {
       setFeatured(false);
     }
   }, [selectedMagazine]);
+
+  const resetForm = () => {
+    setSelectedMagazine(null);
+    setEditMode(false);
+    setTitle('');
+    setSlug('');
+    setDescription('');
+    setCoverImageUrl('');
+    setPdfUrl('');
+    setPublishDate('');
+    setIssueNumber('');
+    setFeatured(false);
+  };
 
   const handleCreateMagazine = async () => {
     if (!title || !description || !publishDate) {
@@ -87,6 +102,7 @@ const MagazineManager = () => {
 
     createMagazine(newMagazine);
     setOpen(false);
+    resetForm();
     refetch();
   };
 
@@ -107,6 +123,7 @@ const MagazineManager = () => {
 
     updateMagazine(updatedMagazine);
     setOpen(false);
+    resetForm();
     refetch();
   };
 
@@ -118,6 +135,7 @@ const MagazineManager = () => {
     try {
       const imageUrl = await uploadImage(file, "magazines");
       setCoverImageUrl(imageUrl);
+      toast.success("Cover image uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload image");
     }
@@ -125,25 +143,31 @@ const MagazineManager = () => {
 
   const handlePdfUpload = async (file: File) => {
     try {
-      const pdfUrl = await uploadPdf(file, "magazines");
+      const pdfUrl = await uploadPdf(file, "magazine-pdfs");
       setPdfUrl(pdfUrl);
+      toast.success("PDF uploaded successfully");
     } catch (error) {
       toast.error("Failed to upload PDF");
     }
+  };
+
+  const handleDialogClose = () => {
+    setOpen(false);
+    resetForm();
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Magazines</h2>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2" onClick={resetForm}>
               <Plus className="h-4 w-4" />
               Create Magazine
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editMode ? 'Edit Magazine' : 'Create New Magazine'}</DialogTitle>
               <DialogDescription>
@@ -161,7 +185,13 @@ const MagazineManager = () => {
                 <Label htmlFor="slug" className="text-right">
                   Slug
                 </Label>
-                <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} className="col-span-3" />
+                <Input 
+                  id="slug" 
+                  value={slug} 
+                  onChange={(e) => setSlug(e.target.value)} 
+                  placeholder="Auto-generated from title"
+                  className="col-span-3" 
+                />
               </div>
               <div className="grid grid-cols-4 items-start gap-4">
                 <Label htmlFor="description" className="text-right mt-2">
@@ -173,32 +203,56 @@ const MagazineManager = () => {
                 <Label htmlFor="coverImage" className="text-right">
                   Cover Image
                 </Label>
-                <div className="col-span-3">
-                  <Input type="file" id="coverImage" onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handleImageUpload(e.target.files[0]);
-                    }
-                  }} className="hidden" />
-                  <Label htmlFor="coverImage" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer">
-                    {uploading ? 'Uploading...' : 'Upload Image'}
+                <div className="col-span-3 space-y-2">
+                  <Input 
+                    type="file" 
+                    id="coverImage" 
+                    accept="image/*"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handleImageUpload(e.target.files[0]);
+                      }
+                    }} 
+                    className="hidden" 
+                  />
+                  <Label htmlFor="coverImage" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer inline-block">
+                    {uploading ? 'Uploading...' : 'Upload Cover Image'}
                   </Label>
-                  {coverImageUrl && <a href={coverImageUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-500 hover:underline">View Image</a>}
+                  {coverImageUrl && (
+                    <div className="flex items-center gap-2">
+                      <a href={coverImageUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm">
+                        View Current Image
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="pdf" className="text-right">
                   PDF File
                 </Label>
-                <div className="col-span-3">
-                  <Input type="file" id="pdf" onChange={(e) => {
-                    if (e.target.files && e.target.files.length > 0) {
-                      handlePdfUpload(e.target.files[0]);
-                    }
-                  }} className="hidden" />
-                  <Label htmlFor="pdf" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer">
+                <div className="col-span-3 space-y-2">
+                  <Input 
+                    type="file" 
+                    id="pdf" 
+                    accept=".pdf"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files.length > 0) {
+                        handlePdfUpload(e.target.files[0]);
+                      }
+                    }} 
+                    className="hidden" 
+                  />
+                  <Label htmlFor="pdf" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer inline-block">
                     {uploading ? 'Uploading...' : 'Upload PDF'}
                   </Label>
-                  {pdfUrl && <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="ml-2 text-blue-500 hover:underline">View PDF</a>}
+                  {pdfUrl && (
+                    <div className="flex items-center gap-2">
+                      <a href={pdfUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline text-sm">
+                        View Current PDF
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
@@ -215,7 +269,7 @@ const MagazineManager = () => {
                   type="number"
                   id="issueNumber"
                   value={issueNumber}
-                  onChange={(e) => setIssueNumber(e.target.value)}
+                  onChange={(e) => setIssueNumber(e.target.value === '' ? '' : Number(e.target.value))}
                   className="col-span-3"
                 />
               </div>
@@ -228,9 +282,14 @@ const MagazineManager = () => {
                 </div>
               </div>
             </div>
-            <Button onClick={editMode ? handleUpdateMagazine : handleCreateMagazine}>
-              {editMode ? 'Update Magazine' : 'Create Magazine'}
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={editMode ? handleUpdateMagazine : handleCreateMagazine} className="flex-1">
+                {editMode ? 'Update Magazine' : 'Create Magazine'}
+              </Button>
+              <Button variant="outline" onClick={handleDialogClose}>
+                Cancel
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>
@@ -239,7 +298,10 @@ const MagazineManager = () => {
         {magazines?.map((magazine) => (
           <Card key={magazine.id} className="overflow-hidden">
             <CardHeader>
-              <CardTitle>{magazine.title}</CardTitle>
+              <CardTitle className="flex items-center justify-between">
+                {magazine.title}
+                {magazine.featured && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
+              </CardTitle>
               <CardDescription>{magazine.description}</CardDescription>
             </CardHeader>
             <CardContent className="flex items-center justify-between">
@@ -262,13 +324,9 @@ const MagazineManager = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="secondary" size="icon" onClick={() => setSelectedMagazine(magazine)}>
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                </Dialog>
+                <Button variant="secondary" size="icon" onClick={() => setSelectedMagazine(magazine)}>
+                  <Edit2 className="h-4 w-4" />
+                </Button>
                 <Button variant="destructive" size="icon" onClick={() => handleDeleteMagazine(magazine.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -277,8 +335,6 @@ const MagazineManager = () => {
           </Card>
         ))}
       </div>
-
-      
     </div>
   );
 };
