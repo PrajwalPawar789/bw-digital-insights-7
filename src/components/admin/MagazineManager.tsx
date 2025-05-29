@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { Route, Routes, Link, useNavigate } from "react-router-dom";
+import { Route, Routes, Link, useNavigate, useParams } from "react-router-dom";
 import { 
   ChevronLeft, 
   Plus, 
@@ -34,7 +33,7 @@ import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from "@/hooks/useMagazines";
+import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine, useMagazineBySlug } from "@/hooks/useMagazines";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 const formSchema = z.object({
@@ -203,11 +202,20 @@ const MagazineList = () => {
 
 const MagazineForm = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditing = !!id;
+  
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [uploadedPdf, setUploadedPdf] = useState<string | null>(null);
   
   const createMutation = useCreateMagazine();
-  const { uploadImage, uploading } = useImageUpload();
+  const updateMutation = useUpdateMagazine();
+  const { uploadImage, uploadPdf, uploading } = useImageUpload();
+  
+  // Get existing magazine data if editing
+  const { data: existingMagazine, isLoading: loadingMagazine } = useMagazineBySlug(id || '', {
+    enabled: isEditing,
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -218,6 +226,21 @@ const MagazineForm = () => {
       publish_date: new Date(),
     },
   });
+
+  // Update form when existing magazine loads
+  React.useEffect(() => {
+    if (existingMagazine && isEditing) {
+      form.reset({
+        title: existingMagazine.title,
+        description: existingMagazine.description || "",
+        featured: existingMagazine.featured || false,
+        issue_number: existingMagazine.issue_number || undefined,
+        publish_date: new Date(existingMagazine.publish_date),
+      });
+      setCoverImage(existingMagazine.cover_image_url);
+      setUploadedPdf(existingMagazine.pdf_url);
+    }
+  }, [existingMagazine, isEditing, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -236,10 +259,15 @@ const MagazineForm = () => {
         publish_date: values.publish_date.toISOString().split('T')[0],
       };
 
-      await createMutation.mutateAsync(magazineData);
+      if (isEditing) {
+        await updateMutation.mutateAsync({ id, ...magazineData });
+      } else {
+        await createMutation.mutateAsync(magazineData);
+      }
+      
       navigate("/admin/magazines");
     } catch (error) {
-      console.error("Error creating magazine:", error);
+      console.error("Error saving magazine:", error);
     }
   }
 
@@ -254,12 +282,25 @@ const MagazineForm = () => {
     }
   };
 
-  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setUploadedPdf(e.target.files[0].name);
-      toast.success("PDF file selected");
+      try {
+        const pdfUrl = await uploadPdf(e.target.files[0], 'magazines');
+        setUploadedPdf(pdfUrl);
+        toast.success("PDF uploaded successfully");
+      } catch (error) {
+        console.error("Error uploading PDF:", error);
+      }
     }
   };
+
+  if (isEditing && loadingMagazine) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-insightRed" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -268,7 +309,9 @@ const MagazineForm = () => {
           <ChevronLeft className="h-4 w-4" />
           <span>Back</span>
         </Button>
-        <h1 className="text-3xl font-bold">New Magazine</h1>
+        <h1 className="text-3xl font-bold">
+          {isEditing ? 'Edit Magazine' : 'New Magazine'}
+        </h1>
       </div>
 
       <Tabs defaultValue="content" className="w-full">
@@ -400,9 +443,10 @@ const MagazineForm = () => {
                     type="button" 
                     variant="outline" 
                     onClick={() => document.getElementById('pdf-upload')?.click()}
+                    disabled={uploading}
                   >
                     <Upload className="mr-2 h-4 w-4" />
-                    Choose PDF
+                    {uploading ? 'Uploading...' : 'Choose PDF'}
                   </Button>
                   <input
                     id="pdf-upload"
@@ -414,7 +458,7 @@ const MagazineForm = () => {
                   {uploadedPdf && (
                     <span className="text-sm text-muted-foreground">
                       <FileText className="mr-1 inline h-4 w-4" />
-                      {uploadedPdf}
+                      PDF Uploaded
                     </span>
                   )}
                 </div>
@@ -492,9 +536,12 @@ const MagazineForm = () => {
               </Button>
               <Button 
                 type="submit" 
-                disabled={createMutation.isPending}
+                disabled={createMutation.isPending || updateMutation.isPending}
               >
-                {createMutation.isPending ? 'Creating...' : 'Create Magazine'}
+                {(createMutation.isPending || updateMutation.isPending) 
+                  ? (isEditing ? 'Updating...' : 'Creating...') 
+                  : (isEditing ? 'Update Magazine' : 'Create Magazine')
+                }
               </Button>
             </div>
           </form>

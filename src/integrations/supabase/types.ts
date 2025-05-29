@@ -132,6 +132,48 @@ export type Database = {
         }
         Relationships: []
       }
+      magazine_articles: {
+        Row: {
+          article_id: string
+          created_at: string
+          featured: boolean | null
+          id: string
+          magazine_id: string
+          page_number: number | null
+        }
+        Insert: {
+          article_id: string
+          created_at?: string
+          featured?: boolean | null
+          id?: string
+          magazine_id: string
+          page_number?: number | null
+        }
+        Update: {
+          article_id?: string
+          created_at?: string
+          featured?: boolean | null
+          id?: string
+          magazine_id?: string
+          page_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "magazine_articles_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "magazine_articles_magazine_id_fkey"
+            columns: ["magazine_id"]
+            isOneToOne: false
+            referencedRelation: "magazines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       magazines: {
         Row: {
           cover_image_url: string | null

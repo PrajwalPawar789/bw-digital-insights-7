@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useMagazineBySlug } from '@/hooks/useMagazines';
+import { useMagazineArticles } from '@/hooks/useMagazineArticles';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { ChevronLeft, ChevronRight, Download, FileWarning, Maximize, ZoomIn, ZoomOut, RefreshCw, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileWarning, Maximize, ZoomIn, ZoomOut, RefreshCw, Loader2, BookOpen, ArrowRight } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.vers
 const MagazineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: magazine, isLoading, error } = useMagazineBySlug(slug || '');
+  const { data: magazineArticles = [], isLoading: articlesLoading } = useMagazineArticles(magazine?.id || '');
   
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
@@ -115,19 +117,18 @@ const MagazineDetail = () => {
     );
   }
 
-  // Use the sample PDF for demo purposes
-  const pdfUrl = magazine.pdf_url || "https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf";
+  const pdfUrl = magazine.pdf_url || "/sample-magazine.pdf";
 
   return (
     <div className="min-h-screen py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Magazine Info */}
+        {/* Magazine Header */}
         <div className="flex flex-col md:flex-row items-start gap-8 mb-12">
           <div className="md:w-1/3">
             <img
               src={magazine.cover_image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800'}
               alt={magazine.title}
-              className="w-full rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="w-full rounded-lg shadow-lg hover:shadow-xl transition-shadow"
             />
           </div>
           <div className="md:w-2/3">
@@ -139,35 +140,101 @@ const MagazineDetail = () => {
                 <ChevronLeft className="mr-1 h-4 w-4" /> Back to Magazines
               </Link>
             </div>
-            <h1 className="text-3xl font-bold text-insightBlack mb-3">{magazine.title}</h1>
+            <h1 className="text-4xl font-bold text-insightBlack mb-4">{magazine.title}</h1>
             {magazine.issue_number && (
-              <span className="inline-block px-2 py-1 text-xs font-semibold bg-gray-100 text-gray-800 rounded-md mb-4">
-                Issue {magazine.issue_number}
-              </span>
+              <div className="flex items-center gap-4 mb-4">
+                <span className="inline-block px-3 py-1 text-sm font-semibold bg-insightRed text-white rounded-md">
+                  Issue {magazine.issue_number}
+                </span>
+                {magazine.featured && (
+                  <span className="inline-block px-3 py-1 text-sm font-semibold bg-green-100 text-green-800 rounded-md">
+                    Featured
+                  </span>
+                )}
+              </div>
             )}
-            <p className="text-gray-600 mb-6">{magazine.description}</p>
+            <p className="text-gray-700 text-lg leading-relaxed mb-6">{magazine.description}</p>
             <div className="flex items-center justify-between mb-6">
               <span className="text-sm text-gray-500">
-                Published: {new Date(magazine.publish_date).toLocaleDateString()}
+                Published: {new Date(magazine.publish_date).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
               </span>
-              <a
-                href={pdfUrl}
-                download
-                className="inline-flex items-center bg-insightBlack hover:bg-insightRed text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                <Download className="mr-2 h-4 w-4" /> Download PDF
-              </a>
+              <div className="flex gap-3">
+                {pdfUrl && (
+                  <a
+                    href={pdfUrl}
+                    download
+                    className="inline-flex items-center bg-insightBlack hover:bg-insightRed text-white px-6 py-3 rounded-md text-sm font-medium transition-colors"
+                  >
+                    <Download className="mr-2 h-4 w-4" /> Download PDF
+                  </a>
+                )}
+                <Button
+                  onClick={() => document.getElementById('pdf-viewer')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-6 py-3 rounded-md text-sm font-medium transition-colors"
+                >
+                  <BookOpen className="mr-2 h-4 w-4" /> Read Online
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Magazine Articles Section */}
+        {!articlesLoading && magazineArticles.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-insightBlack mb-6">Featured Articles in This Issue</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {magazineArticles.map((magazineArticle) => (
+                <div key={magazineArticle.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="aspect-video bg-gray-200 overflow-hidden">
+                    <img
+                      src={magazineArticle.articles.image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'}
+                      alt={magazineArticle.articles.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-medium text-insightRed">
+                        Page {magazineArticle.page_number}
+                      </span>
+                      {magazineArticle.featured && (
+                        <span className="text-xs font-medium bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2 line-clamp-2">{magazineArticle.articles.title}</h3>
+                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">{magazineArticle.articles.excerpt}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-500">By {magazineArticle.articles.author}</span>
+                      <Link
+                        to={`/article/${magazineArticle.articles.slug}`}
+                        className="text-insightRed hover:text-insightBlack font-medium text-sm flex items-center"
+                      >
+                        Read Article <ArrowRight className="ml-1 h-3 w-3" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* PDF Viewer */}
-        <div className={cn(
-          "bg-white p-6 rounded-lg shadow-md mb-12 transition-all duration-300",
-          fullScreen ? "fixed inset-0 z-50 bg-white p-8 rounded-none overflow-auto" : ""
+        <div id="pdf-viewer" className={cn(
+          "bg-white rounded-lg shadow-lg mb-12 transition-all duration-300",
+          fullScreen ? "fixed inset-0 z-50 bg-white p-8 rounded-none overflow-auto" : "p-6"
         )}>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-insightBlack">Magazine Preview</h2>
+            <h2 className="text-2xl font-bold text-insightBlack">
+              {fullScreen ? 'Reading Mode' : 'Magazine Preview'}
+            </h2>
             <div className="flex space-x-2">
               <Button 
                 variant="outline" 
@@ -214,27 +281,27 @@ const MagazineDetail = () => {
           </div>
           
           <div className="flex justify-center">
-            <div className="max-w-3xl transition-all duration-200">
+            <div className="max-w-4xl transition-all duration-200">
               <Document
                 file={pdfUrl}
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={onDocumentLoadError}
                 loading={
-                  <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-100">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-insightRed mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading PDF...</p>
+                  <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-insightRed mx-auto mb-4"></div>
+                    <p className="text-gray-600 text-lg">Loading magazine pages...</p>
                   </div>
                 }
                 error={
-                  <div className="text-center py-12 bg-red-50 rounded-lg border border-red-100">
+                  <div className="text-center py-16 bg-red-50 rounded-lg border border-red-100">
                     <div className="flex flex-col items-center">
-                      <FileWarning className="h-12 w-12 text-red-500 mb-3" />
-                      <p className="text-red-500 font-medium mb-4">Failed to load PDF. Please try downloading instead.</p>
-                      <div className="flex gap-3">
+                      <FileWarning className="h-16 w-16 text-red-500 mb-4" />
+                      <p className="text-red-500 font-medium mb-6 text-lg">Failed to load PDF. Please try downloading instead.</p>
+                      <div className="flex gap-4">
                         <a
                           href={pdfUrl}
                           download
-                          className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                          className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-6 py-3 rounded-md text-sm font-medium transition-colors"
                         >
                           <Download className="mr-2 h-4 w-4" /> Download PDF
                         </a>
@@ -243,7 +310,7 @@ const MagazineDetail = () => {
                           variant="outline"
                           size="default"
                         >
-                          <RefreshCw className="mr-2 h-4 w-4" /> Retry
+                          <RefreshCw className="mr-2 h-4 w-4" /> Retry Loading
                         </Button>
                       </div>
                     </div>
@@ -253,62 +320,117 @@ const MagazineDetail = () => {
                 <Page 
                   pageNumber={pageNumber}
                   scale={scale}
-                  width={fullScreen ? Math.min(800, window.innerWidth - 100) : Math.min(600, window.innerWidth - 40)}
+                  width={fullScreen ? Math.min(900, window.innerWidth - 100) : Math.min(700, window.innerWidth - 80)}
                   renderTextLayer={false}
                   renderAnnotationLayer={false}
-                  className="mx-auto shadow-md"
+                  className="mx-auto shadow-lg rounded"
                 />
               </Document>
             </div>
           </div>
           
-          {/* PDF Navigation */}
+          {/* Enhanced PDF Navigation */}
           {numPages && !pdfError && (
-            <div className="flex justify-between items-center mt-6 bg-gray-50 p-3 rounded-md">
-              <Button
-                onClick={goToPrevPage}
-                disabled={pageNumber <= 1}
-                variant={pageNumber <= 1 ? "ghost" : "outline"}
-                size="sm"
-                className="flex items-center"
-              >
-                <ChevronLeft className="mr-1 h-4 w-4" /> Previous
-              </Button>
-              <p className="text-sm text-gray-600">
-                Page <span className="font-semibold">{pageNumber}</span> of <span className="font-semibold">{numPages}</span>
-              </p>
-              <Button
-                onClick={goToNextPage}
-                disabled={pageNumber >= (numPages || 1)}
-                variant={pageNumber >= (numPages || 1) ? "ghost" : "outline"}
-                size="sm"
-                className="flex items-center"
-              >
-                Next <ChevronRight className="ml-1 h-4 w-4" />
-              </Button>
+            <div className="mt-8 bg-gray-50 rounded-lg p-4">
+              <div className="flex justify-between items-center">
+                <Button
+                  onClick={goToPrevPage}
+                  disabled={pageNumber <= 1}
+                  variant={pageNumber <= 1 ? "ghost" : "outline"}
+                  size="default"
+                  className="flex items-center"
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous Page
+                </Button>
+                
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-600">
+                    Page <span className="font-semibold text-lg">{pageNumber}</span> of <span className="font-semibold text-lg">{numPages}</span>
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      min="1"
+                      max={numPages}
+                      value={pageNumber}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value);
+                        if (page >= 1 && page <= numPages) {
+                          setPageNumber(page);
+                        }
+                      }}
+                      className="w-16 px-2 py-1 text-center border rounded text-sm"
+                    />
+                    <Button
+                      onClick={() => setPageNumber(Math.ceil(numPages / 2))}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Go to Middle
+                    </Button>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={goToNextPage}
+                  disabled={pageNumber >= (numPages || 1)}
+                  variant={pageNumber >= (numPages || 1) ? "ghost" : "outline"}
+                  size="default"
+                  className="flex items-center"
+                >
+                  Next Page <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="mt-4 bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-insightRed h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(pageNumber / numPages) * 100}%` }}
+                ></div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Related Articles Section */}
+        {/* Magazine Information */}
         <div>
           <h2 className="text-2xl font-bold text-insightBlack mb-6">About This Issue</h2>
-          <div className="bg-white p-6 rounded-lg shadow-sm">
-            <p className="text-gray-700 leading-relaxed">
-              {magazine.description || "This magazine issue contains cutting-edge insights and analysis from industry leaders and technology experts."}
-            </p>
-            <div className="mt-4 flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                <p><strong>Issue:</strong> {magazine.issue_number || 'Latest'}</p>
-                <p><strong>Published:</strong> {new Date(magazine.publish_date).toLocaleDateString()}</p>
+          <div className="bg-white p-8 rounded-lg shadow-sm border">
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-gray-700 leading-relaxed text-lg mb-6">
+                  {magazine.description || "This magazine issue contains cutting-edge insights and analysis from industry leaders and technology experts."}
+                </p>
+                <div className="space-y-2">
+                  <p className="text-sm"><strong className="text-insightBlack">Issue:</strong> {magazine.issue_number || 'Latest'}</p>
+                  <p className="text-sm"><strong className="text-insightBlack">Published:</strong> {new Date(magazine.publish_date).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}</p>
+                  <p className="text-sm"><strong className="text-insightBlack">Articles:</strong> {magazineArticles.length} featured articles</p>
+                </div>
               </div>
-              <a
-                href={pdfUrl}
-                download
-                className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-              >
-                <Download className="mr-2 h-4 w-4" /> Download PDF
-              </a>
+              <div className="flex flex-col justify-center">
+                <h3 className="text-lg font-semibold mb-4">Download Options</h3>
+                <div className="space-y-3">
+                  <a
+                    href={pdfUrl}
+                    download
+                    className="inline-flex items-center justify-center bg-insightRed hover:bg-insightBlack text-white px-6 py-3 rounded-md font-medium transition-colors w-full"
+                  >
+                    <Download className="mr-2 h-5 w-5" /> Download Full PDF
+                  </a>
+                  <Button
+                    onClick={() => window.print()}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Print Current Page
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

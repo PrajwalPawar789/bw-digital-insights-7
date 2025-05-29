@@ -33,6 +33,33 @@ export const useImageUpload = () => {
     }
   };
 
+  const uploadPdf = async (file: File, folder: string = "magazines") => {
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${folder}/${Date.now()}.${fileExt}`;
+      
+      const { data, error } = await supabase.storage
+        .from('magazine-pdfs')
+        .upload(fileName, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('magazine-pdfs')
+        .getPublicUrl(fileName);
+
+      toast.success("PDF uploaded successfully");
+      return publicUrl;
+    } catch (error) {
+      toast.error("Failed to upload PDF");
+      console.error(error);
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const deleteImage = async (url: string) => {
     try {
       // Extract filename from URL
@@ -55,5 +82,5 @@ export const useImageUpload = () => {
     }
   };
 
-  return { uploadImage, deleteImage, uploading };
+  return { uploadImage, uploadPdf, deleteImage, uploading };
 };

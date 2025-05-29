@@ -35,7 +35,7 @@ export const useFeaturedMagazines = () => {
   });
 };
 
-export const useMagazineBySlug = (slug: string) => {
+export const useMagazineBySlug = (slug: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["magazines", slug],
     queryFn: async () => {
@@ -48,7 +48,24 @@ export const useMagazineBySlug = (slug: string) => {
       if (error) throw error;
       return data;
     },
-    enabled: !!slug,
+    enabled: !!slug && (options?.enabled !== false),
+  });
+};
+
+export const useMagazineById = (id: string) => {
+  return useQuery({
+    queryKey: ["magazines", "by-id", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("magazines")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
   });
 };
 
