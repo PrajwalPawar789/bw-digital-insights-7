@@ -9,8 +9,11 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Set up PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Configure PDF.js worker with fallback
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 const MagazineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -23,6 +26,14 @@ const MagazineDetail = () => {
   const [loadRetry, setLoadRetry] = useState<number>(0);
   const [scale, setScale] = useState<number>(1.0);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
+  const [pdfLoading, setPdfLoading] = useState<boolean>(true);
+
+  // Configure PDF.js options
+  const options = {
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+  };
 
   // Retry loading PDF if there was an error
   useEffect(() => {
@@ -30,6 +41,7 @@ const MagazineDetail = () => {
       const retryTimer = setTimeout(() => {
         console.log("Retrying PDF load...");
         setPdfError(false);
+        setPdfLoading(true);
         setLoadRetry(prev => prev + 1);
       }, 2000);
       
@@ -38,8 +50,10 @@ const MagazineDetail = () => {
   }, [pdfError, loadRetry]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    console.log("PDF loaded successfully with", numPages, "pages");
     setNumPages(numPages);
     setPdfError(false);
+    setPdfLoading(false);
     setLoadRetry(0);
     toast({
       title: "PDF loaded successfully",
@@ -51,6 +65,7 @@ const MagazineDetail = () => {
   const onDocumentLoadError = (error: Error) => {
     console.error("PDF loading error:", error);
     setPdfError(true);
+    setPdfLoading(false);
     
     toast({
       title: "PDF loading error",
@@ -58,6 +73,12 @@ const MagazineDetail = () => {
       variant: "destructive",
       duration: 5000,
     });
+  };
+
+  const onDocumentLoad = () => {
+    console.log("PDF document started loading");
+    setPdfLoading(true);
+    setPdfError(false);
   };
 
   const goToPrevPage = () => {
@@ -80,6 +101,7 @@ const MagazineDetail = () => {
 
   const retryPdfLoad = () => {
     setPdfError(false);
+    setPdfLoading(true);
     setLoadRetry(0);
     
     toast({
@@ -117,7 +139,9 @@ const MagazineDetail = () => {
     );
   }
 
+  // Use the uploaded PDF URL or fallback to sample
   const pdfUrl = magazine.pdf_url || "/sample-magazine.pdf";
+  console.log("PDF URL:", pdfUrl);
 
   return (
     <div className="min-h-screen py-12">
@@ -226,7 +250,7 @@ const MagazineDetail = () => {
           </div>
         )}
 
-        {/* PDF Viewer */}
+        {/* Enhanced PDF Viewer */}
         <div id="pdf-viewer" className={cn(
           "bg-white rounded-lg shadow-lg mb-12 transition-all duration-300",
           fullScreen ? "fixed inset-0 z-50 bg-white p-8 rounded-none overflow-auto" : "p-6"
@@ -240,7 +264,7 @@ const MagazineDetail = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={zoomOut} 
-                disabled={pdfError}
+                disabled={pdfError || pdfLoading}
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -248,7 +272,7 @@ const MagazineDetail = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={resetZoom} 
-                disabled={pdfError}
+                disabled={pdfError || pdfLoading}
               >
                 <span className="text-xs font-mono">{Math.round(scale * 100)}%</span>
               </Button>
@@ -256,7 +280,7 @@ const MagazineDetail = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={zoomIn} 
-                disabled={pdfError}
+                disabled={pdfError || pdfLoading}
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -264,7 +288,7 @@ const MagazineDetail = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={toggleFullScreen} 
-                disabled={pdfError}
+                disabled={pdfError || pdfLoading}
               >
                 <Maximize className="h-4 w-4" />
               </Button>
@@ -284,19 +308,23 @@ const MagazineDetail = () => {
             <div className="max-w-4xl transition-all duration-200">
               <Document
                 file={pdfUrl}
+                onLoadStart={onDocumentLoad}
                 onLoadSuccess={onDocumentLoadSuccess}
                 onLoadError={onDocumentLoadError}
+                options={options}
                 loading={
                   <div className="text-center py-16 bg-gray-50 rounded-lg border border-gray-100">
                     <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-insightRed mx-auto mb-4"></div>
                     <p className="text-gray-600 text-lg">Loading magazine pages...</p>
+                    <p className="text-gray-500 text-sm mt-2">This may take a moment</p>
                   </div>
                 }
                 error={
                   <div className="text-center py-16 bg-red-50 rounded-lg border border-red-100">
                     <div className="flex flex-col items-center">
                       <FileWarning className="h-16 w-16 text-red-500 mb-4" />
-                      <p className="text-red-500 font-medium mb-6 text-lg">Failed to load PDF. Please try downloading instead.</p>
+                      <p className="text-red-500 font-medium mb-2 text-lg">Failed to load PDF</p>
+                      <p className="text-red-400 text-sm mb-6">The PDF file might be corrupted or unavailable</p>
                       <div className="flex gap-4">
                         <a
                           href={pdfUrl}
@@ -317,20 +345,28 @@ const MagazineDetail = () => {
                   </div>
                 }
               >
-                <Page 
-                  pageNumber={pageNumber}
-                  scale={scale}
-                  width={fullScreen ? Math.min(900, window.innerWidth - 100) : Math.min(700, window.innerWidth - 80)}
-                  renderTextLayer={false}
-                  renderAnnotationLayer={false}
-                  className="mx-auto shadow-lg rounded"
-                />
+                {!pdfError && !pdfLoading && (
+                  <Page 
+                    pageNumber={pageNumber}
+                    scale={scale}
+                    width={fullScreen ? Math.min(900, window.innerWidth - 100) : Math.min(700, window.innerWidth - 80)}
+                    renderTextLayer={false}
+                    renderAnnotationLayer={false}
+                    className="mx-auto shadow-lg rounded border"
+                    loading={
+                      <div className="flex items-center justify-center p-8 bg-gray-100 rounded">
+                        <Loader2 className="h-8 w-8 animate-spin text-insightRed mr-2" />
+                        <span>Loading page {pageNumber}...</span>
+                      </div>
+                    }
+                  />
+                )}
               </Document>
             </div>
           </div>
           
           {/* Enhanced PDF Navigation */}
-          {numPages && !pdfError && (
+          {numPages && !pdfError && !pdfLoading && (
             <div className="mt-8 bg-gray-50 rounded-lg p-4">
               <div className="flex justify-between items-center">
                 <Button
