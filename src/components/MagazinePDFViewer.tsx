@@ -7,6 +7,7 @@ import { zoomPlugin } from '@react-pdf-viewer/zoom';
 import { toolbarPlugin } from '@react-pdf-viewer/toolbar';
 import { Download, Maximize, RefreshCw, Loader2, FileWarning } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { Worker } from '@react-pdf-viewer/core';
 
 import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/page-navigation/lib/styles/index.css';
@@ -115,7 +116,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
         </div>
       </div>
 
-      {/* PDF Viewer */}
+      {/* PDF Viewer with Worker */}
       <div className="relative">
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white bg-opacity-90">
@@ -141,74 +142,76 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
             </div>
           </div>
         ) : (
-          <div
-            style={{
-              border: '1px solid rgba(0, 0, 0, .1)',
-              display: 'flex',
-              flexDirection: 'column',
-              height: fullScreen ? 'calc(100vh - 120px)' : '600px',
-            }}
-          >
-            {/* Toolbar */}
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
             <div
               style={{
-                borderBottom: '1px solid rgba(0, 0, 0, .1)',
-                padding: '8px',
-                backgroundColor: '#f8f9fa',
+                border: '1px solid rgba(0, 0, 0, .1)',
+                display: 'flex',
+                flexDirection: 'column',
+                height: fullScreen ? 'calc(100vh - 120px)' : '600px',
               }}
             >
-              <div className="flex items-center justify-center space-x-4">
-                <ZoomOutButton />
-                <ZoomPopover />
-                <ZoomInButton />
-                <div className="border-l border-gray-300 h-6 mx-2"></div>
-                <MinimalButton onClick={jumpToPreviousPage}>
-                  <PreviousIcon />
-                </MinimalButton>
-                <MinimalButton onClick={jumpToNextPage}>
-                  <NextIcon />
-                </MinimalButton>
+              {/* Toolbar */}
+              <div
+                style={{
+                  borderBottom: '1px solid rgba(0, 0, 0, .1)',
+                  padding: '8px',
+                  backgroundColor: '#f8f9fa',
+                }}
+              >
+                <div className="flex items-center justify-center space-x-4">
+                  <ZoomOutButton />
+                  <ZoomPopover />
+                  <ZoomInButton />
+                  <div className="border-l border-gray-300 h-6 mx-2"></div>
+                  <MinimalButton onClick={jumpToPreviousPage}>
+                    <PreviousIcon />
+                  </MinimalButton>
+                  <MinimalButton onClick={jumpToNextPage}>
+                    <NextIcon />
+                  </MinimalButton>
+                </div>
+              </div>
+
+              {/* Main viewer */}
+              <div
+                style={{
+                  flex: 1,
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <Viewer
+                  fileUrl={fileUrl}
+                  defaultScale={SpecialZoomLevel.PageFit}
+                  scrollMode={ScrollMode.Page}
+                  viewMode={ViewMode.SinglePage}
+                  plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance, toolbarPluginInstance]}
+                  onDocumentLoad={handleDocumentLoad}
+                  renderLoader={(percentages: number) => (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
+                        <p className="text-gray-600">Loading... {Math.round(percentages)}%</p>
+                      </div>
+                    </div>
+                  )}
+                />
+              </div>
+
+              {/* Thumbnails */}
+              <div
+                style={{
+                  height: '120px',
+                  overflow: 'auto',
+                  borderTop: '1px solid rgba(0, 0, 0, .1)',
+                  backgroundColor: '#f8f9fa',
+                }}
+              >
+                <Thumbnails thumbnailDirection={ThumbnailDirection.Horizontal} />
               </div>
             </div>
-
-            {/* Main viewer */}
-            <div
-              style={{
-                flex: 1,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              <Viewer
-                fileUrl={fileUrl}
-                defaultScale={SpecialZoomLevel.PageFit}
-                scrollMode={ScrollMode.Page}
-                viewMode={ViewMode.SinglePage}
-                plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance, toolbarPluginInstance]}
-                onDocumentLoad={handleDocumentLoad}
-                renderLoader={(percentages: number) => (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
-                      <p className="text-gray-600">Loading... {Math.round(percentages)}%</p>
-                    </div>
-                  </div>
-                )}
-              />
-            </div>
-
-            {/* Thumbnails */}
-            <div
-              style={{
-                height: '120px',
-                overflow: 'auto',
-                borderTop: '1px solid rgba(0, 0, 0, .1)',
-                backgroundColor: '#f8f9fa',
-              }}
-            >
-              <Thumbnails thumbnailDirection={ThumbnailDirection.Horizontal} />
-            </div>
-          </div>
+          </Worker>
         )}
       </div>
     </div>
