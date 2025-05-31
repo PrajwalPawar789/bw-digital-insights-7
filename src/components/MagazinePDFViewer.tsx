@@ -50,16 +50,36 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     setPdfError(null);
   };
 
-  const handleDocumentError = (error: any) => {
-    console.error("PDF loading error:", error);
-    setLoading(false);
-    setPdfError(error.message || "Failed to load PDF");
-  };
-
   const retryLoad = () => {
     setLoading(true);
     setPdfError(null);
   };
+
+  // Check if file URL is valid
+  React.useEffect(() => {
+    if (!fileUrl || fileUrl.trim() === '') {
+      setPdfError("No PDF file available");
+      setLoading(false);
+      return;
+    }
+
+    // Reset states when fileUrl changes
+    setLoading(true);
+    setPdfError(null);
+
+    // Test if the file exists by making a HEAD request
+    fetch(fileUrl, { method: 'HEAD' })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`File not found: ${response.status}`);
+        }
+      })
+      .catch(error => {
+        console.error("PDF file check failed:", error);
+        setPdfError(`Failed to access PDF file: ${error.message}`);
+        setLoading(false);
+      });
+  }, [fileUrl]);
 
   if (!fileUrl || fileUrl.trim() === '') {
     return (
@@ -166,7 +186,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
                 viewMode={ViewMode.SinglePage}
                 plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance, toolbarPluginInstance]}
                 onDocumentLoad={handleDocumentLoad}
-                onDocumentError={handleDocumentError}
                 renderLoader={(percentages: number) => (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
