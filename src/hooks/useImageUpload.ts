@@ -9,16 +9,29 @@ export const useImageUpload = () => {
   const uploadImage = async (file: File, folder: string = "general") => {
     setUploading(true);
     try {
-      const fileExt = file.name.split('.').pop();
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
+      // Validate file size (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Image size must be less than 10MB');
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
       console.log("Uploading image to:", fileName);
+      console.log("File size:", file.size, "bytes");
+      console.log("File type:", file.type);
       
       const { data, error } = await supabase.storage
         .from('website-images')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type
         });
 
       if (error) {
@@ -35,7 +48,7 @@ export const useImageUpload = () => {
       return publicUrl;
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error("Failed to upload image");
+      toast.error(`Failed to upload image: ${error.message}`);
       throw error;
     } finally {
       setUploading(false);
@@ -55,17 +68,19 @@ export const useImageUpload = () => {
         throw new Error('File size must be less than 50MB');
       }
 
-      const fileExt = file.name.split('.').pop();
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       
       console.log("Uploading PDF to:", fileName);
       console.log("File size:", file.size, "bytes");
+      console.log("File type:", file.type);
       
       const { data, error } = await supabase.storage
         .from('magazine-pdfs')
         .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: 'application/pdf'
         });
 
       if (error) {
@@ -78,6 +93,18 @@ export const useImageUpload = () => {
         .getPublicUrl(fileName);
 
       console.log("PDF uploaded successfully:", publicUrl);
+      
+      // Verify the uploaded file is accessible
+      try {
+        const verifyResponse = await fetch(publicUrl, { method: 'HEAD' });
+        if (!verifyResponse.ok) {
+          throw new Error(`Uploaded file verification failed: ${verifyResponse.status}`);
+        }
+        console.log("PDF verification successful, file is accessible");
+      } catch (verifyError) {
+        console.warn("PDF verification warning:", verifyError);
+      }
+
       toast.success("PDF uploaded successfully");
       return publicUrl;
     } catch (error) {
@@ -111,5 +138,27 @@ export const useImageUpload = () => {
     }
   };
 
-  return { uploadImage, uploadPdf, deleteImage, uploading };
+  const deletePdf = async (url: string) => {
+    try {
+      // Extract filename from URL
+      const urlParts = url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const folderParts = url.split('magazine-pdfs/')[1];
+      
+      if (!folderParts) throw new Error("Invalid PDF URL");
+
+      const { error } = await supabase.storage
+        .from('magazine-pdfs')
+        .remove([folderParts]);
+
+      if (error) throw error;
+      toast.success("PDF deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete PDF");
+      console.error(error);
+      throw error;
+    }
+  };
+
+  return { uploadImage, uploadPdf, deleteImage, deletePdf, uploading };
 };

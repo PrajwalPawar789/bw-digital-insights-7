@@ -9,8 +9,11 @@ import { toast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+// Configure PDF.js worker with a more reliable setup
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.js',
+  import.meta.url,
+).toString();
 
 const MagazineDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -23,6 +26,7 @@ const MagazineDetail = () => {
   const [scale, setScale] = useState<number>(1.0);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [pdfLoading, setPdfLoading] = useState<boolean>(true);
+  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
 
   // Reset PDF state when magazine changes
   useEffect(() => {
@@ -31,9 +35,42 @@ const MagazineDetail = () => {
       setPageNumber(1);
       setPdfError(null);
       setPdfLoading(true);
+      setPdfData(null);
       console.log("Magazine PDF URL:", magazine.pdf_url);
+      
+      // Pre-fetch PDF data if URL exists
+      if (magazine.pdf_url && magazine.pdf_url.trim() !== '') {
+        fetchPdfData(magazine.pdf_url);
+      }
     }
   }, [magazine?.id]);
+
+  const fetchPdfData = async (url: string) => {
+    try {
+      setPdfLoading(true);
+      console.log("Fetching PDF from:", url);
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/pdf',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      console.log("PDF data fetched successfully, size:", arrayBuffer.byteLength, "bytes");
+      setPdfData(arrayBuffer);
+      setPdfError(null);
+    } catch (error) {
+      console.error("Error fetching PDF:", error);
+      setPdfError(`Failed to fetch PDF: ${error.message}`);
+      setPdfData(null);
+    }
+  };
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     console.log("PDF loaded successfully with", numPages, "pages");
@@ -90,12 +127,58 @@ const MagazineDetail = () => {
     setPdfLoading(true);
     setNumPages(null);
     setPageNumber(1);
+    setPdfData(null);
+    
+    if (magazine?.pdf_url) {
+      fetchPdfData(magazine.pdf_url);
+    }
     
     toast({
       title: "Retrying PDF load",
       description: "Attempting to load the PDF again...",
       duration: 2000,
     });
+  };
+
+  const downloadPdf = async () => {
+    if (!magazine?.pdf_url) {
+      toast({
+        title: "No PDF available",
+        description: "This magazine doesn't have a PDF file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(magazine.pdf_url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `${magazine.title}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Download started",
+        description: "The PDF download has begun.",
+      });
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download the PDF file.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -132,6 +215,7 @@ const MagazineDetail = () => {
   
   console.log("Using PDF URL:", pdfUrl);
   console.log("Has valid PDF URL:", hasPdfUrl);
+  console.log("PDF data available:", !!pdfData);
 
   return (
     <div className="min-h-screen py-12">
@@ -178,13 +262,12 @@ const MagazineDetail = () => {
               </span>
               <div className="flex gap-3">
                 {hasPdfUrl && (
-                  <a
-                    href={pdfUrl}
-                    download
+                  <Button
+                    onClick={downloadPdf}
                     className="inline-flex items-center bg-insightBlack hover:bg-insightRed text-white px-6 py-3 rounded-md text-sm font-medium transition-colors"
                   >
                     <Download className="mr-2 h-4 w-4" /> Download PDF
-                  </a>
+                  </Button>
                 )}
                 <Button
                   onClick={() => document.getElementById('pdf-viewer')?.scrollIntoView({ behavior: 'smooth' })}
@@ -323,13 +406,12 @@ const MagazineDetail = () => {
                       <p className="text-red-400 text-sm mb-2">Error: {pdfError}</p>
                       <p className="text-red-400 text-sm mb-6">The PDF file might be corrupted or unavailable</p>
                       <div className="flex gap-4">
-                        <a
-                          href={pdfUrl}
-                          download
+                        <Button
+                          onClick={downloadPdf}
                           className="inline-flex items-center bg-insightRed hover:bg-insightBlack text-white px-6 py-3 rounded-md text-sm font-medium transition-colors"
                         >
-                          <Download className="mr-2 h-4 w-4" /> Download PDF
-                        </a>
+                          <Download className="mr-2 h-4 w-4" /> Try Download
+                        </Button>
                         <Button
                           onClick={retryPdfLoad}
                           variant="outline"
@@ -343,16 +425,19 @@ const MagazineDetail = () => {
                 )}
 
                 <Document
-                  file={pdfUrl}
+                  file={pdfData || pdfUrl}
                   onLoadStart={onDocumentLoadStart}
                   onLoadSuccess={onDocumentLoadSuccess}
                   onLoadError={onDocumentLoadError}
-                  loading={null} // We handle loading state ourselves
-                  error={null}   // We handle error state ourselves
+                  loading={null}
+                  error={null}
                   options={{
-                    cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                    cMapUrl: 'https://unpkg.com/pdfjs-dist@4.8.69/cmaps/',
                     cMapPacked: true,
-                    standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@4.8.69/standard_fonts/',
+                    useWorkerFetch: false,
+                    isEvalSupported: false,
+                    useSystemFonts: true,
                   }}
                 >
                   {!pdfError && !pdfLoading && numPages && (
@@ -462,13 +547,12 @@ const MagazineDetail = () => {
               <div className="flex flex-col justify-center">
                 <h3 className="text-lg font-semibold mb-4">Download Options</h3>
                 <div className="space-y-3">
-                  <a
-                    href={pdfUrl}
-                    download
+                  <Button
+                    onClick={downloadPdf}
                     className="inline-flex items-center justify-center bg-insightRed hover:bg-insightBlack text-white px-6 py-3 rounded-md font-medium transition-colors w-full"
                   >
                     <Download className="mr-2 h-5 w-5" /> Download Full PDF
-                  </a>
+                  </Button>
                   <Button
                     onClick={() => window.print()}
                     variant="outline"

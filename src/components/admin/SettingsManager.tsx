@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Settings, 
@@ -28,6 +27,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useSettings } from "@/hooks/useSettings";
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, "Display name must be at least 2 characters"),
@@ -100,15 +100,12 @@ const AccountSettings = () => {
   });
 
   function onSubmit(values: z.infer<typeof profileFormSchema>) {
-    // In a real app, this would call an API to update the profile
     console.log(values);
     toast.success("Profile updated successfully");
     setIsEditing(false);
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // In a real app, this would upload the image to a server
-    // Here we just simulate setting the image URL
     if (e.target.files && e.target.files[0]) {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -303,7 +300,6 @@ const SecuritySettings = () => {
   });
 
   function onSubmit(values: z.infer<typeof securityFormSchema>) {
-    // In a real app, this would call an API to update the password
     console.log(values);
     toast.success("Password changed successfully");
     form.reset();
@@ -463,10 +459,11 @@ const SecuritySettings = () => {
 };
 
 const SiteSettings = () => {
-  const [siteTitle, setSiteTitle] = useState("BW Digital Insights");
-  const [siteLogo, setSiteLogo] = useState<string | null>(null);
-  const [primaryColor, setPrimaryColor] = useState("#0f172a");
-  const [analyticsCode, setAnalyticsCode] = useState("");
+  const { settings, loading, saveSettings, updateHomepageSection } = useSettings();
+  const [siteTitle, setSiteTitle] = useState(settings.siteTitle);
+  const [siteLogo, setSiteLogo] = useState<string | null>(settings.siteLogo);
+  const [primaryColor, setPrimaryColor] = useState(settings.primaryColor);
+  const [analyticsCode, setAnalyticsCode] = useState(settings.analyticsCode);
   
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -481,9 +478,17 @@ const SiteSettings = () => {
     }
   };
 
-  const saveSiteSettings = () => {
-    // In a real app, this would call an API to save the site settings
-    toast.success("Site settings saved successfully");
+  const saveSiteSettings = async () => {
+    const success = await saveSettings({
+      siteTitle,
+      siteLogo,
+      primaryColor,
+      analyticsCode,
+    });
+    
+    if (success) {
+      console.log("Site settings saved successfully");
+    }
   };
 
   return (
@@ -585,45 +590,76 @@ const SiteSettings = () => {
         <h2 className="text-xl font-semibold">Homepage Sections</h2>
         <div className="mt-4 space-y-2">
           <p className="text-sm text-muted-foreground">
-            Enable or disable sections on your homepage.
+            Enable or disable sections on your homepage. Changes take effect immediately.
           </p>
-          <div className="space-y-2">
+          <div className="space-y-3 mt-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Featured Articles</label>
               <label className="relative inline-flex cursor-pointer items-center">
-                <input type="checkbox" className="peer sr-only" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  className="peer sr-only" 
+                  checked={settings.homepageSections.featuredArticles}
+                  onChange={(e) => updateHomepageSection('featuredArticles', e.target.checked)}
+                />
                 <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Latest Magazine</label>
               <label className="relative inline-flex cursor-pointer items-center">
-                <input type="checkbox" className="peer sr-only" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  className="peer sr-only" 
+                  checked={settings.homepageSections.latestMagazine}
+                  onChange={(e) => updateHomepageSection('latestMagazine', e.target.checked)}
+                />
                 <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Leadership Profiles</label>
               <label className="relative inline-flex cursor-pointer items-center">
-                <input type="checkbox" className="peer sr-only" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  className="peer sr-only" 
+                  checked={settings.homepageSections.leadershipProfiles}
+                  onChange={(e) => updateHomepageSection('leadershipProfiles', e.target.checked)}
+                />
                 <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
             </div>
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Press Releases</label>
               <label className="relative inline-flex cursor-pointer items-center">
-                <input type="checkbox" className="peer sr-only" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  className="peer sr-only" 
+                  checked={settings.homepageSections.pressReleases}
+                  onChange={(e) => updateHomepageSection('pressReleases', e.target.checked)}
+                />
                 <div className="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
               </label>
+            </div>
+          </div>
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-sm text-blue-800">
+              <strong>Current status:</strong>
+            </p>
+            <div className="text-xs text-blue-700 mt-1">
+              <p>Featured Articles: {settings.homepageSections.featuredArticles ? '✅ Enabled' : '❌ Disabled'}</p>
+              <p>Latest Magazine: {settings.homepageSections.latestMagazine ? '✅ Enabled' : '❌ Disabled'}</p>
+              <p>Leadership Profiles: {settings.homepageSections.leadershipProfiles ? '✅ Enabled' : '❌ Disabled'}</p>
+              <p>Press Releases: {settings.homepageSections.pressReleases ? '✅ Enabled' : '❌ Disabled'}</p>
             </div>
           </div>
         </div>
       </div>
 
       <div className="flex justify-end">
-        <Button onClick={saveSiteSettings}>
+        <Button onClick={saveSiteSettings} disabled={loading}>
           <Save className="mr-2 h-4 w-4" />
-          Save Settings
+          {loading ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
     </div>
