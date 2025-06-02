@@ -50,12 +50,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     setPdfError(null);
   };
 
-  const handleDocumentError = (error: any) => {
-    console.error("PDF loading error:", error);
-    setPdfError("Failed to load PDF document");
-    setLoading(false);
-  };
-
   const retryLoad = () => {
     setLoading(true);
     setPdfError(null);
@@ -134,7 +128,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
             </div>
           </div>
         ) : (
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js">
             <div
               style={{
                 border: '1px solid rgba(0, 0, 0, .1)',
@@ -180,7 +174,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
                   viewMode={ViewMode.SinglePage}
                   plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance, toolbarPluginInstance]}
                   onDocumentLoad={handleDocumentLoad}
-                  onLoadError={handleDocumentError}
                   renderLoader={(percentages: number) => (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
