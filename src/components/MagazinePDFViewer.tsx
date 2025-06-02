@@ -4,7 +4,6 @@ import { MinimalButton, ScrollMode, SpecialZoomLevel, Viewer, ViewMode, Worker }
 import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
 import { ThumbnailDirection, thumbnailPlugin } from '@react-pdf-viewer/thumbnail';
 import { zoomPlugin } from '@react-pdf-viewer/zoom';
-import { toolbarPlugin } from '@react-pdf-viewer/toolbar';
 import { Download, Maximize, RefreshCw, Loader2, FileWarning } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
@@ -12,7 +11,6 @@ import '@react-pdf-viewer/core/lib/styles/index.css';
 import '@react-pdf-viewer/page-navigation/lib/styles/index.css';
 import '@react-pdf-viewer/thumbnail/lib/styles/index.css';
 import '@react-pdf-viewer/zoom/lib/styles/index.css';
-import '@react-pdf-viewer/toolbar/lib/styles/index.css';
 
 interface MagazinePDFViewerProps {
   fileUrl: string;
@@ -40,9 +38,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
 
   const zoomPluginInstance = zoomPlugin();
   const { ZoomInButton, ZoomOutButton, ZoomPopover } = zoomPluginInstance;
-
-  const toolbarPluginInstance = toolbarPlugin();
-  const { Toolbar } = toolbarPluginInstance;
 
   const handleDocumentLoad = () => {
     console.log("PDF loaded successfully");
@@ -128,7 +123,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
             </div>
           </div>
         ) : (
-          <Worker workerUrl="https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.js">
+          <Worker workerUrl="/pdf.worker.min.js">
             <div
               style={{
                 border: '1px solid rgba(0, 0, 0, .1)',
@@ -172,7 +167,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
                   defaultScale={SpecialZoomLevel.PageFit}
                   scrollMode={ScrollMode.Page}
                   viewMode={ViewMode.SinglePage}
-                  plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance, toolbarPluginInstance]}
+                  plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance]}
                   onDocumentLoad={handleDocumentLoad}
                   renderLoader={(percentages: number) => (
                     <div className="flex items-center justify-center h-full">

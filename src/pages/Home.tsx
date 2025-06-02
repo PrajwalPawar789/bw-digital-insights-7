@@ -1,8 +1,9 @@
 
 import { Link } from "react-router-dom";
-import { ArrowRight, BookOpen, Users, FileText, TrendingUp } from "lucide-react";
+import { ArrowRight, BookOpen, Users, FileText, TrendingUp, Star, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import ClientLogos from "@/components/ClientLogos";
 import { useFeaturedArticles } from "@/hooks/useArticles";
 import { useFeaturedMagazines } from "@/hooks/useMagazines";
@@ -112,48 +113,63 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Articles */}
-      <section className="py-16">
+      {/* Editorial Picks Section */}
+      <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">
-              Latest Insights
-            </h2>
+            <div className="flex items-center justify-center mb-4">
+              <Star className="h-8 w-8 text-insightRed mr-2" />
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack">
+                Editorial Picks
+              </h2>
+            </div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Stay ahead with our latest articles featuring strategic insights, technology trends, and leadership perspectives.
+              Handpicked articles by our editorial team featuring the most impactful insights for modern executives.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredArticles.slice(0, 3).map((article) => (
-              <Card key={article.id} className="overflow-hidden hover:shadow-xl transition-shadow group">
+              <Card key={article.id} className="overflow-hidden hover:shadow-xl transition-shadow group border-0 shadow-lg">
                 <div className="relative h-48 overflow-hidden">
                   <img
                     src={article.image_url || 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600'}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-insightRed text-white">
+                      <Star className="h-3 w-3 mr-1" />
+                      Editor's Pick
+                    </Badge>
+                  </div>
                   <div className="absolute bottom-4 left-4">
-                    <span className="bg-insightRed text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    <Badge variant="secondary" className="bg-white/90 text-insightBlack">
                       {article.category}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
-                <CardHeader>
-                  <CardTitle className="text-xl group-hover:text-insightRed transition-colors">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-xl group-hover:text-insightRed transition-colors line-clamp-2">
                     <Link to={`/article/${article.slug}`}>
                       {article.title}
                     </Link>
                   </CardTitle>
-                  <CardDescription className="text-gray-600">
+                  <CardDescription className="text-gray-600 line-clamp-2">
                     {article.excerpt}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>By {article.author}</span>
-                    <span>{new Date(article.date).toLocaleDateString()}</span>
+                    <div className="flex items-center">
+                      <User className="h-4 w-4 mr-1" />
+                      <span>{article.author}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>{new Date(article.date).toLocaleDateString()}</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -162,7 +178,7 @@ const Home = () => {
 
           <div className="text-center">
             <Button size="lg" variant="outline" className="border-insightRed text-insightRed hover:bg-insightRed hover:text-white">
-              <Link to="/magazine" className="flex items-center">
+              <Link to="/articles" className="flex items-center">
                 View All Articles
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
@@ -185,7 +201,7 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
             {featuredLeaders.slice(0, 3).map((leader) => (
-              <Card key={leader.id} className="overflow-hidden hover:shadow-xl transition-shadow group">
+              <Card key={leader.id} className="overflow-hidden hover:shadow-xl transition-shadow group border-0 shadow-lg">
                 <div className="relative h-64 overflow-hidden">
                   <img
                     src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
