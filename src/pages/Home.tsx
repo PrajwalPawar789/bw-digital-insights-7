@@ -209,7 +209,7 @@ const Home = () => {
                           5 min read
                         </div>
                       </div>
-                      <Link to={`/article/${article.slug}`}>
+                      <Link to={`/articles/${article.slug}`}>
                         <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
                           Read Full Article
                           <ArrowRight className="ml-2 h-4 w-4" />
@@ -295,16 +295,16 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Latest Premium Edition Section - Restructured */}
+      {/* Latest Premium Edition Section */}
       {settings.homepageSections.latestMagazine && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">
-                Latest Premium Edition
+                Real-Time Market Intelligence
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover exclusive interviews, deep-dive analysis, and strategic insights in our quarterly premium publication.
+                Stay informed with the latest market developments, financial insights, and business trends as they happen.
               </p>
             </div>
 
@@ -415,83 +415,72 @@ const Home = () => {
         </section>
       )}
 
-      {/* Leadership Profiles Section */}
+      {/* Executive Leadership Spotlight Section - Redesigned */}
       {settings.homepageSections.leadershipProfiles && (
-        <section className="py-20 bg-gradient-to-br from-slate-900 via-gray-900 to-insightBlack text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-5">
-            <div className="w-full h-full bg-gradient-to-br from-insightRed/30 to-transparent"></div>
-          </div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <Badge className="mb-6 bg-insightRed/20 text-insightRed border-insightRed/30 text-sm px-6 py-2 font-semibold">
-                EXCLUSIVE EXECUTIVE ACCESS
+              <Badge className="mb-6 bg-insightRed/10 text-insightRed border-insightRed/20 text-sm px-6 py-2 font-semibold">
+                EXECUTIVE SPOTLIGHT
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-                Executive Leadership Spotlight
+              <h2 className="text-4xl md:text-5xl font-bold text-insightBlack mb-6 leading-tight">
+                Leadership Excellence
               </h2>
-              <p className="text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-8">
-                Meet the visionary leaders driving innovation and transformation across industries. Get exclusive access to their strategies and insights.
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Meet the visionary leaders driving innovation and transformation across industries worldwide.
               </p>
-              <div className="flex justify-center items-center space-x-8 text-sm text-gray-400">
-                <div className="flex items-center">
-                  <Star className="h-4 w-4 mr-2 text-yellow-400" />
-                  C-Suite Executives
-                </div>
-                <div className="flex items-center">
-                  <Target className="h-4 w-4 mr-2 text-green-400" />
-                  Strategic Insights
-                </div>
-                <div className="flex items-center">
-                  <Award className="h-4 w-4 mr-2 text-blue-400" />
-                  Industry Leaders
-                </div>
-              </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {leadershipLoading ? (
                 Array.from({ length: 3 }).map((_, index) => (
-                  <Card key={index} className="bg-white/5 backdrop-blur-sm border border-white/10 text-white animate-pulse">
-                    <div className="h-64 bg-gray-300 rounded-t-lg"></div>
+                  <Card key={index} className="animate-pulse border-0 shadow-lg">
+                    <div className="h-80 bg-gray-200 rounded-lg"></div>
                     <CardHeader className="p-6">
-                      <div className="h-4 bg-gray-300 rounded mb-2"></div>
-                      <div className="h-3 bg-gray-300 rounded"></div>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
                     </CardHeader>
                   </Card>
                 ))
               ) : (
                 featuredLeadership.slice(0, 3).map((leader) => (
-                  <Card key={leader.id} className="bg-white/5 backdrop-blur-sm border border-white/10 text-white group hover:bg-white/10 transition-all duration-500 hover:scale-105">
-                    <div className="relative overflow-hidden rounded-t-lg">
-                      <img
-                        src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
-                        alt={leader.name}
-                        className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                      <div className="absolute bottom-4 left-4 right-4">
+                  <Card key={leader.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden">
+                    <div className="relative">
+                      <div className="h-80 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                        <img
+                          src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
+                          alt={leader.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                         <Badge className="bg-insightRed/90 text-white border-none mb-2">
                           FEATURED EXECUTIVE
                         </Badge>
                       </div>
                     </div>
-                    <CardHeader className="p-6">
-                      <CardTitle className="text-2xl font-bold text-white group-hover:text-insightRed transition-colors">
+                    <CardHeader className="p-6 bg-white">
+                      <CardTitle className="text-2xl font-bold text-insightBlack group-hover:text-insightRed transition-colors duration-300 mb-2">
                         {leader.name}
                       </CardTitle>
-                      <div className="text-insightRed font-semibold text-lg mb-3">
-                        {leader.title}
+                      <div className="space-y-1">
+                        <p className="text-lg font-semibold text-insightRed">
+                          {leader.title}
+                        </p>
+                        {leader.company && (
+                          <p className="text-gray-600 font-medium">
+                            {leader.company}
+                          </p>
+                        )}
                       </div>
-                      <CardDescription className="text-gray-300 leading-relaxed text-base">
-                        {leader.bio}
-                      </CardDescription>
                     </CardHeader>
                     <CardContent className="p-6 pt-0">
                       <Link to={`/leadership/${leader.slug}`}>
                         <Button 
-                          className="w-full bg-insightRed hover:bg-red-700 text-white font-semibold py-3 transition-all duration-300 border-none"
+                          className="w-full bg-gradient-to-r from-insightRed to-red-700 hover:from-red-700 hover:to-insightRed text-white font-semibold py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
                         >
-                          Read Executive Profile
+                          View Executive Profile
                           <ArrowRight className="ml-2 h-5 w-5" />
                         </Button>
                       </Link>
@@ -505,7 +494,8 @@ const Home = () => {
               <Link to="/leadership">
                 <Button 
                   size="lg" 
-                  className="bg-white text-insightBlack hover:bg-gray-100 px-12 py-4 text-lg font-semibold transition-all duration-300"
+                  variant="outline"
+                  className="border-2 border-insightRed text-insightRed hover:bg-insightRed hover:text-white px-12 py-4 text-lg font-semibold transition-all duration-300"
                 >
                   View All Leadership Profiles
                   <ArrowRight className="ml-3 h-6 w-6" />
@@ -516,7 +506,7 @@ const Home = () => {
         </section>
       )}
 
-      {/* Corporate Announcements & Market Movers Section - Restructured */}
+      {/* Corporate Announcements & Market Movers Section */}
       {settings.homepageSections.pressReleases && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
