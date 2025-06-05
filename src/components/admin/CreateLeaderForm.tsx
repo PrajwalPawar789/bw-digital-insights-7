@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useCreateLeader } from '@/hooks/useLeadership';
+import { useCreateLeadership } from '@/hooks/useLeadership';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +17,7 @@ interface CreateLeaderFormProps {
 }
 
 const CreateLeaderForm = ({ open, onOpenChange }: CreateLeaderFormProps) => {
-  const { mutate: createLeader, isPending } = useCreateLeader();
+  const { mutate: createLeader, isPending } = useCreateLeadership();
   const { uploadImage, uploading } = useImageUpload();
   
   const [name, setName] = useState('');
