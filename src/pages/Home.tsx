@@ -209,7 +209,7 @@ const Home = () => {
                           5 min read
                         </div>
                       </div>
-                      <Link to={`/articles/${article.slug}`}>
+                      <Link to={`/article/${article.slug}`}>
                         <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
                           Read Full Article
                           <ArrowRight className="ml-2 h-4 w-4" />
