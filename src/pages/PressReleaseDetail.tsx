@@ -1,4 +1,3 @@
-
 import { useParams, Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { pressReleaseData, PressRelease } from '../data/pressReleaseData';
@@ -31,7 +30,7 @@ const PressReleaseDetail = () => {
         if (supabaseRelease && !error) {
           // Convert Supabase data to PressRelease format
           const convertedRelease: PressRelease = {
-            id: supabaseRelease.id,
+            id: supabaseRelease.id, // Now both are strings (UUID)
             title: supabaseRelease.title,
             excerpt: supabaseRelease.excerpt || '',
             content: supabaseRelease.content,
@@ -51,8 +50,8 @@ const PressReleaseDetail = () => {
             .limit(2);
 
           if (relatedData) {
-            const convertedRelated = relatedData.map(item => ({
-              id: item.id,
+            const convertedRelated: PressRelease[] = relatedData.map(item => ({
+              id: item.id, // Now both are strings
               title: item.title,
               excerpt: item.excerpt || '',
               content: item.content,
