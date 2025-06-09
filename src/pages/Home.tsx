@@ -155,10 +155,18 @@ const Home = () => {
           <div className="flex items-center">
             <Badge className="bg-white text-insightRed mr-4 font-bold">BREAKING</Badge>
             <div className="animate-marquee whitespace-nowrap">
-              <span className="mx-8">🔥 Fortune 500 CEO reveals game-changing strategy</span>
-              <span className="mx-8">📈 Tech sector shows unprecedented 15% growth</span>
-              <span className="mx-8">💼 Exclusive: Merger talks between industry giants</span>
-              <span className="mx-8">🚀 AI revolution drives $2.8B in new investments</span>
+              {!newsLoading && industryNews.length > 0 ? (
+                industryNews.slice(0, 4).map((news, index) => (
+                  <span key={index} className="mx-8">🔥 {news.title}</span>
+                ))
+              ) : (
+                <>
+                  <span className="mx-8">🔥 Fortune 500 CEO reveals game-changing strategy</span>
+                  <span className="mx-8">📈 Tech sector shows unprecedented 15% growth</span>
+                  <span className="mx-8">💼 Exclusive: Merger talks between industry giants</span>
+                  <span className="mx-8">🚀 AI revolution drives $2.8B in new investments</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -254,7 +262,7 @@ const Home = () => {
         </section>
       )}
 
-      {/* Premium Editions (Sponsored News Section) */}
+      {/* Premium Editions (Magazine Section) */}
       {settings.homepageSections.latestMagazine && (
         <section className="py-20 bg-gradient-to-br from-gray-900 to-insightBlack text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
