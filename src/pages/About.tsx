@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { teamData } from '../data/teamData';
 import { 
@@ -13,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useCompanyName } from '@/hooks/useDatabaseSettings';
 
 const About = () => {
   const [activeTeamMember, setActiveTeamMember] = useState<number | null>(null);
@@ -41,6 +41,8 @@ const About = () => {
     { icon: <TrendingUp className="h-6 w-6 text-insightRed" />, title: "Growth", description: "We foster continuous learning and development." },
     { icon: <Globe className="h-6 w-6 text-insightRed" />, title: "Integrity", description: "We operate with honesty, transparency, and ethical conduct." }
   ];
+
+  const companyName = useCompanyName();
 
   useEffect(() => {
     // Set up intersection observer for scroll animations
@@ -71,7 +73,7 @@ const About = () => {
         <div className="absolute inset-0 opacity-20 bg-[url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">About InsightsBW</h1>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">About {companyName}</h1>
             <p className="max-w-3xl mx-auto text-lg text-gray-200 mb-8">
               Transforming complex business data into actionable intelligence for forward-thinking leaders.
             </p>
