@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { useUpdateDatabaseSettings } from "@/hooks/useUpdateDatabaseSettings";
 import { useDatabaseSettings } from "@/hooks/useDatabaseSettings";
 import { toast } from "sonner";
 import { Loader2, Upload, X, Save } from "lucide-react";
+import React from "react";
 
 const SettingsManager = () => {
   const { settings, loading, saveSettings, updateHomepageSection, resetSettings } = useSettings();
@@ -336,5 +338,3 @@ const SettingsManager = () => {
 };
 
 export default SettingsManager;
-
-}
