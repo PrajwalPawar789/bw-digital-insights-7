@@ -29,6 +29,8 @@ const CreateLeaderForm = ({ open, onOpenChange }: CreateLeaderFormProps) => {
   const [imageUrl, setImageUrl] = useState('');
   const [linkedinUrl, setLinkedinUrl] = useState('');
   const [twitterUrl, setTwitterUrl] = useState('');
+  const [areasOfExpertise, setAreasOfExpertise] = useState('');
+  const [industryImpact, setIndustryImpact] = useState('');
   const [featured, setFeatured] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -82,6 +84,8 @@ const CreateLeaderForm = ({ open, onOpenChange }: CreateLeaderFormProps) => {
       image_url: imageUrl,
       linkedin_url: linkedinUrl,
       twitter_url: twitterUrl,
+      areas_of_expertise: areasOfExpertise,
+      industry_impact: industryImpact,
       featured,
     };
 
@@ -108,6 +112,8 @@ const CreateLeaderForm = ({ open, onOpenChange }: CreateLeaderFormProps) => {
     setImageUrl('');
     setLinkedinUrl('');
     setTwitterUrl('');
+    setAreasOfExpertise('');
+    setIndustryImpact('');
     setFeatured(false);
     setSelectedFile(null);
   };
@@ -175,6 +181,28 @@ const CreateLeaderForm = ({ open, onOpenChange }: CreateLeaderFormProps) => {
               rows={6}
               placeholder="Professional biography and achievements"
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="areas_of_expertise">Areas of Expertise</Label>
+            <Textarea
+              id="areas_of_expertise"
+              value={areasOfExpertise}
+              onChange={(e) => setAreasOfExpertise(e.target.value)}
+              rows={3}
+              placeholder="Key areas of expertise and specialization"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="industry_impact">Industry Impact</Label>
+            <Textarea
+              id="industry_impact"
+              value={industryImpact}
+              onChange={(e) => setIndustryImpact(e.target.value)}
+              rows={3}
+              placeholder="Impact and contributions to the industry"
             />
           </div>
 

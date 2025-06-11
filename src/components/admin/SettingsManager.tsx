@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,7 +10,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { useUpdateDatabaseSettings } from "@/hooks/useUpdateDatabaseSettings";
 import { useDatabaseSettings } from "@/hooks/useDatabaseSettings";
 import { toast } from "sonner";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, Save } from "lucide-react";
 
 const SettingsManager = () => {
   const { settings, loading, saveSettings, updateHomepageSection, resetSettings } = useSettings();
@@ -20,6 +19,15 @@ const SettingsManager = () => {
   const { uploadImage, uploading } = useImageUpload();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [previewLogo, setPreviewLogo] = useState<string | null>(null);
+  const [tempCompanyName, setTempCompanyName] = useState("");
+  const [companyNameChanged, setCompanyNameChanged] = useState(false);
+
+  // Initialize temp company name when dbSettings loads
+  React.useEffect(() => {
+    if (dbSettings?.company_name && !companyNameChanged) {
+      setTempCompanyName(dbSettings.company_name);
+    }
+  }, [dbSettings?.company_name, companyNameChanged]);
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -69,11 +77,22 @@ const SettingsManager = () => {
     saveSettings({ siteTitle: value });
   };
 
-  const handleCompanyNameChange = (value: string) => {
-    // Save to database
-    updateDbSetting({ key: 'company_name', value });
-    // Also save to local settings for immediate update
-    saveSettings({ companyName: value });
+  const handleCompanyNameInputChange = (value: string) => {
+    setTempCompanyName(value);
+    setCompanyNameChanged(true);
+  };
+
+  const handleSaveCompanyName = () => {
+    updateDbSetting({ key: 'company_name', value: tempCompanyName }, {
+      onSuccess: () => {
+        setCompanyNameChanged(false);
+        toast.success("Company name updated successfully");
+      },
+      onError: () => {
+        setTempCompanyName(dbSettings?.company_name || "");
+        setCompanyNameChanged(false);
+      }
+    });
   };
 
   const handlePrimaryColorChange = (value: string) => {
@@ -107,13 +126,26 @@ const SettingsManager = () => {
 
           <div className="space-y-2">
             <Label htmlFor="company-name">Company Name</Label>
-            <Input
-              id="company-name"
-              value={dbSettings?.company_name || settings.companyName}
-              onChange={(e) => handleCompanyNameChange(e.target.value)}
-              placeholder="Enter company name"
-              disabled={updatingDbSetting}
-            />
+            <div className="flex gap-2">
+              <Input
+                id="company-name"
+                value={tempCompanyName}
+                onChange={(e) => handleCompanyNameInputChange(e.target.value)}
+                placeholder="Enter company name"
+                disabled={updatingDbSetting}
+              />
+              <Button 
+                onClick={handleSaveCompanyName}
+                disabled={updatingDbSetting || !companyNameChanged}
+                size="sm"
+              >
+                {updatingDbSetting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
             {updatingDbSetting && (
               <p className="text-sm text-muted-foreground">Updating...</p>
             )}
@@ -304,3 +336,5 @@ const SettingsManager = () => {
 };
 
 export default SettingsManager;
+
+}

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useUpdateLeadership } from '@/hooks/useLeadership';
 import { useImageUpload } from '@/hooks/useImageUpload';
@@ -28,6 +27,8 @@ const EditLeaderForm = ({ leader, open, onOpenChange }: EditLeaderFormProps) => 
     image_url: leader?.image_url || '',
     linkedin_url: leader?.linkedin_url || '',
     twitter_url: leader?.twitter_url || '',
+    areas_of_expertise: leader?.areas_of_expertise || '',
+    industry_impact: leader?.industry_impact || '',
     featured: leader?.featured || false
   });
 
@@ -125,6 +126,28 @@ const EditLeaderForm = ({ leader, open, onOpenChange }: EditLeaderFormProps) => 
               onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
               rows={6}
               required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="areas_of_expertise">Areas of Expertise</Label>
+            <Textarea
+              id="areas_of_expertise"
+              value={formData.areas_of_expertise}
+              onChange={(e) => setFormData({ ...formData, areas_of_expertise: e.target.value })}
+              rows={3}
+              placeholder="Key areas of expertise and specialization"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="industry_impact">Industry Impact</Label>
+            <Textarea
+              id="industry_impact"
+              value={formData.industry_impact}
+              onChange={(e) => setFormData({ ...formData, industry_impact: e.target.value })}
+              rows={3}
+              placeholder="Impact and contributions to the industry"
             />
           </div>
 

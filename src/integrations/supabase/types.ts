@@ -89,12 +89,14 @@ export type Database = {
       }
       leadership_profiles: {
         Row: {
+          areas_of_expertise: string | null
           bio: string
           company: string | null
           created_at: string | null
           featured: boolean | null
           id: string
           image_url: string | null
+          industry_impact: string | null
           linkedin_url: string | null
           name: string
           slug: string
@@ -103,12 +105,14 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          areas_of_expertise?: string | null
           bio: string
           company?: string | null
           created_at?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          industry_impact?: string | null
           linkedin_url?: string | null
           name: string
           slug: string
@@ -117,12 +121,14 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          areas_of_expertise?: string | null
           bio?: string
           company?: string | null
           created_at?: string | null
           featured?: boolean | null
           id?: string
           image_url?: string | null
+          industry_impact?: string | null
           linkedin_url?: string | null
           name?: string
           slug?: string
