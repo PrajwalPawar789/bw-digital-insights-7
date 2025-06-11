@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { MinimalButton, ScrollMode, SpecialZoomLevel, Viewer, ViewMode, Worker } from '@react-pdf-viewer/core';
 import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
@@ -42,6 +43,12 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     console.log("PDF loaded successfully");
     setLoading(false);
     setPdfError(null);
+  };
+
+  const handleDocumentLoadError = (error: any) => {
+    console.error("PDF load error:", error);
+    setLoading(false);
+    setPdfError(error.message || "Failed to load PDF");
   };
 
   const retryLoad = () => {
@@ -126,7 +133,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
             </div>
           </div>
         ) : (
-          <Worker workerUrl="/pdf.worker.min.js">
+          <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
             <div
               style={{
                 border: '1px solid rgba(0, 0, 0, .1)',
@@ -172,6 +179,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
                   viewMode={ViewMode.SinglePage}
                   plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance]}
                   onDocumentLoad={handleDocumentLoad}
+                  onLoadError={handleDocumentLoadError}
                   renderLoader={(percentages: number) => (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
