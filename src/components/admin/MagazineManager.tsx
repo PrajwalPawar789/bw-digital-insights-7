@@ -1,6 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
+import { useArticles } from '@/hooks/useArticles';
+import { useMagazineArticles } from '@/hooks/useMagazineArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,10 +26,12 @@ interface Magazine {
   publish_date: string;
   issue_number: number;
   featured: boolean;
+  featured_article_id: string | null;
 }
 
 const MagazineManager = () => {
   const { data: magazines, isLoading, refetch } = useMagazines();
+  const { data: articles } = useArticles();
   const { mutate: createMagazine } = useCreateMagazine();
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
@@ -44,6 +48,7 @@ const MagazineManager = () => {
   const [publishDate, setPublishDate] = useState('');
   const [issueNumber, setIssueNumber] = useState<number | ''>('' as number | '');
   const [featured, setFeatured] = useState(false);
+  const [featuredArticleId, setFeaturedArticleId] = useState<string | null>(null);
   const [uploadingFile, setUploadingFile] = useState<'image' | 'pdf' | null>(null);
 
   useEffect(() => {
@@ -57,6 +62,7 @@ const MagazineManager = () => {
       setPublishDate(selectedMagazine.publish_date);
       setIssueNumber(selectedMagazine.issue_number);
       setFeatured(selectedMagazine.featured);
+      setFeaturedArticleId(selectedMagazine.featured_article_id);
       setOpen(true);
     } else {
       setEditMode(false);
@@ -68,6 +74,7 @@ const MagazineManager = () => {
       setPublishDate('');
       setIssueNumber('' as number | '');
       setFeatured(false);
+      setFeaturedArticleId(null);
     }
   }, [selectedMagazine]);
 
@@ -82,6 +89,7 @@ const MagazineManager = () => {
     setPublishDate('');
     setIssueNumber('' as number | '');
     setFeatured(false);
+    setFeaturedArticleId(null);
     setUploadingFile(null);
   };
 
@@ -101,6 +109,7 @@ const MagazineManager = () => {
         publish_date: publishDate,
         issue_number: issueNumber !== '' ? Number(issueNumber) : null,
         featured,
+        featured_article_id: featuredArticleId,
       };
 
       createMagazine(newMagazine);
@@ -132,6 +141,7 @@ const MagazineManager = () => {
         publish_date: publishDate,
         issue_number: issueNumber !== '' ? Number(issueNumber) : null,
         featured,
+        featured_article_id: featuredArticleId,
       };
 
       updateMagazine(updatedMagazine);
@@ -311,6 +321,27 @@ const MagazineManager = () => {
                 />
               </div>
               <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="featuredArticle" className="text-right">
+                  Featured Article
+                </Label>
+                <Select 
+                  value={featuredArticleId || ""} 
+                  onValueChange={(value) => setFeaturedArticleId(value || null)}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select featured article (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No featured article</SelectItem>
+                    {articles?.map((article) => (
+                      <SelectItem key={article.id} value={article.id}>
+                        {article.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="featured" className="text-right">
                   Featured
                 </Label>
@@ -347,45 +378,50 @@ const MagazineManager = () => {
             </Button>
           </div>
         ) : (
-          magazines?.map((magazine) => (
-            <Card key={magazine.id} className="overflow-hidden">
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  {magazine.title}
-                  {magazine.featured && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
-                </CardTitle>
-                <CardDescription>{magazine.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-500">Published: {new Date(magazine.publish_date).toLocaleDateString()}</p>
-                  {magazine.issue_number && <p className="text-sm text-gray-500">Issue: {magazine.issue_number}</p>}
-                  <div className="flex gap-2 mt-2">
-                    {magazine.cover_image_url && (
-                      <a href={magazine.cover_image_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
-                        <ExternalLink className="w-4 h-4" />
-                        Cover Image
-                      </a>
-                    )}
-                    {magazine.pdf_url && (
-                      <a href={magazine.pdf_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
-                        <FileText className="w-4 h-4" />
-                        PDF
-                      </a>
-                    )}
+          magazines?.map((magazine) => {
+            const featuredArticle = articles?.find(article => article.id === magazine.featured_article_id);
+            
+            return (
+              <Card key={magazine.id} className="overflow-hidden">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    {magazine.title}
+                    {magazine.featured && <Star className="h-5 w-5 text-yellow-500 fill-current" />}
+                  </CardTitle>
+                  <CardDescription>{magazine.description}</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500">Published: {new Date(magazine.publish_date).toLocaleDateString()}</p>
+                    {magazine.issue_number && <p className="text-sm text-gray-500">Issue: {magazine.issue_number}</p>}
+                    {featuredArticle && <p className="text-sm text-gray-500">Featured Article: {featuredArticle.title}</p>}
+                    <div className="flex gap-2 mt-2">
+                      {magazine.cover_image_url && (
+                        <a href={magazine.cover_image_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
+                          <ExternalLink className="w-4 h-4" />
+                          Cover Image
+                        </a>
+                      )}
+                      {magazine.pdf_url && (
+                        <a href={magazine.pdf_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
+                          <FileText className="w-4 h-4" />
+                          PDF
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="secondary" size="icon" onClick={() => setSelectedMagazine(magazine)}>
-                    <Edit2 className="h-4 w-4" />
-                  </Button>
-                  <Button variant="destructive" size="icon" onClick={() => handleDeleteMagazine(magazine.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                  <div className="flex gap-2">
+                    <Button variant="secondary" size="icon" onClick={() => setSelectedMagazine(magazine)}>
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" size="icon" onClick={() => handleDeleteMagazine(magazine.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
         )}
       </div>
     </div>

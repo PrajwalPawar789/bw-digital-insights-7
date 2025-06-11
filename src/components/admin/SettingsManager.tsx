@@ -8,11 +8,15 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { useSettings } from "@/hooks/useSettings";
+import { useUpdateDatabaseSettings } from "@/hooks/useUpdateDatabaseSettings";
+import { useDatabaseSettings } from "@/hooks/useDatabaseSettings";
 import { toast } from "sonner";
 import { Loader2, Upload, X } from "lucide-react";
 
 const SettingsManager = () => {
   const { settings, loading, saveSettings, updateHomepageSection, resetSettings } = useSettings();
+  const { data: dbSettings } = useDatabaseSettings();
+  const { mutate: updateDbSetting, isPending: updatingDbSetting } = useUpdateDatabaseSettings();
   const { uploadImage, uploading } = useImageUpload();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [previewLogo, setPreviewLogo] = useState<string | null>(null);
@@ -66,6 +70,9 @@ const SettingsManager = () => {
   };
 
   const handleCompanyNameChange = (value: string) => {
+    // Save to database
+    updateDbSetting({ key: 'company_name', value });
+    // Also save to local settings for immediate update
     saveSettings({ companyName: value });
   };
 
@@ -102,10 +109,14 @@ const SettingsManager = () => {
             <Label htmlFor="company-name">Company Name</Label>
             <Input
               id="company-name"
-              value={settings.companyName}
+              value={dbSettings?.company_name || settings.companyName}
               onChange={(e) => handleCompanyNameChange(e.target.value)}
               placeholder="Enter company name"
+              disabled={updatingDbSetting}
             />
+            {updatingDbSetting && (
+              <p className="text-sm text-muted-foreground">Updating...</p>
+            )}
           </div>
 
           <div className="space-y-2">
