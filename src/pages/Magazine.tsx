@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { magazineData, Magazine } from '../data/magazineData';
+import { useMagazines, useFeaturedMagazines } from '@/hooks/useMagazines';
 import {
   Pagination,
   PaginationContent,
@@ -11,18 +11,29 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
-import { BookOpen, Star } from 'lucide-react';
+import { BookOpen, Star, Loader2 } from 'lucide-react';
 
 const MagazinePage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 6;
   
-  const categories = ['all', ...Array.from(new Set(magazineData.map(mag => mag.category)))];
+  const { data: allMagazines = [], isLoading } = useMagazines();
+  const { data: featuredMagazines = [] } = useFeaturedMagazines();
+  
+  // Extract unique categories from magazines
+  const categories = ['all', ...Array.from(new Set(allMagazines.map(mag => mag.title.toLowerCase().includes('ai') ? 'technology' : 
+    mag.title.toLowerCase().includes('cybersecurity') ? 'security' : 
+    mag.title.toLowerCase().includes('innovation') ? 'innovation' : 'business')))];
   
   const filteredMagazines = selectedCategory === 'all'
-    ? magazineData
-    : magazineData.filter(magazine => magazine.category === selectedCategory);
+    ? allMagazines
+    : allMagazines.filter(magazine => {
+        const category = magazine.title.toLowerCase().includes('ai') ? 'technology' : 
+          magazine.title.toLowerCase().includes('cybersecurity') ? 'security' : 
+          magazine.title.toLowerCase().includes('innovation') ? 'innovation' : 'business';
+        return category === selectedCategory;
+      });
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -61,6 +72,17 @@ const MagazinePage = () => {
     return pageNumbers;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-8 w-8 animate-spin text-insightRed" />
+          <span className="text-lg">Loading magazines...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Section with Enhanced Design */}
@@ -77,7 +99,7 @@ const MagazinePage = () => {
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Featured Stats - Updated with more authentic numbers */}
+        {/* Featured Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
           {[
             { label: "Global Readers", value: "185K+" },
@@ -118,7 +140,7 @@ const MagazinePage = () => {
         {/* Magazine Grid with Enhanced Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {currentMagazines.length > 0 ? (
-            currentMagazines.map((magazine: Magazine) => (
+            currentMagazines.map((magazine) => (
               <Link
                 key={magazine.id}
                 to={`/magazine/${magazine.slug}`}
@@ -127,21 +149,23 @@ const MagazinePage = () => {
                 <div className="relative">
                   <div className="aspect-w-3 aspect-h-4">
                     <img
-                      src={magazine.coverImage}
+                      src={magazine.cover_image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800'}
                       alt={magazine.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      className="w-full h-64 object-cover transition-transform group-hover:scale-105"
                     />
                   </div>
                   <div className="absolute top-0 right-0 bg-insightRed text-white text-xs font-bold px-3 py-2 m-3 rounded-full">
-                    {magazine.category}
+                    {magazine.issue_number ? `Issue ${magazine.issue_number}` : 'Latest'}
                   </div>
                   {/* Premium Badge */}
-                  <div className="absolute top-0 left-0 m-3">
-                    <div className="flex items-center bg-black bg-opacity-75 text-white text-xs px-3 py-1 rounded-full">
-                      <Star className="w-3 h-3 mr-1" />
-                      Premium
+                  {magazine.featured && (
+                    <div className="absolute top-0 left-0 m-3">
+                      <div className="flex items-center bg-black bg-opacity-75 text-white text-xs px-3 py-1 rounded-full">
+                        <Star className="w-3 h-3 mr-1" />
+                        Featured
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-bold mb-3 text-insightBlack group-hover:text-insightRed transition-colors line-clamp-2">
@@ -151,7 +175,7 @@ const MagazinePage = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center text-sm text-gray-500">
                       <BookOpen className="w-4 h-4 mr-1" />
-                      <span>{magazine.articles.length} Articles</span>
+                      <span>{new Date(magazine.publish_date).toLocaleDateString()}</span>
                     </div>
                     <span className="inline-flex items-center text-insightRed font-medium">
                       Read More

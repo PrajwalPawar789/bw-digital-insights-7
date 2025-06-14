@@ -1,186 +1,202 @@
+
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { leaderProfiles, leadershipArticles } from '../data/leadershipData';
-import { ExternalLink, Award, TrendingUp, Users, BookOpen, ArrowRight } from 'lucide-react';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+import { useLeadershipProfiles, useFeaturedLeadership } from '@/hooks/useLeadership';
+import { Search, Linkedin, Twitter, Loader2 } from 'lucide-react';
 
 const Leadership = () => {
-  const philosophyArticles = leadershipArticles.filter(article => article.type === 'philosophy');
-  const interviewsAndFeatures = leadershipArticles.filter(article => article.type === 'interview' || article.type === 'feature');
+  const [searchTerm, setSearchTerm] = useState('');
+  const { data: allLeaders = [], isLoading } = useLeadershipProfiles();
+  const { data: featuredLeaders = [] } = useFeaturedLeadership();
+
+  const filteredLeaders = allLeaders.filter(leader =>
+    leader.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    leader.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (leader.company && leader.company.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="h-8 w-8 animate-spin text-insightRed" />
+          <span className="text-lg">Loading leadership profiles...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen">
-      {/* Enhanced Hero Section with Parallax Effect */}
-      <div className="relative h-[60vh] bg-gradient-to-r from-insightBlack to-gray-900 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?ixlib=rb-1.2.1&auto=format&fit=crop&w=2070&q=80')] opacity-20 bg-cover bg-center"></div>
-        <div className="relative h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-              Leadership Insights
-            </h1>
-            <p className="max-w-3xl mx-auto text-gray-300 text-lg md:text-xl leading-relaxed mb-8">
-              Discover the minds shaping tomorrow's business landscape through exclusive interviews
-              and strategic insights from global technology leaders.
-            </p>
-            
-            {/* Leadership Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-              {[
-                { icon: Users, label: "Featured Leaders", value: "500+" },
-                { icon: Award, label: "Industry Awards", value: "250+" },
-                { icon: TrendingUp, label: "Success Stories", value: "1000+" },
-                { icon: BookOpen, label: "Expert Articles", value: "2000+" },
-              ].map((stat, index) => (
-                <div 
-                  key={index}
-                  className="bg-white/10 backdrop-blur-sm p-4 rounded-lg text-white hover:bg-white/20 transition-all duration-300"
-                >
-                  <stat.icon className="w-8 h-8 mb-2 mx-auto text-insightRed" />
-                  <div className="text-2xl font-bold mb-1">{stat.value}</div>
-                  <div className="text-sm opacity-80">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Section */}
+      <div className="relative bg-insightBlack text-white py-16 mb-12">
+        <div className="absolute inset-0 opacity-30 bg-[url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-1.2.1&auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+            Leadership Excellence
+          </h1>
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-200 leading-relaxed">
+            Meet the visionary leaders who are shaping the future of technology and business. Their insights drive innovation and transformation across industries.
+          </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* CIO Profiles Section with Enhanced Cards */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold text-insightBlack mb-8 text-center">
-            Featured Technology Leaders
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {leaderProfiles.map(profile => (
-              <HoverCard key={profile.id}>
-                <HoverCardTrigger asChild>
-                  <div className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-1">
-                    <div className="relative h-72 overflow-hidden">
-                      <img 
-                        src={profile.image} 
-                        alt={profile.name}
-                        className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-insightBlack mb-1 group-hover:text-insightRed transition-colors">
-                        {profile.name}
-                      </h3>
-                      <p className="text-insightRed font-medium mb-2">{profile.title}</p>
-                      <p className="text-gray-600 text-sm mb-4">{profile.company}</p>
-                    </div>
-                  </div>
-                </HoverCardTrigger>
-                <HoverCardContent className="w-80 p-6">
-                  <h4 className="text-lg font-semibold mb-2">{profile.name}</h4>
-                  <p className="text-sm text-gray-600">{profile.bio}</p>
-                </HoverCardContent>
-              </HoverCard>
-            ))}
-          </div>
-        </section>
-
-        {/* Leadership Philosophy Articles with Parallax Sections */}
-        <section className="mb-20">
-          <h2 className="text-3xl font-bold text-insightBlack mb-8 text-center">
-            Leadership Philosophy & Insights
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {philosophyArticles.map(article => (
-              <div 
-                key={article.id} 
-                className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex flex-col md:flex-row h-full">
-                  <div className="md:w-2/5 relative overflow-hidden">
-                    <img 
-                      src={article.image} 
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Featured Leaders Section */}
+        {featuredLeaders.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-3xl font-bold text-insightBlack mb-8 text-center">Featured Leaders</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredLeaders.map((leader) => (
+                <Link
+                  key={leader.id}
+                  to={`/leadership/${leader.slug}`}
+                  className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                >
+                  <div className="relative">
+                    <img
+                      src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
+                      alt={leader.name}
+                      className="w-full h-64 object-cover transition-transform group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>
-                  <div className="md:w-3/5 p-6 flex flex-col">
-                    <h3 className="text-xl font-bold text-insightBlack mb-3 group-hover:text-insightRed transition-colors">
-                      {article.title}
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-insightBlack group-hover:text-insightRed transition-colors mb-2">
+                      {leader.name}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-4 flex-grow">
-                      {article.excerpt}
+                    <p className="text-insightRed font-medium mb-1">{leader.title}</p>
+                    {leader.company && (
+                      <p className="text-gray-600 text-sm mb-3">{leader.company}</p>
+                    )}
+                    <p className="text-gray-700 text-sm line-clamp-3 mb-4">
+                      {leader.bio.substring(0, 150)}...
                     </p>
-                    <div className="flex justify-between items-center mt-4">
-                      <span className="text-sm text-gray-500">By {article.author}</span>
-                      <Link 
-                        to={`/article/${article.id}`}
-                        className="inline-flex items-center text-insightRed hover:text-insightBlack transition-colors"
-                      >
-                        Read More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
+                    <div className="flex items-center space-x-3">
+                      {leader.linkedin_url && (
+                        <a
+                          href={leader.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Linkedin className="w-5 h-5" />
+                        </a>
+                      )}
+                      {leader.twitter_url && (
+                        <a
+                          href={leader.twitter_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-600 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Twitter className="w-5 h-5" />
+                        </a>
+                      )}
                     </div>
                   </div>
-                </div>
-              </div>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </section>
+        )}
 
-        {/* Interviews and Media Features with Grid Layout */}
-        <section>
-          <h2 className="text-3xl font-bold text-insightBlack mb-8 text-center">
-            Interviews & Media Coverage
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {interviewsAndFeatures.map(article => (
-              <div 
-                key={article.id} 
-                className="group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col"
-              >
-                <div className="relative h-48 overflow-hidden">
-                  <img 
-                    src={article.image} 
-                    alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                  />
-                  <div className="absolute top-0 right-0 m-4">
-                    <span className="inline-block px-3 py-1 text-xs font-semibold bg-insightRed text-white rounded-full">
-                      {article.type === 'interview' ? 'Interview' : 'Feature'}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-lg font-bold text-insightBlack mb-3 group-hover:text-insightRed transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-4 flex-grow">{article.excerpt}</p>
-                  <div className="flex justify-between items-center mt-auto">
-                    <span className="text-sm text-gray-500">{article.date}</span>
-                    {article.url ? (
-                      <a 
-                        href={article.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center text-insightRed hover:text-insightBlack transition-colors"
-                      >
-                        Read More <ExternalLink className="ml-2 h-4 w-4" />
-                      </a>
-                    ) : (
-                      <Link 
-                        to={`/article/${article.id}`}
-                        className="inline-flex items-center text-insightRed hover:text-insightBlack transition-colors"
-                      >
-                        Read More <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Search Section */}
+        <div className="bg-white p-6 rounded-lg shadow-sm mb-10">
+          <h2 className="text-xl font-semibold mb-4 text-insightBlack">Find Leadership Profiles</h2>
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by name, title, or company..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-insightRed focus:border-transparent"
+            />
           </div>
-        </section>
+        </div>
+
+        {/* All Leaders Section */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-bold text-insightBlack mb-8 text-center">
+            {searchTerm ? 'Search Results' : 'All Leaders'}
+          </h2>
+          
+          {filteredLeaders.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredLeaders.map((leader) => (
+                <Link
+                  key={leader.id}
+                  to={`/leadership/${leader.slug}`}
+                  className="group bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                >
+                  <div className="relative">
+                    <img
+                      src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
+                      alt={leader.name}
+                      className="w-full h-64 object-cover transition-transform group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-insightBlack group-hover:text-insightRed transition-colors mb-2">
+                      {leader.name}
+                    </h3>
+                    <p className="text-insightRed font-medium mb-1">{leader.title}</p>
+                    {leader.company && (
+                      <p className="text-gray-600 text-sm mb-3">{leader.company}</p>
+                    )}
+                    <p className="text-gray-700 text-sm line-clamp-3 mb-4">
+                      {leader.bio.substring(0, 150)}...
+                    </p>
+                    <div className="flex items-center space-x-3">
+                      {leader.linkedin_url && (
+                        <a
+                          href={leader.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Linkedin className="w-5 h-5" />
+                        </a>
+                      )}
+                      {leader.twitter_url && (
+                        <a
+                          href={leader.twitter_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-600 transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Twitter className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <p className="text-gray-600 text-lg mb-4">
+                  {searchTerm ? 'No leaders found matching your search.' : 'No leadership profiles available.'}
+                </p>
+                {searchTerm && (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="text-insightRed hover:text-insightBlack transition-colors"
+                  >
+                    Clear search
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
