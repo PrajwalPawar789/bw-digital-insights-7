@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Route, Routes, Link, useNavigate, useParams } from "react-router-dom";
+import { Route, Routes, Link, useNavigate } from "react-router-dom";
 import { 
   ChevronLeft, 
   Plus, 
@@ -9,9 +9,7 @@ import {
   Trash, 
   Calendar,
   ArrowUp,
-  ArrowDown,
-  Upload,
-  Image as ImageIcon
+  ArrowDown
 } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -40,11 +38,46 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { useArticles, useCreateArticle, useUpdateArticle, useDeleteArticle, useArticleBySlug } from "@/hooks/useArticles";
-import { useImageUpload } from "@/hooks/useImageUpload";
-import { slugify } from "@/lib/slugify";
+import { toast } from "sonner";
 
+// Mock data for demo purposes
 const mockCategories = ["Technology", "Business", "Leadership", "Innovation", "Finance"];
+
+const mockArticles = [
+  {
+    id: 1,
+    title: "AI and Machine Learning Transforming Business Operations",
+    author: "Sarah Johnson",
+    date: "2025-04-12",
+    category: "Technology",
+    excerpt: "How artificial intelligence and machine learning are changing business operations",
+    isFeatured: true,
+    status: "published",
+    slug: "ai-machine-learning-transforming-business-operations"
+  },
+  {
+    id: 2,
+    title: "The Future of Remote Work in Global Companies",
+    author: "Michael Chen",
+    date: "2025-04-10",
+    category: "Business",
+    excerpt: "Exploring how remote work is reshaping global business strategies",
+    isFeatured: false,
+    status: "published",
+    slug: "future-remote-work-global-companies"
+  },
+  {
+    id: 3,
+    title: "Sustainable Business Practices for Modern Enterprises",
+    author: "Jessica Williams",
+    date: "2025-04-08",
+    category: "Business",
+    excerpt: "How companies can implement sustainable practices while maintaining growth",
+    isFeatured: false,
+    status: "draft",
+    slug: "sustainable-business-practices-modern-enterprises"
+  },
+];
 
 const formSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -55,7 +88,8 @@ const formSchema = z.object({
   }),
   excerpt: z.string().min(10, "Excerpt must be at least 10 characters"),
   content: z.string().min(50, "Content must be at least 50 characters"),
-  featured: z.boolean().default(false),
+  isFeatured: z.boolean().default(false),
+  status: z.enum(["draft", "published", "archived"]).default("draft"),
 });
 
 const ArticleManager = () => {
@@ -63,7 +97,7 @@ const ArticleManager = () => {
     <Routes>
       <Route path="/" element={<ArticleList />} />
       <Route path="/create" element={<ArticleForm />} />
-      <Route path="/edit/:id" element={<ArticleForm isEditing />} />
+      <Route path="/edit/:id" element={<ArticleForm />} />
     </Routes>
   );
 };
@@ -74,10 +108,7 @@ const ArticleList = () => {
   const [sortField, setSortField] = useState<string>("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   
-  const { data: articles = [], isLoading } = useArticles();
-  const deleteArticle = useDeleteArticle();
-  
-  const filteredArticles = articles
+  const filteredArticles = mockArticles
     .filter(article => 
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       article.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -107,15 +138,10 @@ const ArticleList = () => {
     }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this article?")) {
-      deleteArticle.mutate(id);
-    }
+  const handleDelete = (id: number) => {
+    // In a real app, this would call an API to delete the article
+    toast.success("Article deleted successfully");
   };
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-64">Loading articles...</div>;
-  }
 
   return (
     <div className="space-y-6">
@@ -193,7 +219,19 @@ const ArticleList = () => {
                     )}
                   </button>
                 </th>
-                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium">
+                  <button 
+                    onClick={() => handleSort("status")}
+                    className="flex items-center"
+                  >
+                    Status
+                    {sortField === "status" && (
+                      sortDirection === "asc" 
+                        ? <ArrowUp className="ml-1 h-4 w-4" /> 
+                        : <ArrowDown className="ml-1 h-4 w-4" />
+                    )}
+                  </button>
+                </th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -211,10 +249,14 @@ const ArticleList = () => {
                     <td className="px-4 py-3">{article.category}</td>
                     <td className="px-4 py-3">{format(new Date(article.date), "MMM d, yyyy")}</td>
                     <td className="px-4 py-3">
-                      <div className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800">
-                        Published
+                      <div className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                        article.status === 'published' ? 'bg-green-100 text-green-800' :
+                        article.status === 'draft' ? 'bg-amber-100 text-amber-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {article.status}
                       </div>
-                      {article.featured && (
+                      {article.isFeatured && (
                         <div className="ml-2 inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-semibold text-purple-800">
                           Featured
                         </div>
@@ -234,7 +276,6 @@ const ArticleList = () => {
                           variant="ghost" 
                           size="icon"
                           onClick={() => handleDelete(article.id)}
-                          disabled={deleteArticle.isPending}
                         >
                           <Trash className="h-4 w-4" />
                           <span className="sr-only">Delete</span>
@@ -258,15 +299,10 @@ const ArticleList = () => {
   );
 };
 
-const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
+const ArticleForm = () => {
   const navigate = useNavigate();
-  const { id } = useParams();
-  const [featuredImage, setFeaturedImage] = useState<string | null>(null);
-
-  const { data: existingArticle, isLoading } = useArticleBySlug(id || "");
-  const createArticle = useCreateArticle();
-  const updateArticle = useUpdateArticle();
-  const { uploadImage, uploading } = useImageUpload();
+  const [content, setContent] = useState("");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -276,60 +312,17 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
       category: "",
       excerpt: "",
       content: "",
-      featured: false,
+      isFeatured: false,
+      status: "draft",
       date: new Date(),
     },
   });
 
-  // Set form values when editing
-  useState(() => {
-    if (isEditing && existingArticle) {
-      form.reset({
-        title: existingArticle.title,
-        author: existingArticle.author,
-        category: existingArticle.category,
-        excerpt: existingArticle.excerpt || "",
-        content: existingArticle.content,
-        featured: existingArticle.featured || false,
-        date: new Date(existingArticle.date),
-      });
-      setFeaturedImage(existingArticle.image_url);
-    }
-  });
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      try {
-        const imageUrl = await uploadImage(e.target.files[0], "articles");
-        setFeaturedImage(imageUrl);
-      } catch (error) {
-        console.error("Failed to upload image:", error);
-      }
-    }
-  };
-
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const slug = slugify(values.title);
-    const articleData = {
-      ...values,
-      slug,
-      image_url: featuredImage,
-      date: values.date.toISOString().split('T')[0],
-    };
-
-    if (isEditing && existingArticle) {
-      updateArticle.mutate({ id: existingArticle.id, ...articleData }, {
-        onSuccess: () => navigate("/admin/articles")
-      });
-    } else {
-      createArticle.mutate(articleData, {
-        onSuccess: () => navigate("/admin/articles")
-      });
-    }
-  }
-
-  if (isEditing && isLoading) {
-    return <div className="flex items-center justify-center h-64">Loading article...</div>;
+    // In a real app, this would call an API to save the article
+    console.log(values);
+    toast.success("Article saved successfully");
+    navigate("/admin/articles");
   }
 
   return (
@@ -339,12 +332,13 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
           <ChevronLeft className="h-4 w-4" />
           <span>Back</span>
         </Button>
-        <h1 className="text-3xl font-bold">{isEditing ? "Edit Article" : "New Article"}</h1>
+        <h1 className="text-3xl font-bold">New Article</h1>
       </div>
 
       <Tabs defaultValue="content" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
         
@@ -390,7 +384,7 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
                       <FormLabel>Category</FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
-                        value={field.value}
+                        defaultValue={field.value}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -450,51 +444,6 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
                   )}
                 />
               </div>
-
-              <div>
-                <label className="text-sm font-medium leading-none mb-2 block">
-                  Featured Image
-                </label>
-                <div className="flex items-center space-x-4">
-                  {featuredImage ? (
-                    <div className="relative">
-                      <img
-                        src={featuredImage}
-                        alt="Featured"
-                        className="w-32 h-24 object-cover rounded-md"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute -top-2 -right-2 h-6 w-6"
-                        onClick={() => setFeaturedImage(null)}
-                      >
-                        ×
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="w-32 h-24 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center">
-                      <ImageIcon className="h-8 w-8 text-gray-400" />
-                    </div>
-                  )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => document.getElementById('image-upload')?.click()}
-                    disabled={uploading}
-                  >
-                    {uploading ? "Uploading..." : "Upload Image"}
-                  </Button>
-                  <input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleImageUpload}
-                  />
-                </div>
-              </div>
               
               <FormField
                 control={form.control}
@@ -533,6 +482,41 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
               />
             </TabsContent>
             
+            <TabsContent value="seo" className="space-y-4">
+              <div>
+                <h2 className="text-lg font-medium">Search Engine Optimization</h2>
+                <p className="text-sm text-muted-foreground">
+                  Optimize your article for search engines.
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Meta Title
+                  </label>
+                  <Input className="mt-1" placeholder="SEO title (if different from article title)" />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Meta Description
+                  </label>
+                  <Textarea 
+                    className="mt-1 h-20" 
+                    placeholder="Description for search engine results"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Keywords
+                  </label>
+                  <Input className="mt-1" placeholder="Comma separated keywords" />
+                </div>
+              </div>
+            </TabsContent>
+            
             <TabsContent value="settings" className="space-y-4">
               <div>
                 <h2 className="text-lg font-medium">Article Settings</h2>
@@ -541,25 +525,71 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
                 </p>
               </div>
               
-              <FormField
-                control={form.control}
-                name="featured"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                    <FormControl>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        checked={field.value}
-                        onChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="text-sm font-normal">
-                      Feature this article on the homepage
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Publication Status</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="published">Published</SelectItem>
+                          <SelectItem value="archived">Archived</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="isFeatured"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                      <FormControl>
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={field.value}
+                          onChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-sm font-normal">
+                        Feature this article on the homepage
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                
+                <div>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    Related Articles
+                  </label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select articles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockArticles.map(article => (
+                        <SelectItem key={article.id} value={article.id.toString()}>
+                          {article.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </TabsContent>
             
             <div className="flex items-center justify-end space-x-2">
@@ -570,15 +600,7 @@ const ArticleForm = ({ isEditing = false }: { isEditing?: boolean }) => {
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={createArticle.isPending || updateArticle.isPending}
-              >
-                {createArticle.isPending || updateArticle.isPending 
-                  ? "Saving..." 
-                  : isEditing ? "Update Article" : "Save Article"
-                }
-              </Button>
+              <Button type="submit">Save Article</Button>
             </div>
           </form>
         </Form>
