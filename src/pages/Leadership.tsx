@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLeadershipProfiles } from '@/hooks/useLeadership';
 import { Link } from 'react-router-dom';
@@ -15,8 +16,8 @@ const Leadership = () => {
   }
 
   // Filter and organize leaders
-  const featuredLeaders = leaders?.filter(leader => leader.featured) || [];
-  const regularLeaders = leaders?.filter(leader => !leader.featured) || [];
+  const featuredLeaders = Array.isArray(leaders) ? leaders.filter((leader) => leader.featured) : [];
+  const regularLeaders = Array.isArray(leaders) ? leaders.filter((leader) => !leader.featured) : [];
 
   return (
     <div className="min-h-screen bg-white py-16">
@@ -56,10 +57,9 @@ const Leadership = () => {
               <Award className="h-6 w-6 text-insightRed mr-3" />
               <h2 className="text-2xl font-bold text-insightBlack">Featured Leaders</h2>
             </div>
-            
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* First featured leader - larger card */}
-              {featuredLeaders[0] && (
+              {featuredLeaders.length > 0 && (
                 <div className="lg:col-span-2 lg:row-span-2">
                   <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
                     <div className="aspect-[4/3] overflow-hidden">
@@ -263,7 +263,7 @@ const Leadership = () => {
         )}
 
         {/* Empty state */}
-        {(!leaders || leaders.length === 0) && (
+        {(Array.isArray(leaders) && leaders.length === 0) && (
           <div className="text-center py-16">
             <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">No Leadership Profiles Available</h3>
