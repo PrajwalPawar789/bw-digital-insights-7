@@ -4,7 +4,7 @@ import { MinimalButton, ScrollMode, SpecialZoomLevel, Viewer, ViewMode, Worker }
 import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
 import { ThumbnailDirection, thumbnailPlugin } from '@react-pdf-viewer/thumbnail';
 import { zoomPlugin } from '@react-pdf-viewer/zoom';
-import { Download, Maximize, RefreshCw, Loader2, FileWarning } from 'lucide-react';
+import { Maximize, RefreshCw, Loader2, FileWarning } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 import '@react-pdf-viewer/core/lib/styles/index.css';
@@ -48,7 +48,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
   const handleDocumentLoadError = (error: any) => {
     console.error("PDF load error:", error);
     setLoading(false);
-    setPdfError(error.message || "Failed to load PDF");
+    setPdfError(error?.message || "Failed to load PDF");
   };
 
   const retryLoad = () => {
@@ -87,11 +87,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
           {fullScreen ? 'Reading Mode' : 'Magazine Preview'}
         </h2>
         <div className="flex space-x-2">
-          {onDownload && (
-            <Button onClick={onDownload} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-1" /> Download
-            </Button>
-          )}
           {onFullScreen && (
             <Button onClick={onFullScreen} variant="outline" size="sm">
               <Maximize className="h-4 w-4" />
@@ -121,16 +116,9 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
             <FileWarning className="h-16 w-16 text-red-500 mx-auto mb-4" />
             <p className="text-red-700 font-medium mb-2 text-lg">Failed to load PDF</p>
             <p className="text-red-600 text-sm mb-4">Error: {pdfError}</p>
-            <div className="flex gap-4 justify-center">
-              {onDownload && (
-                <Button onClick={onDownload} variant="outline">
-                  <Download className="mr-2 h-4 w-4" /> Try Download
-                </Button>
-              )}
-              <Button onClick={retryLoad} variant="outline">
-                <RefreshCw className="mr-2 h-4 w-4" /> Retry
-              </Button>
-            </div>
+            <Button onClick={retryLoad} variant="outline">
+              <RefreshCw className="mr-2 h-4 w-4" /> Retry
+            </Button>
           </div>
         ) : (
           <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
