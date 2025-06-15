@@ -3,15 +3,27 @@ import React, { useState } from "react";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Card, CardHeader, CardTitle, CardContent, CardDescription
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { toast } from "sonner";
 import { Loader2, Plus, Edit, Trash2, Save, X } from "lucide-react";
 
+// Use type-safe string or null for id, as Supabase uuid is a string.
 interface TestimonialFormData {
   id?: string;
   quote: string;
@@ -20,7 +32,6 @@ interface TestimonialFormData {
   company: string;
   avatar_url: string;
 }
-
 const emptyForm: TestimonialFormData = {
   quote: "",
   name: "",
@@ -37,18 +48,24 @@ const TestimonialManager: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // Extra: Defensive for table values
+  const getString = (value: any) =>
+    typeof value === "string" ? value : value == null ? "" : String(value);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleEdit = (t: any) => {
     setForm({
       id: t.id,
-      quote: t.quote || "",
-      name: t.name || "",
-      title: t.title || "",
-      company: t.company || "",
-      avatar_url: t.avatar_url || "",
+      quote: getString(t.quote),
+      name: getString(t.name),
+      title: getString(t.title),
+      company: getString(t.company),
+      avatar_url: getString(t.avatar_url),
     });
     setEditingId(t.id);
     setShowForm(true);
@@ -93,13 +110,15 @@ const TestimonialManager: React.FC = () => {
         // Create testimonial
         const { error } = await supabase
           .from("testimonials")
-          .insert([{
-            quote: form.quote,
-            name: form.name,
-            title: form.title,
-            company: form.company,
-            avatar_url: form.avatar_url,
-          }]);
+          .insert([
+            {
+              quote: form.quote,
+              name: form.name,
+              title: form.title,
+              company: form.company,
+              avatar_url: form.avatar_url,
+            },
+          ]);
         if (error) throw error;
         toast.success("Testimonial created!");
       }
@@ -117,7 +136,10 @@ const TestimonialManager: React.FC = () => {
     if (!window.confirm("Delete this testimonial?")) return;
     setDeletingId(id);
     try {
-      const { error } = await supabase.from("testimonials").delete().eq("id", id);
+      const { error } = await supabase
+        .from("testimonials")
+        .delete()
+        .eq("id", id);
       if (error) throw error;
       toast.success("Testimonial deleted!");
       refetch();
@@ -133,7 +155,9 @@ const TestimonialManager: React.FC = () => {
         <CardHeader className="flex flex-row justify-between items-center">
           <div>
             <CardTitle>Testimonials</CardTitle>
-            <CardDescription>Manage testimonials shown on the main site.</CardDescription>
+            <CardDescription>
+              Manage testimonials shown on the main site.
+            </CardDescription>
           </div>
           <Button variant="default" size="sm" onClick={handleAddNew}>
             <Plus className="h-4 w-4 mr-2" /> Add Testimonial
@@ -166,21 +190,27 @@ const TestimonialManager: React.FC = () => {
                     onChange={handleInputChange}
                     required
                   />
-                  <Label htmlFor="title" className="mt-2 block">Title</Label>
+                  <Label htmlFor="title" className="mt-2 block">
+                    Title
+                  </Label>
                   <Input
                     id="title"
                     name="title"
                     value={form.title}
                     onChange={handleInputChange}
                   />
-                  <Label htmlFor="company" className="mt-2 block">Company</Label>
+                  <Label htmlFor="company" className="mt-2 block">
+                    Company
+                  </Label>
                   <Input
                     id="company"
                     name="company"
                     value={form.company}
                     onChange={handleInputChange}
                   />
-                  <Label htmlFor="avatar_url" className="mt-2 block">Avatar Image URL</Label>
+                  <Label htmlFor="avatar_url" className="mt-2 block">
+                    Avatar Image URL
+                  </Label>
                   <Input
                     id="avatar_url"
                     name="avatar_url"
@@ -191,10 +221,19 @@ const TestimonialManager: React.FC = () => {
               </div>
               <div className="flex gap-2">
                 <Button type="submit" disabled={saving}>
-                  {saving ? <Loader2 className="animate-spin h-4 w-4" /> : <Save className="h-4 w-4 mr-2" />}
+                  {saving ? (
+                    <Loader2 className="animate-spin h-4 w-4" />
+                  ) : (
+                    <Save className="h-4 w-4 mr-2" />
+                  )}
                   {editingId ? "Update Testimonial" : "Add Testimonial"}
                 </Button>
-                <Button type="button" variant="secondary" onClick={handleCancel} disabled={saving}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={handleCancel}
+                  disabled={saving}
+                >
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
@@ -228,14 +267,22 @@ const TestimonialManager: React.FC = () => {
                   </TableRow>
                 ) : (
                   testimonials.map((t: any) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="max-w-xs truncate">{t.quote}</TableCell>
-                      <TableCell>{t.name}</TableCell>
-                      <TableCell>{t.title}</TableCell>
-                      <TableCell>{t.company}</TableCell>
+                    <TableRow key={t.id ?? Math.random()}>
+                      <TableCell className="max-w-xs truncate">
+                        {getString(t.quote)}
+                      </TableCell>
+                      <TableCell>{getString(t.name)}</TableCell>
+                      <TableCell>{getString(t.title)}</TableCell>
+                      <TableCell>{getString(t.company)}</TableCell>
                       <TableCell>
-                        {t.avatar_url && (
-                          <img src={t.avatar_url} alt="Avatar" className="w-10 h-10 object-cover rounded-full" />
+                        {t.avatar_url ? (
+                          <img
+                            src={getString(t.avatar_url)}
+                            alt="Avatar"
+                            className="w-10 h-10 object-cover rounded-full"
+                          />
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
                       <TableCell>
