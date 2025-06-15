@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
 
 const headingKey = "client_logos_heading";
 
@@ -187,28 +195,75 @@ const ClientLogosManager = () => {
       </Card>
 
       <h2 className="mb-2 text-xl font-semibold">All Logos</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : (
-          logos?.map((logo: any) => (
-            <Card key={logo.id}>
-              <CardContent className="p-4 flex flex-col items-center">
-                <img src={logo.logo_url} alt={logo.name} className="h-12 w-auto mb-2" />
-                <div className="font-semibold">{logo.name}</div>
-                {logo.website_url && (
-                  <a href={logo.website_url} className="text-sm text-insightRed mt-1 underline" target="_blank" rel="noopener noreferrer">
-                    {logo.website_url}
-                  </a>
-                )}
-                <div className="flex gap-2 mt-3">
-                  <Button size="sm" onClick={() => startEditLogo(logo)}>Edit</Button>
-                  <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(logo.id)}>Delete</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
+      {/* Begin Table for logos */}
+      <div className="overflow-x-auto rounded-md bg-white shadow mb-8">
+        <Table>
+          <TableCaption>
+            {isLoading ? "Loading client logos..." : (logos && logos.length === 0 ? "No client logos found." : null)}
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[60px]">Logo</TableHead>
+              <TableHead>Name</TableHead>
+              <TableHead>Website</TableHead>
+              <TableHead className="w-[140px] text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center">Loading...</TableCell>
+              </TableRow>
+            ) : (
+              (logos && logos.length > 0) ? logos.map((logo: any) => (
+                <TableRow key={logo.id}>
+                  <TableCell>
+                    <img
+                      src={logo.logo_url}
+                      alt={logo.name}
+                      className="h-10 w-auto max-w-[64px] rounded bg-gray-100 border"
+                    />
+                  </TableCell>
+                  <TableCell className="text-base font-semibold">{logo.name}</TableCell>
+                  <TableCell>
+                    {logo.website_url ? (
+                      <a
+                        href={logo.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-insightRed underline break-all"
+                      >
+                        {logo.website_url}
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="flex gap-2 items-center justify-end">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => startEditLogo(logo)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteMutation.mutate(logo.id)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              )) : (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center text-gray-500">No client logos found.</TableCell>
+                </TableRow>
+              )
+            )}
+          </TableBody>
+        </Table>
       </div>
     </div>
   );
