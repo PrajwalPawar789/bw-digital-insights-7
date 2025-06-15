@@ -213,7 +213,6 @@ const Home = () => {
                     <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">Cover Story</span>
                   </div>
                   <h3 className="text-3xl font-bold mb-2 max-w-xl">{coverStory.title || "Untitled"}</h3>
-                  <p className="text-gray-200 mb-4 max-w-xl">{coverStory.excerpt || ""}</p>
                 </div>
               </div>
               {/* ... Highlights -- skip for now */}
@@ -283,7 +282,6 @@ const Home = () => {
                           <span className="text-sm text-gray-300">{news.date}</span>
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold mb-3">{news.title}</h3>
-                        <p className="text-base md:text-lg mb-6 text-gray-200">{news.excerpt}</p>
                         <a
                           href={`/article/${news.slug}`}
                           className="inline-flex items-center text-white bg-insightRed hover:bg-red-700 px-6 py-3 rounded-md text-base font-medium transition-colors"
