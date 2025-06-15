@@ -51,6 +51,7 @@ function safeGetMagId(magObj: any) {
 }
 
 const Home = () => {
+  console.log("Rendering Home");
   // Articles & Magazines
   const { data: newsDataRaw, isLoading: newsLoading } = useArticles();
   const { data: magazineDataRaw, isLoading: magLoading } = useMagazines();
