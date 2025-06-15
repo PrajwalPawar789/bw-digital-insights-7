@@ -363,11 +363,11 @@ const Home = () => {
                             </div>
                           </div>
                         </div>
-                      </Link>
-                    </CarouselItem>
-                  ))
+                      </div>
+                    </Link>
+                  </CarouselItem>
                 ))
-              : (
+              ) : (
                 <div className="w-full text-center text-gray-400 py-10">No magazines available.</div>
               )}
             </CarouselContent>
