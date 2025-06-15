@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Card, CardHeader, CardTitle, CardContent, CardDescription,
+  Card, CardHeader, CardTitle, CardContent, CardDescription
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,7 @@ const emptyForm: TestimonialFormData = {
   avatar_url: "",
 };
 
-const TestimonialManager = () => {
+const TestimonialManager: React.FC = () => {
   const { data: testimonials = [], refetch, isLoading } = useTestimonials();
   const [form, setForm] = useState<TestimonialFormData>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -76,7 +76,7 @@ const TestimonialManager = () => {
     }
     try {
       if (editingId) {
-        // Update
+        // Update testimonial
         const { error } = await supabase
           .from("testimonials")
           .update({
@@ -90,7 +90,7 @@ const TestimonialManager = () => {
         if (error) throw error;
         toast.success("Testimonial updated!");
       } else {
-        // Create
+        // Create testimonial
         const { error } = await supabase
           .from("testimonials")
           .insert([{
@@ -147,8 +147,9 @@ const TestimonialManager = () => {
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>Quote*</Label>
+                  <Label htmlFor="quote">Quote*</Label>
                   <textarea
+                    id="quote"
                     name="quote"
                     value={form.quote}
                     onChange={handleInputChange}
@@ -157,27 +158,31 @@ const TestimonialManager = () => {
                   />
                 </div>
                 <div>
-                  <Label>Name*</Label>
+                  <Label htmlFor="name">Name*</Label>
                   <Input
+                    id="name"
                     name="name"
                     value={form.name}
                     onChange={handleInputChange}
                     required
                   />
-                  <Label className="mt-2 block">Title</Label>
+                  <Label htmlFor="title" className="mt-2 block">Title</Label>
                   <Input
+                    id="title"
                     name="title"
                     value={form.title}
                     onChange={handleInputChange}
                   />
-                  <Label className="mt-2 block">Company</Label>
+                  <Label htmlFor="company" className="mt-2 block">Company</Label>
                   <Input
+                    id="company"
                     name="company"
                     value={form.company}
                     onChange={handleInputChange}
                   />
-                  <Label className="mt-2 block">Avatar Image URL</Label>
+                  <Label htmlFor="avatar_url" className="mt-2 block">Avatar Image URL</Label>
                   <Input
+                    id="avatar_url"
                     name="avatar_url"
                     value={form.avatar_url}
                     onChange={handleInputChange}
