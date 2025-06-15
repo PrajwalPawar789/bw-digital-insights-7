@@ -35,7 +35,7 @@ const MagazineManager = () => {
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
   const { uploadImage, uploadPdf, uploading } = useImageUpload();
-  const { mutate: createMagazineArticle } = useCreateMagazineArticle();
+  const { mutate: createMagazineArticle } = useCreateMagazineArticle(); // use mutate!
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -111,7 +111,6 @@ const MagazineManager = () => {
         featured_article_id: featuredArticleId,
       };
 
-      // 1. Create the magazine
       createMagazine(newMagazine, {
         onSuccess: (createdMagazine) => {
           console.log('Created magazine from onSuccess:', createdMagazine);
@@ -127,7 +126,7 @@ const MagazineManager = () => {
               magazine_id: createdMagazine.id,
               article_id: featuredArticleId,
               featured: true,
-              page_number: 1, // or let the user choose/add in UI later
+              page_number: 1,
             });
           }
           setOpen(false);
@@ -167,7 +166,6 @@ const MagazineManager = () => {
         featured_article_id: featuredArticleId,
       };
 
-      // 1. Update the magazine
       updateMagazine(updatedMagazine, {
         onSuccess: (magazine) => {
           console.log('Updated magazine from onSuccess:', magazine);
@@ -183,7 +181,7 @@ const MagazineManager = () => {
               magazine_id: magazine.id,
               article_id: featuredArticleId,
               featured: true,
-              page_number: 1, // or customize
+              page_number: 1,
             });
           }
           setOpen(false);
