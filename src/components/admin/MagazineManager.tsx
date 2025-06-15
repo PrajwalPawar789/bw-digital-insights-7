@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
-import { useMagazineArticles } from '@/hooks/useMagazineArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // import the insert hook for magazine_articles
 import { Button } from '@/components/ui/button';
@@ -94,49 +93,43 @@ const MagazineManager = () => {
     setUploadingFile(null);
   };
 
-  const handleCreateMagazine = async () => {
+  const handleCreateMagazine = () => {
     if (!title || !description || !publishDate) {
       toast.error('Please fill in all required fields (title, description, publish date).');
       return;
     }
 
-    try {
-      const newMagazine = {
-        title,
-        slug: slug || slugify(title),
-        description,
-        cover_image_url: coverImageUrl,
-        pdf_url: pdfUrl,
-        publish_date: publishDate,
-        issue_number: issueNumber !== '' ? Number(issueNumber) : null,
-        featured,
-        featured_article_id: featuredArticleId,
-      };
+    const newMagazine = {
+      title,
+      slug: slug || slugify(title),
+      description,
+      cover_image_url: coverImageUrl,
+      pdf_url: pdfUrl,
+      publish_date: publishDate,
+      issue_number: issueNumber !== '' ? Number(issueNumber) : null,
+      featured,
+      featured_article_id: featuredArticleId,
+    };
 
-      // 1. Create the magazine
-      createMagazine(newMagazine, {
-        onSuccess: (createdMagazine) => {
-          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
-          if (featuredArticleId && createdMagazine?.id) {
-            createMagazineArticle({
-              magazine_id: createdMagazine.id,
-              article_id: featuredArticleId,
-              featured: true,
-              page_number: 1, // or let the user choose/add in UI later
-            });
-          }
-          setOpen(false);
-          resetForm();
-          refetch();
+    createMagazine(newMagazine, {
+      onSuccess: (createdMagazine) => {
+        if (featuredArticleId && createdMagazine?.id) {
+          createMagazineArticle({
+            magazine_id: createdMagazine.id,
+            article_id: featuredArticleId,
+            featured: true,
+            page_number: 1,
+          });
         }
-      });
-    } catch (error) {
-      toast.error('Failed to create magazine');
-      console.error('Error creating magazine:', error);
-    }
+        setOpen(false);
+        resetForm();
+        refetch();
+      },
+      // onError is handled globally in the useCreateMagazine hook
+    });
   };
 
-  const handleUpdateMagazine = async () => {
+  const handleUpdateMagazine = () => {
     if (!selectedMagazine?.id) return;
 
     if (!title || !description || !publishDate) {
@@ -144,51 +137,48 @@ const MagazineManager = () => {
       return;
     }
 
-    try {
-      const updatedMagazine = {
-        id: selectedMagazine.id,
-        title,
-        slug: slug || slugify(title),
-        description,
-        cover_image_url: coverImageUrl,
-        pdf_url: pdfUrl,
-        publish_date: publishDate,
-        issue_number: issueNumber !== '' ? Number(issueNumber) : null,
-        featured,
-        featured_article_id: featuredArticleId,
-      };
+    const updatedMagazine = {
+      id: selectedMagazine.id,
+      title,
+      slug: slug || slugify(title),
+      description,
+      cover_image_url: coverImageUrl,
+      pdf_url: pdfUrl,
+      publish_date: publishDate,
+      issue_number: issueNumber !== '' ? Number(issueNumber) : null,
+      featured,
+      featured_article_id: featuredArticleId,
+    };
 
-      // 1. Update the magazine
-      updateMagazine(updatedMagazine, {
-        onSuccess: (magazine) => {
-          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
-          if (featuredArticleId && magazine?.id) {
-            createMagazineArticle({
-              magazine_id: magazine.id,
-              article_id: featuredArticleId,
-              featured: true,
-              page_number: 1, // or customize
-            });
-          }
-          setOpen(false);
-          resetForm();
-          refetch();
+    updateMagazine(updatedMagazine, {
+      onSuccess: (magazine) => {
+        if (featuredArticleId && magazine?.id) {
+          createMagazineArticle({
+            magazine_id: magazine.id,
+            article_id: featuredArticleId,
+            featured: true,
+            page_number: 1,
+          });
         }
-      });
-    } catch (error) {
-      toast.error('Failed to update magazine');
-      console.error('Error updating magazine:', error);
-    }
+        setOpen(false);
+        resetForm();
+        refetch();
+      },
+      // onError is handled globally in the useUpdateMagazine hook
+    });
   };
 
-  const handleDeleteMagazine = async (id: string) => {
+  const handleDeleteMagazine = (id: string) => {
     if (window.confirm("Are you sure you want to delete this magazine? This action cannot be undone.")) {
-      try {
-        deleteMagazine(id);
-      } catch (error) {
-        console.error('Error deleting magazine:', error);
-        toast.error('Failed to delete magazine');
-      }
+      deleteMagazine(id, {
+        onSuccess: () => {
+          toast.success("Magazine deleted successfully.");
+          refetch();
+        },
+        onError: (error) => {
+          toast.error(`Failed to delete magazine: ${error.message}`);
+        }
+      });
     }
   };
 
