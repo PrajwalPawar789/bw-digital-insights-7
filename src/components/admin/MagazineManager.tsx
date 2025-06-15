@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
-import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // import the insert hook for magazine_articles
+import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Edit2, Trash2, Plus, Upload, FileText, Calendar, Hash, Star, ExternalLink } from 'lucide-react';
+import { Edit2, Trash2, Plus, FileText, Star, ExternalLink } from 'lucide-react';
 import { slugify } from '@/lib/slugify';
 
 interface Magazine {
@@ -23,7 +23,7 @@ interface Magazine {
   cover_image_url: string;
   pdf_url: string;
   publish_date: string;
-  issue_number: number;
+  issue_number: number | null;
   featured: boolean;
   featured_article_id: string | null;
 }
@@ -34,7 +34,7 @@ const MagazineManager = () => {
   const { mutate: createMagazine } = useCreateMagazine();
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
-  const { uploadImage, uploadPdf, uploading } = useImageUpload();
+  const { uploadImage, uploadPdf } = useImageUpload();
   const { mutate: createMagazineArticle } = useCreateMagazineArticle();
 
   const [open, setOpen] = useState(false);
@@ -46,7 +46,7 @@ const MagazineManager = () => {
   const [coverImageUrl, setCoverImageUrl] = useState('');
   const [pdfUrl, setPdfUrl] = useState('');
   const [publishDate, setPublishDate] = useState('');
-  const [issueNumber, setIssueNumber] = useState<number | ''>('' as number | '');
+  const [issueNumber, setIssueNumber] = useState('');
   const [featured, setFeatured] = useState(false);
   const [featuredArticleId, setFeaturedArticleId] = useState<string | null>(null);
   const [uploadingFile, setUploadingFile] = useState<'image' | 'pdf' | null>(null);
@@ -60,139 +60,92 @@ const MagazineManager = () => {
       setCoverImageUrl(selectedMagazine.cover_image_url);
       setPdfUrl(selectedMagazine.pdf_url);
       setPublishDate(selectedMagazine.publish_date);
-      setIssueNumber(selectedMagazine.issue_number);
+      setIssueNumber(selectedMagazine.issue_number?.toString() ?? '');
       setFeatured(selectedMagazine.featured);
       setFeaturedArticleId(selectedMagazine.featured_article_id);
       setOpen(true);
     } else {
-      setEditMode(false);
-      setTitle('');
-      setSlug('');
-      setDescription('');
-      setCoverImageUrl('');
-      setPdfUrl('');
-      setPublishDate('');
-      setIssueNumber('' as number | '');
-      setFeatured(false);
-      setFeaturedArticleId(null);
+      resetForm();
     }
   }, [selectedMagazine]);
 
   const resetForm = () => {
-    setSelectedMagazine(null);
     setEditMode(false);
+    setSelectedMagazine(null);
     setTitle('');
     setSlug('');
     setDescription('');
     setCoverImageUrl('');
     setPdfUrl('');
     setPublishDate('');
-    setIssueNumber('' as number | '');
+    setIssueNumber('');
     setFeatured(false);
     setFeaturedArticleId(null);
     setUploadingFile(null);
   };
 
-  const handleCreateMagazine = () => {
+  const handleSubmit = () => {
     if (!title || !description || !publishDate) {
       toast.error('Please fill in all required fields (title, description, publish date).');
       return;
     }
 
-    const newMagazine = {
+    const magazineData = {
       title,
       slug: slug || slugify(title),
       description,
       cover_image_url: coverImageUrl,
       pdf_url: pdfUrl,
       publish_date: publishDate,
-      issue_number: issueNumber !== '' ? Number(issueNumber) : null,
+      issue_number: issueNumber ? parseInt(issueNumber, 10) : null,
       featured,
       featured_article_id: featuredArticleId,
     };
 
-    createMagazine(newMagazine, {
-      onSuccess: (createdMagazine) => {
-        if (featuredArticleId && createdMagazine?.id) {
-          createMagazineArticle({
-            magazine_id: createdMagazine.id,
-            article_id: featuredArticleId,
-            featured: true,
-            page_number: 1,
-          });
-        }
-        setOpen(false);
-        resetForm();
-        refetch();
-      },
-      // onError is handled globally in the useCreateMagazine hook
-    });
-  };
-
-  const handleUpdateMagazine = () => {
-    if (!selectedMagazine?.id) return;
-
-    if (!title || !description || !publishDate) {
-      toast.error('Please fill in all required fields (title, description, publish date).');
-      return;
+    if (editMode && selectedMagazine) {
+      updateMagazine({ id: selectedMagazine.id, ...magazineData }, {
+        onSuccess: (updatedMagazine) => {
+          if (featuredArticleId && updatedMagazine?.id) {
+            // This logic might need refinement to handle changes of featured articles correctly
+            createMagazineArticle({
+              magazine_id: updatedMagazine.id,
+              article_id: featuredArticleId,
+              featured: true,
+              page_number: 1,
+            });
+          }
+          handleDialogClose();
+        },
+      });
+    } else {
+      createMagazine(magazineData, {
+        onSuccess: (createdMagazine) => {
+          if (featuredArticleId && createdMagazine?.id) {
+            createMagazineArticle({
+              magazine_id: createdMagazine.id,
+              article_id: featuredArticleId,
+              featured: true,
+              page_number: 1,
+            });
+          }
+          handleDialogClose();
+        },
+      });
     }
-
-    const updatedMagazine = {
-      id: selectedMagazine.id,
-      title,
-      slug: slug || slugify(title),
-      description,
-      cover_image_url: coverImageUrl,
-      pdf_url: pdfUrl,
-      publish_date: publishDate,
-      issue_number: issueNumber !== '' ? Number(issueNumber) : null,
-      featured,
-      featured_article_id: featuredArticleId,
-    };
-
-    updateMagazine(updatedMagazine, {
-      onSuccess: (magazine) => {
-        if (featuredArticleId && magazine?.id) {
-          createMagazineArticle({
-            magazine_id: magazine.id,
-            article_id: featuredArticleId,
-            featured: true,
-            page_number: 1,
-          });
-        }
-        setOpen(false);
-        resetForm();
-        refetch();
-      },
-      // onError is handled globally in the useUpdateMagazine hook
-    });
   };
 
   const handleDeleteMagazine = (id: string) => {
     if (window.confirm("Are you sure you want to delete this magazine? This action cannot be undone.")) {
-      deleteMagazine(id, {
-        onSuccess: () => {
-          toast.success("Magazine deleted successfully.");
-          refetch();
-        },
-        onError: (error) => {
-          toast.error(`Failed to delete magazine: ${error.message}`);
-        }
-      });
+      deleteMagazine(id);
     }
   };
 
   const handleImageUpload = async (file: File) => {
     try {
       setUploadingFile('image');
-      console.log('Uploading cover image:', file.name);
       const imageUrl = await uploadImage(file, "magazines");
       setCoverImageUrl(imageUrl);
-      toast.success("Cover image uploaded successfully");
-      setUploadingFile(null);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      toast.error("Failed to upload image");
+    } finally {
       setUploadingFile(null);
     }
   };
@@ -200,14 +153,9 @@ const MagazineManager = () => {
   const handlePdfUpload = async (file: File) => {
     try {
       setUploadingFile('pdf');
-      console.log('Uploading PDF:', file.name);
-      const pdfUrl = await uploadPdf(file, "magazine-pdfs");
-      setPdfUrl(pdfUrl);
-      toast.success("PDF uploaded successfully");
-      setUploadingFile(null);
-    } catch (error) {
-      console.error('Error uploading PDF:', error);
-      toast.error("Failed to upload PDF");
+      const pdfFileUrl = await uploadPdf(file, "magazine-pdfs");
+      setPdfUrl(pdfFileUrl);
+    } finally {
       setUploadingFile(null);
     }
   };
@@ -221,9 +169,15 @@ const MagazineManager = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Magazines</h2>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={(isOpen) => {
+          if (!isOpen) handleDialogClose();
+          else setOpen(true);
+        }}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2" onClick={resetForm}>
+            <Button variant="outline" className="flex items-center gap-2" onClick={() => {
+              resetForm();
+              setOpen(true);
+            }}>
               <Plus className="h-4 w-4" />
               Create Magazine
             </Button>
@@ -275,6 +229,7 @@ const MagazineManager = () => {
                       }
                     }} 
                     className="hidden" 
+                    disabled={uploadingFile === 'image'}
                   />
                   <Label htmlFor="coverImage" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer inline-block">
                     {uploadingFile === 'image' ? 'Uploading...' : 'Upload Cover Image'}
@@ -302,7 +257,8 @@ const MagazineManager = () => {
                         handlePdfUpload(e.target.files[0]);
                       }
                     }} 
-                    className="hidden" 
+                    className="hidden"
+                    disabled={uploadingFile === 'pdf'}
                   />
                   <Label htmlFor="pdf" className="bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-md px-3 py-2 text-sm cursor-pointer inline-block">
                     {uploadingFile === 'pdf' ? 'Uploading...' : 'Upload PDF'}
@@ -330,10 +286,7 @@ const MagazineManager = () => {
                   type="number"
                   id="issueNumber"
                   value={issueNumber}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setIssueNumber(val === '' ? '' : Number(val));
-                  }}
+                  onChange={(e) => setIssueNumber(e.target.value.replace(/[^0-9]/g, ''))}
                   className="col-span-3"
                 />
               </div>
@@ -368,7 +321,7 @@ const MagazineManager = () => {
               </div>
             </div>
             <div className="flex gap-2">
-              <Button onClick={editMode ? handleUpdateMagazine : handleCreateMagazine} className="flex-1">
+              <Button onClick={handleSubmit} className="flex-1">
                 {editMode ? 'Update Magazine' : 'Create Magazine'}
               </Button>
               <Button variant="outline" onClick={handleDialogClose}>
