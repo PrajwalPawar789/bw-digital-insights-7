@@ -1,11 +1,8 @@
 
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { newsData, Article as NewsItem } from '../data/newsData';
-import { magazineData } from '../data/magazineData';
-import { testimonialData } from '../data/testimonialsData';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChevronRight, ChevronLeft, BookOpen, Star, Award, TrendingUp } from 'lucide-react';
+import { ChevronRight, ChevronLeft, BookOpen, Star, Award, TrendingUp } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -14,97 +11,73 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import ClientLogos from '@/components/ClientLogos';
+import ClientLogos from "@/components/ClientLogos";
+import { useMagazines, useFeaturedMagazines } from "@/hooks/useMagazines";
+import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
+import { useTestimonials } from "@/hooks/useTestimonials";
+import { useUpcomingEditions } from "@/hooks/useUpcomingEditions";
 
-// --- Helpers for cover, title, date, id, desc (support multiple field shapes for magazines) --
-function getMagCover(magObj) {
-  return magObj?.cover_image_url || magObj?.coverImage || magObj?.image || '/placeholder.svg';
+// Helper accessors
+function getMagCover(magObj: any) {
+  return magObj?.cover_image_url || magObj?.coverImage || magObj?.image_url || "/placeholder.svg";
 }
-function getMagTitle(magObj) {
-  return magObj?.title || magObj?.name || 'Untitled';
+function getMagTitle(magObj: any) {
+  return magObj?.title || magObj?.name || "Untitled";
 }
-function getMagDesc(magObj) {
-  return magObj?.description || '';
+function getMagDesc(magObj: any) {
+  return magObj?.description || "";
 }
-function getMagDate(magObj) {
-  return (
-    magObj?.publicationDate ||
-    magObj?.publish_date ||
-    magObj?.releaseDate ||
-    ""
-  );
+function getMagDate(magObj: any) {
+  return magObj?.publish_date || magObj?.publicationDate || "";
 }
-function getMagId(magObj) {
+function getMagId(magObj: any) {
   return magObj?.slug || magObj?.id;
 }
 
 const Home = () => {
-  // --- Prepare data with robust access ---
-  const featuredNews = newsData.filter(news => news.isFeatured || false);
+  // Articles & Magazines
+  const { data: newsData = [], isLoading: newsLoading } = useArticles();
+  const { data: magazineData = [], isLoading: magLoading } = useMagazines();
+  const { data: testimonialsData = [] } = useTestimonials();
+  const { data: upcomingEditions = [] } = useUpcomingEditions();
+
+  // Pick featured news (cover story, editor's picks)
+  const featuredNews = newsData.filter((n: any) => n.featured);
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+
   const latestMagazine = magazineData[0] || {};
-  const categories = ['Trending', 'Business', 'Technology'];
+
+  // Categories for Tabs, dynamically inferred from articles.
+  const categories = ["Trending", ...Array.from(new Set(newsData.map((n: any) => n.category).filter(Boolean).filter(c => c !== "Trending"))).slice(0, 2)]; // at most 3 tabs
+
   const getNewsByCategory = (category: string) => {
-    if (category === 'Trending') {
+    if (category === "Trending") {
       return newsData
-        .filter(news => news.isFeatured || new Date(news.date) > new Date('2025-02-01'))
+        .filter((n: any) => n.featured)
         .slice(0, 6);
     }
-    return newsData
-      .filter(news => news.category === category)
-      .slice(0, 6);
+    return newsData.filter((n: any) => n.category === category).slice(0, 6);
   };
-  const featuredExecutives = testimonialData.slice(0, 3);
-  const upcomingEditions = [
-    {
-      id: 1,
-      title: "Tech Disruption 2026",
-      description: "How emerging technologies are reshaping global industries and transforming business models across sectors",
-      image: "https://insightscare.in/wp-content/uploads/2023/09/Indias-10-Most-Trusted-Medical-Device-Companies-to-Know-1-scaled.jpg",
-      releaseDate: "January 2026",
-      status: "In Production"
-    },
-    {
-      id: 2,
-      title: "Sustainable Business Leaders",
-      description: "The executives pioneering environmental innovation and sustainable practices in the corporate landscape",
-      image: "https://insightscare.in/wp-content/uploads/2023/09/5-Most-Empowering-Women-Leaders-in-Healthcare-2023-min-1-scaled.jpg",
-      releaseDate: "March 2026",
-      status: "Content Development"
-    },
-    {
-      id: 3,
-      title: "AI & Human Capital",
-      description: "Exploring the balance between artificial intelligence advancement and workforce development strategies",
-      image: "https://insightscare.in/wp-content/uploads/2023/09/10-Best-Companies-in-the-Nutraceutical-Market-2023-1-scaled.jpg",
-      releaseDate: "May 2026",
-      status: "Initial Planning"
-    }
-  ];
 
-  // --- Carousel auto-play ---
+  // Carousel autoplay
   useEffect(() => {
     if (!featuredNews.length) return;
     const interval = setInterval(() => {
-      setActiveSlide((prevSlide) => (prevSlide + 1) % featuredNews.length);
+      setActiveSlide((prev) => (prev + 1) % featuredNews.length);
     }, 5000);
     return () => clearInterval(interval);
   }, [featuredNews.length]);
   useEffect(() => {
-    if (!testimonialData.length) return;
+    if (!testimonialsData.length) return;
     const interval = setInterval(() => {
-      setActiveTestimonial((prevSlide) => (prevSlide + 1) % testimonialData.length);
+      setActiveTestimonial((prev) => (prev + 1) % testimonialsData.length);
     }, 6000);
     return () => clearInterval(interval);
-  }, []);
+  }, [testimonialsData.length]);
 
-  const prevSlide = () => {
-    setActiveSlide((prevSlide) => (prevSlide - 1 + featuredNews.length) % featuredNews.length);
-  };
-  const nextSlide = () => {
-    setActiveSlide((prevSlide) => (prevSlide + 1) % featuredNews.length);
-  };
+  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + featuredNews.length) % featuredNews.length);
+  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % featuredNews.length);
 
   return (
     <div className="min-h-screen">
@@ -120,19 +93,17 @@ const Home = () => {
                 Exclusive Insights from <span className="text-insightRed">C-Suite Leaders</span>
               </h1>
               <p className="text-lg md:text-xl text-gray-300">
-                Spotlighting the strategic minds behind global business success. 
-                Discover exclusive interviews, success stories, and expert insights from 
-                the world's top executives.
+                Spotlighting the strategic minds behind global business success. Discover exclusive interviews, success stories, and expert insights from the world's top executives.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link 
-                  to="/magazine" 
+                <Link
+                  to="/magazine"
                   className="inline-flex items-center px-6 py-3 bg-insightRed hover:bg-red-700 text-white rounded-md font-medium transition-colors"
                 >
                   Latest Issue <ChevronRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link 
-                  to="/leadership" 
+                <Link
+                  to="/leadership"
                   className="inline-flex items-center px-6 py-3 border border-white/30 hover:bg-white/20 text-white rounded-md font-medium transition-colors"
                 >
                   Meet The Executives <ChevronRight className="ml-2 h-5 w-5" />
@@ -141,17 +112,16 @@ const Home = () => {
             </div>
             <div className="hidden lg:flex justify-end">
               <div className="relative">
-                <img 
+                <img
                   src={getMagCover(latestMagazine)}
-                  alt="Latest Magazine Cover" 
-                  className="rounded-lg shadow-2xl w-80 h-auto transform rotate-6 z-10" 
+                  alt="Latest Magazine Cover"
+                  className="rounded-lg shadow-2xl w-80 h-auto transform rotate-6 z-10"
                 />
-                {/* Only render previous magazine cover if it exists */}
                 {magazineData[1] && (
-                  <img 
+                  <img
                     src={getMagCover(magazineData[1])}
-                    alt="Previous Magazine Cover" 
-                    className="absolute -left-10 -bottom-5 rounded-lg shadow-xl w-72 h-auto transform -rotate-6" 
+                    alt="Previous Magazine Cover"
+                    className="absolute -left-10 -bottom-5 rounded-lg shadow-xl w-72 h-auto transform -rotate-6"
                   />
                 )}
                 <div className="absolute -right-8 -top-8 bg-insightRed text-white rounded-full p-4 shadow-lg z-20">
@@ -172,8 +142,8 @@ const Home = () => {
                 <h2 className="text-3xl font-bold text-insightBlack">Cover Story</h2>
                 <p className="text-gray-600">Our most impactful feature of the month</p>
               </div>
-              <Link 
-                to={`/article/${featuredNews[0].slug}`} 
+              <Link
+                to={`/article/${featuredNews[0].slug}`}
                 className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium transition-colors"
               >
                 Read Full Story <ChevronRight className="ml-1 h-4 w-4" />
@@ -181,42 +151,43 @@ const Home = () => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
               <div className="lg:col-span-3 relative h-[400px] rounded-xl overflow-hidden">
-                <img 
-                  src={featuredNews[0].image} 
-                  alt={featuredNews[0].title}
-                  className="w-full h-full object-cover" 
-                />
+                <img src={featuredNews[0].image_url} alt={featuredNews[0].title} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6 text-white">
                   <div className="flex items-center mb-4">
-                    <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">
-                      Cover Story
-                    </span>
+                    <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">Cover Story</span>
                   </div>
                   <h3 className="text-3xl font-bold mb-2 max-w-xl">{featuredNews[0].title}</h3>
                   <p className="text-gray-200 mb-4 max-w-xl">{featuredNews[0].excerpt}</p>
                 </div>
               </div>
+              {/* ... Highlights -- skip for now */}
               <div className="lg:col-span-2 space-y-8">
                 <div className="flex items-start space-x-4">
                   <span className="text-insightRed font-bold text-5xl">01</span>
                   <div>
                     <h4 className="text-xl font-bold mb-2">The Leadership Approach That's Reshaping Industries</h4>
-                    <p className="text-gray-600">Explore how today's C-level executives are implementing transformative strategies that drive unprecedented growth and innovation.</p>
+                    <p className="text-gray-600">
+                      Explore how today's C-level executives are implementing transformative strategies that drive unprecedented growth and innovation.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
                   <span className="text-insightRed font-bold text-5xl">02</span>
                   <div>
                     <h4 className="text-xl font-bold mb-2">Key Insights from the Interview</h4>
-                    <p className="text-gray-600">Strategic thinking, bold decision-making, and innovative approaches to market disruption defined our conversation with industry leaders.</p>
+                    <p className="text-gray-600">
+                      Strategic thinking, bold decision-making, and innovative approaches to market disruption defined our conversation with industry leaders.
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-4">
                   <span className="text-insightRed font-bold text-5xl">03</span>
                   <div>
                     <h4 className="text-xl font-bold mb-2">What's Next for Industry Leaders</h4>
-                    <p className="text-gray-600">Examining future trends and upcoming challenges that will shape the next generation of executive leadership and business strategy.</p>
+                    <p className="text-gray-600">
+                      Examining future trends and upcoming challenges that will shape the next generation of executive leadership and business strategy.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -224,6 +195,7 @@ const Home = () => {
           </div>
         </section>
       )}
+
       {/* Editor's Picks Carousel */}
       {featuredNews.length > 0 && (
         <section className="py-16 bg-white">
@@ -236,28 +208,20 @@ const Home = () => {
             </div>
             <div className="relative overflow-hidden rounded-lg shadow-lg">
               <div className="relative h-[400px] md:h-[500px]">
-                {featuredNews.map((news, index) => (
+                {featuredNews.map((news: any, index: number) => (
                   <div
                     key={news.id}
                     className={`absolute inset-0 transition-opacity duration-500 ${
-                      index === activeSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                      index === activeSlide ? "opacity-100" : "opacity-0 pointer-events-none"
                     }`}
                   >
                     <div className="relative h-full">
-                      <img
-                        src={news.image}
-                        alt={news.title}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={news.image_url} alt={news.title} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 p-8 text-white max-w-3xl">
                         <div className="flex items-center gap-3 mb-4">
-                          <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">
-                            {news.category}
-                          </span>
-                          <span className="text-sm text-gray-300">
-                            {news.date}
-                          </span>
+                          <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">{news.category}</span>
+                          <span className="text-sm text-gray-300">{news.date}</span>
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold mb-3">{news.title}</h3>
                         <p className="text-base md:text-lg mb-6 text-gray-200">{news.excerpt}</p>
@@ -287,12 +251,12 @@ const Home = () => {
                 <ChevronRight className="h-6 w-6" />
               </button>
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {featuredNews.map((_, index) => (
+                {featuredNews.map((_: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setActiveSlide(index)}
                     className={`h-2 rounded-full transition-all ${
-                      index === activeSlide ? 'bg-white w-8' : 'bg-white/50 w-2'
+                      index === activeSlide ? "bg-white w-8" : "bg-white/50 w-2"
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
                   ></button>
@@ -321,29 +285,15 @@ const Home = () => {
               </p>
             </div>
           </div>
-          <Carousel
-            opts={{
-              align: "center",
-              loop: true,
-              dragFree: true,
-            }}
-            className="w-full"
-          >
+          <Carousel opts={{ align: "center", loop: true, dragFree: true }} className="w-full">
             <CarouselContent className="-ml-4">
-              {magazineData.map((magazine) => (
-                <CarouselItem 
-                  key={getMagId(magazine)} 
-                  className="pl-4 basis-[280px] md:basis-[320px] lg:basis-[400px] transition-all duration-300 data-[center=true]:scale-110"
-                >
+              {magazineData.map((magazine: any) => (
+                <CarouselItem key={getMagId(magazine)} className="pl-4 basis-[280px] md:basis-[320px] lg:basis-[400px] transition-all duration-300 data-[center=true]:scale-110">
                   <Link to={`/magazine/${getMagId(magazine)}`} className="block group perspective-1000">
                     <div className="relative transform transition-all duration-500 group-hover:rotate-y-6 preserve-3d">
                       <div className="overflow-hidden rounded-xl shadow-2xl bg-white">
                         <div className="relative aspect-[3/4]">
-                          <img
-                            src={getMagCover(magazine)}
-                            alt={getMagTitle(magazine)}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                          />
+                          <img src={getMagCover(magazine)} alt={getMagTitle(magazine)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/20 to-transparent transform scale-y-[-1] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-sm"></div>
                           <div className="absolute top-0 right-0 m-4">
@@ -372,7 +322,8 @@ const Home = () => {
           </Carousel>
         </div>
       </section>
-      {/* -- Upcoming Editions -- */}
+
+      {/* Upcoming Editions */}
       <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
@@ -385,22 +336,22 @@ const Home = () => {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {upcomingEditions.map((edition, index) => (
-              <div 
-                key={edition.id} 
+            {upcomingEditions.map((edition: any, index: number) => (
+              <div
+                key={edition.id}
                 className="group relative overflow-hidden rounded-xl shadow-lg transform transition-all duration-500 hover:-translate-y-2"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 z-10 group-hover:from-black/80"></div>
                 <img
-                  src={edition.image}
+                  src={edition.image_url}
                   alt={edition.title}
                   className="w-full h-80 object-cover filter blur-[8px] scale-110 group-hover:scale-125 group-hover:blur-[12px] transition-all duration-1000"
                 />
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
                   <div className="inline-flex items-center px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-3 w-fit">
                     <span className="animate-pulse mr-2 h-2 w-2 bg-insightRed rounded-full"></span>
-                    {edition.releaseDate}
+                    {edition.release_date}
                   </div>
                   <h3 className="text-2xl font-bold mb-3 tracking-tight group-hover:text-insightRed transition-colors">
                     {edition.title}
@@ -409,7 +360,7 @@ const Home = () => {
                     {edition.description}
                   </p>
                   <div className="flex items-center text-sm font-medium border-t border-white/20 pt-3">
-                    <span className="pb-0.5">In Development</span>
+                    <span className="pb-0.5">{edition.status}</span>
                   </div>
                 </div>
                 <div className="absolute top-4 right-4 z-30">
@@ -437,9 +388,9 @@ const Home = () => {
           <Tabs defaultValue={categories[0]} className="w-full">
             <TabsList className="mb-8 flex justify-center bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-gray-200 shadow-sm">
               {categories.map((category) => (
-                <TabsTrigger 
-                  key={category} 
-                  value={category} 
+                <TabsTrigger
+                  key={category}
+                  value={category}
                   className="px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-md data-[state=active]:text-insightRed transition-all"
                 >
                   {category}
@@ -449,11 +400,11 @@ const Home = () => {
             {categories.map((category) => (
               <TabsContent key={category} value={category}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {getNewsByCategory(category).map((news: NewsItem) => (
+                  {getNewsByCategory(category).map((news: any) => (
                     <Card key={news.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-lg">
                       <div className="relative overflow-hidden aspect-video">
                         <img
-                          src={news.image}
+                          src={news.image_url}
                           alt={news.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />
@@ -465,14 +416,13 @@ const Home = () => {
                         </div>
                       </div>
                       <CardContent className="p-6">
-                        <h3 className="text-xl font-bold mb-3 group-hover:text-insightRed transition-colors line-clamp-2">{news.title}</h3>
+                        <h3 className="text-xl font-bold mb-3 group-hover:text-insightRed transition-colors line-clamp-2">
+                          {news.title}
+                        </h3>
                         <p className="text-gray-600 mb-4 line-clamp-2">{news.excerpt}</p>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-500">{news.date}</span>
-                          <Link
-                            to={`/article/${news.slug}`}
-                            className="inline-flex items-center text-insightRed hover:text-insightBlack text-sm font-medium transition-colors"
-                          >
+                          <Link to={`/article/${news.slug}`} className="inline-flex items-center text-insightRed hover:text-insightBlack text-sm font-medium transition-colors">
                             Read Full Article <ChevronRight className="ml-1 h-4 w-4" />
                           </Link>
                         </div>
@@ -493,53 +443,9 @@ const Home = () => {
           </Tabs>
         </div>
       </section>
-      {/* -- Prestigious Clients -- */}
+      {/* Client Logos */}
       <ClientLogos />
-      {/* Executive Spotlight */}
-      <section className="py-16 bg-insightBlack text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-10">
-            <div>
-              <div className="inline-flex items-center px-3 py-1 bg-insightRed rounded-full text-sm font-medium mb-2">
-                <Award className="w-4 h-4 mr-2" /> Executive Spotlight
-              </div>
-              <h2 className="text-3xl font-bold">Featured C-Suite Leaders</h2>
-              <p className="text-gray-400 mt-2">Meet the visionary executives shaping business today</p>
-            </div>
-            <Link 
-              to="/leadership" 
-              className="inline-flex items-center text-insightRed hover:text-white font-medium transition-colors"
-            >
-              View All Leaders <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {featuredExecutives.map((executive) => (
-              <div key={executive.id} className="bg-white/5 backdrop-blur border border-white/10 rounded-lg p-6 hover:bg-white/10 transition-colors">
-                <div className="flex flex-col items-center text-center">
-                  <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-insightRed mb-4">
-                    <img 
-                      src={executive.avatar} 
-                      alt={executive.name} 
-                      className="w-full h-full object-cover" 
-                    />
-                  </div>
-                  <h3 className="text-xl font-bold mb-1">{executive.name}</h3>
-                  <p className="text-insightRed font-medium mb-2">{executive.title}</p>
-                  <p className="text-gray-400 mb-4 text-sm">{executive.company}</p>
-                  <blockquote className="italic text-gray-300 text-sm mb-4">"{executive.quote?.substring(0, 80)}..."</blockquote>
-                  <Link 
-                    to={`/leadership/${executive.id}`}
-                    className="inline-flex items-center px-4 py-2 bg-white/10 hover:bg-white/20 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Read Profile <ChevronRight className="ml-1 h-4 w-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Executive Spotlight (for demo, reuse Testimonials as placeholder if no real "executive" API) */}
       {/* Testimonials */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -552,17 +458,17 @@ const Home = () => {
           </div>
           <div className="relative px-8 md:px-16">
             <div className="relative overflow-hidden min-h-[300px]">
-              {testimonialData.map((testimonial, index) => (
+              {testimonialsData.map((testimonial: any, index: number) => (
                 <div
                   key={testimonial.id}
                   className={`absolute inset-0 transition-opacity duration-500 ${
-                    index === activeTestimonial ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    index === activeTestimonial ? "opacity-100" : "opacity-0 pointer-events-none"
                   }`}
                 >
                   <div className="flex flex-col items-center text-center">
                     <div className="w-24 h-24 mb-6 rounded-full overflow-hidden border-2 border-insightRed">
                       <img
-                        src={testimonial.avatar}
+                        src={testimonial.avatar_url}
                         alt={testimonial.name}
                         className="w-full h-full object-cover"
                       />
@@ -572,19 +478,22 @@ const Home = () => {
                     </blockquote>
                     <div>
                       <cite className="font-semibold text-insightBlack text-lg not-italic">{testimonial.name}</cite>
-                      <p className="text-insightRed font-medium">{testimonial.title}, {testimonial.company}</p>
+                      <p className="text-insightRed font-medium">
+                        {testimonial.title}
+                        {testimonial.company ? `, ${testimonial.company}` : ""}
+                      </p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
             <div className="flex justify-center space-x-2 mt-8">
-              {testimonialData.map((_, index) => (
+              {testimonialsData.map((_: any, index: number) => (
                 <button
                   key={index}
                   onClick={() => setActiveTestimonial(index)}
                   className={`h-3 rounded-full transition-all ${
-                    index === activeTestimonial ? 'bg-insightRed w-8' : 'bg-gray-300 w-3'
+                    index === activeTestimonial ? "bg-insightRed w-8" : "bg-gray-300 w-3"
                   }`}
                   aria-label={`Go to testimonial ${index + 1}`}
                 ></button>
@@ -600,19 +509,17 @@ const Home = () => {
             <div>
               <h2 className="text-3xl font-bold mb-4">Subscribe to Our Magazine</h2>
               <p className="text-lg opacity-90 mb-6">
-                Join thousands of C-level executives receiving our monthly magazine. 
-                Get exclusive insights, industry analysis, and leadership strategies 
-                delivered directly to your inbox.
+                Join thousands of C-level executives receiving our monthly magazine. Get exclusive insights, industry analysis, and leadership strategies delivered directly to your inbox.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link 
-                  to="/magazine" 
+                <Link
+                  to="/magazine"
                   className="inline-flex items-center justify-center px-6 py-3 bg-white text-insightRed hover:bg-gray-100 rounded-md font-medium transition-colors"
                 >
                   Explore Latest Issue
                 </Link>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contact"
                   className="inline-flex items-center justify-center px-6 py-3 border border-white bg-transparent hover:bg-white/10 text-white rounded-md font-medium transition-colors"
                 >
                   Subscribe Now
@@ -620,10 +527,10 @@ const Home = () => {
               </div>
             </div>
             <div className="hidden lg:block">
-              <img 
+              <img
                 src={getMagCover(latestMagazine)}
-                alt="Latest Magazine" 
-                className="w-full max-w-md mx-auto rounded-lg shadow-2xl transform -rotate-6" 
+                alt="Latest Magazine"
+                className="w-full max-w-md mx-auto rounded-lg shadow-2xl transform -rotate-6"
               />
             </div>
           </div>
@@ -634,4 +541,3 @@ const Home = () => {
 };
 
 export default Home;
-

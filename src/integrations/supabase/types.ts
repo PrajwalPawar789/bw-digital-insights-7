@@ -54,6 +54,30 @@ export type Database = {
         }
         Relationships: []
       }
+      client_logos: {
+        Row: {
+          created_at: string | null
+          id: string
+          logo_url: string
+          name: string
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          logo_url: string
+          name: string
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          logo_url?: string
+          name?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       documentation: {
         Row: {
           category: string
@@ -299,6 +323,66 @@ export type Database = {
           key?: string
           updated_at?: string | null
           value?: string | null
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          company: string | null
+          created_at: string | null
+          id: string
+          name: string
+          quote: string
+          title: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string | null
+          id?: string
+          name: string
+          quote: string
+          title?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          company?: string | null
+          created_at?: string | null
+          id?: string
+          name?: string
+          quote?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
+      upcoming_editions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          release_date: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          release_date?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          release_date?: string | null
+          status?: string | null
+          title?: string
         }
         Relationships: []
       }
