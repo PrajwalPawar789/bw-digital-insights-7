@@ -126,69 +126,71 @@ const Leadership = () => {
               )}
 
               {/* Other featured leaders - smaller cards */}
-              <div className="lg:col-span-1 space-y-8">
-                {featuredLeaders.slice(1, 3).map((leader) => (
-                  <div key={leader.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={leader.image_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'}
-                        alt={leader.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                    <div className="p-6">
-                      <span className="bg-insightRed text-white px-2 py-1 rounded-full text-xs font-medium mb-3 inline-block">
-                        Featured
-                      </span>
-                      <h3 className="text-xl font-bold text-insightBlack mb-2">
-                        {leader.name}
-                      </h3>
-                      <p className="text-insightRed font-semibold mb-2">
-                        {leader.title}
-                      </p>
-                      {leader.company && (
-                        <div className="flex items-center text-gray-600 mb-3">
-                          <Building2 className="h-4 w-4 mr-2" />
-                          <span className="text-sm">{leader.company}</span>
+              {featuredLeaders.length > 1 && (
+                <div className="lg:col-span-1 space-y-8">
+                  {featuredLeaders.slice(1, 3).map((leader) => (
+                    <div key={leader.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                      <div className="aspect-[4/3] overflow-hidden">
+                        <img
+                          src={leader.image_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'}
+                          alt={leader.name}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                      <div className="p-6">
+                        <span className="bg-insightRed text-white px-2 py-1 rounded-full text-xs font-medium mb-3 inline-block">
+                          Featured
+                        </span>
+                        <h3 className="text-xl font-bold text-insightBlack mb-2">
+                          {leader.name}
+                        </h3>
+                        <p className="text-insightRed font-semibold mb-2">
+                          {leader.title}
+                        </p>
+                        {leader.company && (
+                          <div className="flex items-center text-gray-600 mb-3">
+                            <Building2 className="h-4 w-4 mr-2" />
+                            <span className="text-sm">{leader.company}</span>
+                          </div>
+                        )}
+                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                          {leader.bio}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex space-x-2">
+                            {leader.linkedin_url && (
+                              <a
+                                href={leader.linkedin_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-400 hover:text-blue-600 transition-colors"
+                              >
+                                <Linkedin className="h-4 w-4" />
+                              </a>
+                            )}
+                            {leader.twitter_url && (
+                              <a
+                                href={leader.twitter_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-gray-400 hover:text-blue-400 transition-colors"
+                              >
+                                <Twitter className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                          <Link
+                            to={`/leadership/${leader.slug}`}
+                            className="text-insightRed hover:text-insightBlack font-medium text-sm transition-colors"
+                          >
+                            View Profile
+                          </Link>
                         </div>
-                      )}
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                        {leader.bio}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-2">
-                          {leader.linkedin_url && (
-                            <a
-                              href={leader.linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-blue-600 transition-colors"
-                            >
-                              <Linkedin className="h-4 w-4" />
-                            </a>
-                          )}
-                          {leader.twitter_url && (
-                            <a
-                              href={leader.twitter_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-blue-400 transition-colors"
-                            >
-                              <Twitter className="h-4 w-4" />
-                            </a>
-                          )}
-                        </div>
-                        <Link
-                          to={`/leadership/${leader.slug}`}
-                          className="text-insightRed hover:text-insightBlack font-medium text-sm transition-colors"
-                        >
-                          View Profile
-                        </Link>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
