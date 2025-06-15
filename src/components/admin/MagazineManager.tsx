@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
-import { useMagazineArticles, useCreateMagazineArticle } from '@/hooks/useMagazineArticles';
+import { useMagazineArticles } from '@/hooks/useMagazineArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
+import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // import the insert hook for magazine_articles
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import { Edit2, Trash2, Plus, Upload, FileText, Calendar, Hash, Star, ExternalLink } from 'lucide-react';
 import { slugify } from '@/lib/slugify';
 
@@ -36,10 +36,7 @@ const MagazineManager = () => {
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
   const { uploadImage, uploadPdf, uploading } = useImageUpload();
-  const { toast } = useToast();
-
-  // Only create the mutation hook ONCE, at the top level
-  const createMagazineArticleMutation = useCreateMagazineArticle();
+  const { mutate: createMagazineArticle } = useCreateMagazineArticle();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -99,13 +96,10 @@ const MagazineManager = () => {
 
   const handleCreateMagazine = async () => {
     if (!title || !description || !publishDate) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please fill in all required fields (title, description, publish date)."
-      });
+      toast.error('Please fill in all required fields (title, description, publish date).');
       return;
     }
+
     try {
       const newMagazine = {
         title,
@@ -119,41 +113,26 @@ const MagazineManager = () => {
         featured_article_id: featuredArticleId,
       };
 
+      // 1. Create the magazine
       createMagazine(newMagazine, {
         onSuccess: (createdMagazine) => {
-          // Only create a magazine_article relation if we have both IDs
-          if (
-            featuredArticleId &&
-            createdMagazine &&
-            typeof createdMagazine === "object" &&
-            'id' in createdMagazine &&
-            createdMagazine.id
-          ) {
-            createMagazineArticleMutation.mutate({
+          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
+          if (featuredArticleId && createdMagazine?.id) {
+            createMagazineArticle({
               magazine_id: createdMagazine.id,
               article_id: featuredArticleId,
               featured: true,
-              page_number: 1,
+              page_number: 1, // or let the user choose/add in UI later
             });
           }
           setOpen(false);
           resetForm();
           refetch();
-        },
-        onError: (e) => {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to create magazine"
-          });
-        },
+        }
       });
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to create magazine"
-      });
+      toast.error('Failed to create magazine');
+      console.error('Error creating magazine:', error);
     }
   };
 
@@ -161,11 +140,7 @@ const MagazineManager = () => {
     if (!selectedMagazine?.id) return;
 
     if (!title || !description || !publishDate) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please fill in all required fields (title, description, publish date)."
-      });
+      toast.error('Please fill in all required fields (title, description, publish date).');
       return;
     }
 
@@ -183,41 +158,26 @@ const MagazineManager = () => {
         featured_article_id: featuredArticleId,
       };
 
+      // 1. Update the magazine
       updateMagazine(updatedMagazine, {
         onSuccess: (magazine) => {
-          // Only create a magazine_article relation if we have both IDs
-          if (
-            featuredArticleId &&
-            magazine &&
-            typeof magazine === "object" &&
-            'id' in magazine &&
-            magazine.id
-          ) {
-            createMagazineArticleMutation.mutate({
+          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
+          if (featuredArticleId && magazine?.id) {
+            createMagazineArticle({
               magazine_id: magazine.id,
               article_id: featuredArticleId,
               featured: true,
-              page_number: 1,
+              page_number: 1, // or customize
             });
           }
           setOpen(false);
           resetForm();
           refetch();
-        },
-        onError: (e) => {
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to update magazine"
-          });
-        },
+        }
       });
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update magazine"
-      });
+      toast.error('Failed to update magazine');
+      console.error('Error updating magazine:', error);
     }
   };
 
@@ -227,11 +187,7 @@ const MagazineManager = () => {
         deleteMagazine(id);
       } catch (error) {
         console.error('Error deleting magazine:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to delete magazine"
-        });
+        toast.error('Failed to delete magazine');
       }
     }
   };
@@ -242,18 +198,11 @@ const MagazineManager = () => {
       console.log('Uploading cover image:', file.name);
       const imageUrl = await uploadImage(file, "magazines");
       setCoverImageUrl(imageUrl);
-      toast({
-        title: "Success",
-        description: "Cover image uploaded successfully"
-      });
+      toast.success("Cover image uploaded successfully");
       setUploadingFile(null);
     } catch (error) {
       console.error('Error uploading image:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to upload image"
-      });
+      toast.error("Failed to upload image");
       setUploadingFile(null);
     }
   };
@@ -264,18 +213,11 @@ const MagazineManager = () => {
       console.log('Uploading PDF:', file.name);
       const pdfUrl = await uploadPdf(file, "magazine-pdfs");
       setPdfUrl(pdfUrl);
-      toast({
-        title: "Success",
-        description: "PDF uploaded successfully"
-      });
+      toast.success("PDF uploaded successfully");
       setUploadingFile(null);
     } catch (error) {
       console.error('Error uploading PDF:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to upload PDF"
-      });
+      toast.error("Failed to upload PDF");
       setUploadingFile(null);
     }
   };
