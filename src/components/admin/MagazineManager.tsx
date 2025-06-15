@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
-import { useMagazineArticles } from '@/hooks/useMagazineArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles';
 import { Button } from '@/components/ui/button';
@@ -94,7 +93,7 @@ const MagazineManager = () => {
     setUploadingFile(null);
   };
 
-  const handleCreateMagazine = async () => {
+  const handleCreateMagazine = () => {
     if (!title || !description || !publishDate) {
       toast.error("Please fill in all required fields (title, description, publish date).");
       return;
@@ -134,11 +133,12 @@ const MagazineManager = () => {
       },
       onError: (error) => {
         console.error('Error creating magazine:', error);
+        toast.error("Failed to create magazine. Please try again.");
       }
     });
   };
 
-  const handleUpdateMagazine = async () => {
+  const handleUpdateMagazine = () => {
     if (!selectedMagazine?.id) return;
 
     if (!title || !description || !publishDate) {
@@ -181,6 +181,7 @@ const MagazineManager = () => {
       },
       onError: (error) => {
         console.error('Error updating magazine:', error);
+        toast.error("Failed to update magazine. Please try again.");
       }
     });
   };
