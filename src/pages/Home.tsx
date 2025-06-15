@@ -75,14 +75,25 @@ const Home = () => {
 
   const latestMagazine = magazineData[0] || {};
 
-  // Categories for Tabs, dynamically inferred from articles.
-  const categories = ["Trending", ...Array.from(new Set(newsData.map((n: any) => n.category).filter(Boolean).filter(c => c !== "Trending"))).slice(0, 2)];
+  // Categories for Tabs, dynamically inferred from articles
+  const categories = [
+    "Trending",
+    ...Array.from(
+      new Set(
+        newsData
+          .filter((n: any) => !n.featured && n.category && n.category !== "Trending")
+          .map((n: any) => n.category)
+      )
+    ).slice(0, 2),
+  ];
 
+  // Only non-featured articles by category for the Business Insights section
   const getNewsByCategory = (category: string) => {
     if (category === "Trending") {
-      return newsData.filter((n: any) => n.featured).slice(0, 6);
+      // For Trending, show non-featured articles in Trending category (not already featured)
+      return newsData.filter((n: any) => n.category === "Trending" && !n.featured).slice(0, 6);
     }
-    return newsData.filter((n: any) => n.category === category).slice(0, 6);
+    return newsData.filter((n: any) => n.category === category && !n.featured).slice(0, 6);
   };
 
   // Carousel autoplay
@@ -101,8 +112,8 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [testimonialsData.length]);
 
-  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + featuredNewsArr.length) % featuredNewsArr.length);
-  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % featuredNewsArr.length);
+  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + Math.max(featuredNewsArr.length - 1, 1)) % Math.max(featuredNewsArr.length - 1, 1));
+  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % Math.max(featuredNewsArr.length - 1, 1));
 
   // Defensive: never try to access .slug, .title etc. if they're missing
   const hasCoverStory = !!coverStory && typeof coverStory === "object" && (coverStory.title || coverStory.slug);
@@ -245,7 +256,7 @@ const Home = () => {
       )}
 
       {/* Editor's Picks Carousel */}
-      {hasFeaturedNews ? (
+      {hasFeaturedNews && featuredNewsArr.length > 1 ? (
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
@@ -256,7 +267,8 @@ const Home = () => {
             </div>
             <div className="relative overflow-hidden rounded-lg shadow-lg">
               <div className="relative h-[400px] md:h-[500px]">
-                {featuredNewsArr.map((news: any, index: number) => (
+                {/* Show Editor's Picks starting from index 1 (skip Cover Story) */}
+                {featuredNewsArr.slice(1).map((news: any, index: number) => (
                   <div
                     key={news.id || index}
                     className={`absolute inset-0 transition-opacity duration-500 ${
@@ -273,33 +285,33 @@ const Home = () => {
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold mb-3">{news.title}</h3>
                         <p className="text-base md:text-lg mb-6 text-gray-200">{news.excerpt}</p>
-                        <Link
-                          to={`/article/${news.slug}`}
+                        <a
+                          href={`/article/${news.slug}`}
                           className="inline-flex items-center text-white bg-insightRed hover:bg-red-700 px-6 py-3 rounded-md text-base font-medium transition-colors"
                         >
                           Read Full Article <ChevronRight className="ml-2 h-5 w-5" />
-                        </Link>
+                        </a>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
               <button
-                onClick={prevSlide}
+                onClick={() => setActiveSlide((prev) => (prev - 1 + Math.max(featuredNewsArr.length - 1, 1)) % Math.max(featuredNewsArr.length - 1, 1))}
                 className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-3 text-white backdrop-blur-sm transition-colors"
                 aria-label="Previous slide"
               >
                 <ChevronLeft className="h-6 w-6" />
               </button>
               <button
-                onClick={nextSlide}
+                onClick={() => setActiveSlide((prev) => (prev + 1) % Math.max(featuredNewsArr.length - 1, 1))}
                 className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 rounded-full p-3 text-white backdrop-blur-sm transition-colors"
                 aria-label="Next slide"
               >
                 <ChevronRight className="h-6 w-6" />
               </button>
               <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {featuredNewsArr.map((_: any, index: number) => (
+                {featuredNewsArr.slice(1).map((_: any, index: number) => (
                   <button
                     key={index}
                     onClick={() => setActiveSlide(index)}
@@ -486,9 +498,9 @@ const Home = () => {
                           <p className="text-gray-600 mb-4 line-clamp-2">{news.excerpt}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">{news.date}</span>
-                            <Link to={`/article/${news.slug}`} className="inline-flex items-center text-insightRed hover:text-insightBlack text-sm font-medium transition-colors">
+                            <a href={`/article/${news.slug}`} className="inline-flex items-center text-insightRed hover:text-insightBlack text-sm font-medium transition-colors">
                               Read Full Article <ChevronRight className="ml-1 h-4 w-4" />
-                            </Link>
+                            </a>
                           </div>
                         </CardContent>
                       </Card>
@@ -498,12 +510,12 @@ const Home = () => {
                   <div className="text-center p-8 text-gray-400">No articles available for this category.</div>
                 )}
                 <div className="flex justify-center mt-12">
-                  <Link
-                    to={`/category/${category.toLowerCase()}`}
+                  <a
+                    href={`/category/${category.toLowerCase()}`}
                     className="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-50 border border-gray-200 rounded-lg font-medium transition-all hover:shadow-lg group"
                   >
                     View All {category} Articles <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
+                  </a>
                 </div>
               </TabsContent>
             ))}
