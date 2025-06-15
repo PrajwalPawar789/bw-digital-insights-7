@@ -10,6 +10,7 @@ import DocumentationManager from '@/components/admin/DocumentationManager';
 import SettingsManager from '@/components/admin/SettingsManager';
 import PressReleaseManager from '@/components/admin/PressReleaseManager';
 import TestimonialManager from '@/components/admin/TestimonialManager';
+import ClientLogosManager from "@/pages/admin/ClientLogosManager";
 
 const AdminDashboard = () => {
   const { data: stats, isLoading } = useDashboardStats();
@@ -75,7 +76,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="articles" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="articles" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Articles
@@ -95,6 +96,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               Testimonials
+            </TabsTrigger>
+            <TabsTrigger value="client-logos" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Client Logos
             </TabsTrigger>
             <TabsTrigger value="documentation" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -124,6 +129,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="testimonials" className="space-y-6">
             <TestimonialManager />
+          </TabsContent>
+
+          <TabsContent value="client-logos" className="space-y-6">
+            <ClientLogosManager />
           </TabsContent>
 
           <TabsContent value="documentation" className="space-y-6">
