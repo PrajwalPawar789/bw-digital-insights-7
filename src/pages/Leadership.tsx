@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLeadershipProfiles } from '@/hooks/useLeadership';
 import { Link } from 'react-router-dom';
@@ -15,14 +14,13 @@ const Leadership = () => {
     );
   }
 
-  // Filter and organize leaders
   const featuredLeaders = Array.isArray(leaders) ? leaders.filter((leader) => leader.featured) : [];
   const regularLeaders = Array.isArray(leaders) ? leaders.filter((leader) => !leader.featured) : [];
 
   return (
-    <div className="min-h-screen bg-white py-16">
+    <div className="min-h-screen bg-white">
       {/* HERO SECTION with BG IMAGE */}
-      <div className="relative mb-16">
+      <div className="relative w-full h-[360px] sm:h-[420px] md:h-[480px] lg:h-[520px] flex items-end">
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
@@ -33,7 +31,7 @@ const Leadership = () => {
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/60" />
         {/* Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col items-center text-center">
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-20 flex flex-col items-center text-center">
           <div className="flex justify-center mb-6">
             <div className="p-3 bg-insightRed/10 rounded-full">
               <Users className="h-8 w-8 text-insightRed" />
@@ -49,7 +47,7 @@ const Leadership = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
         {/* Featured Leaders Section */}
         {featuredLeaders.length > 0 && (
           <div className="mb-16">
