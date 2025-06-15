@@ -45,12 +45,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     setPdfError(null);
   };
 
-  const handleDocumentLoadError = (error: any) => {
-    console.error("PDF load error:", error);
-    setLoading(false);
-    setPdfError(error?.message || "Failed to load PDF");
-  };
-
   const retryLoad = () => {
     setLoading(true);
     setPdfError(null);
@@ -167,7 +161,6 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
                   viewMode={ViewMode.SinglePage}
                   plugins={[pageNavigationPluginInstance, thumbnailPluginInstance, zoomPluginInstance]}
                   onDocumentLoad={handleDocumentLoad}
-                  onLoadError={handleDocumentLoadError}
                   renderLoader={(percentages: number) => (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
