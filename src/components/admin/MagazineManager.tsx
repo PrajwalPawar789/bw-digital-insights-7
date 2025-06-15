@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
-import { useMagazineArticles, useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // only import once!
+import { useMagazineArticles, useCreateMagazineArticle } from '@/hooks/useMagazineArticles';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ const MagazineManager = () => {
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
   const { uploadImage, uploadPdf, uploading } = useImageUpload();
-  const { mutate: createMagazineArticle } = useCreateMagazineArticle(); // use mutate!
+  const createMagazineArticleMutation = useCreateMagazineArticle();
 
   const [open, setOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -122,7 +122,7 @@ const MagazineManager = () => {
             'id' in createdMagazine &&
             createdMagazine.id
           ) {
-            createMagazineArticle({
+            createMagazineArticleMutation.mutate({
               magazine_id: createdMagazine.id,
               article_id: featuredArticleId,
               featured: true,
@@ -177,7 +177,7 @@ const MagazineManager = () => {
             'id' in magazine &&
             magazine.id
           ) {
-            createMagazineArticle({
+            createMagazineArticleMutation.mutate({
               magazine_id: magazine.id,
               article_id: featuredArticleId,
               featured: true,
