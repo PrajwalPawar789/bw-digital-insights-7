@@ -35,6 +35,8 @@ const MagazineManager = () => {
   const { mutate: updateMagazine } = useUpdateMagazine();
   const { mutate: deleteMagazine } = useDeleteMagazine();
   const { uploadImage, uploadPdf, uploading } = useImageUpload();
+
+  // Only create the mutation hook ONCE, at the top level
   const createMagazineArticleMutation = useCreateMagazineArticle();
 
   const [open, setOpen] = useState(false);
@@ -113,7 +115,6 @@ const MagazineManager = () => {
 
       createMagazine(newMagazine, {
         onSuccess: (createdMagazine) => {
-          console.log('Created magazine from onSuccess:', createdMagazine);
           // Only create a magazine_article relation if we have both IDs
           if (
             featuredArticleId &&
@@ -134,13 +135,11 @@ const MagazineManager = () => {
           refetch();
         },
         onError: (e) => {
-          console.error('Error creating magazine:', e);
           toast.error('Failed to create magazine');
         },
       });
     } catch (error) {
       toast.error('Failed to create magazine');
-      console.error('Error creating magazine:', error);
     }
   };
 
@@ -168,7 +167,6 @@ const MagazineManager = () => {
 
       updateMagazine(updatedMagazine, {
         onSuccess: (magazine) => {
-          console.log('Updated magazine from onSuccess:', magazine);
           // Only create a magazine_article relation if we have both IDs
           if (
             featuredArticleId &&
@@ -189,13 +187,11 @@ const MagazineManager = () => {
           refetch();
         },
         onError: (e) => {
-          console.error('Error updating magazine:', e);
           toast.error('Failed to update magazine');
         },
       });
     } catch (error) {
       toast.error('Failed to update magazine');
-      console.error('Error updating magazine:', error);
     }
   };
 
