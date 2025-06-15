@@ -191,7 +191,6 @@ const Home = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold text-insightBlack">Cover Story</h2>
-                <p className="text-gray-600">Our most impactful feature of the month</p>
               </div>
               <Link
                 to={`/article/${coverStory.slug || ""}`}
@@ -262,7 +261,6 @@ const Home = () => {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <h2 className="text-3xl font-bold text-insightBlack">Editor's Picks</h2>
-                <p className="text-gray-600">Curated content from our latest issues</p>
               </div>
             </div>
             <div className="relative overflow-hidden rounded-lg shadow-lg">
@@ -359,7 +357,7 @@ const Home = () => {
                         <div className="overflow-hidden rounded-xl shadow-2xl bg-white">
                           <div className="relative aspect-[3/4]">
                             <img src={safeGetMagCover(magazine)} alt={safeGetMagTitle(magazine)} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                             <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/20 to-transparent transform scale-y-[-1] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-sm"></div>
                             <div className="absolute top-0 right-0 m-4">
                               <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-insightBlack text-sm font-semibold rounded-full">
