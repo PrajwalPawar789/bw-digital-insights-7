@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useMagazines, useCreateMagazine, useUpdateMagazine, useDeleteMagazine } from '@/hooks/useMagazines';
 import { useArticles } from '@/hooks/useArticles';
-import { useMagazineArticles } from '@/hooks/useMagazineArticles';
+import { useMagazineArticles, useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // only import once!
 import { useImageUpload } from '@/hooks/useImageUpload';
-import { useCreateMagazineArticle } from '@/hooks/useMagazineArticles'; // import the insert hook for magazine_articles
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -99,7 +98,6 @@ const MagazineManager = () => {
       toast.error('Please fill in all required fields (title, description, publish date).');
       return;
     }
-
     try {
       const newMagazine = {
         title,
@@ -116,8 +114,15 @@ const MagazineManager = () => {
       // 1. Create the magazine
       createMagazine(newMagazine, {
         onSuccess: (createdMagazine) => {
-          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
-          if (featuredArticleId && createdMagazine?.id) {
+          console.log('Created magazine from onSuccess:', createdMagazine);
+          // Only create a magazine_article relation if we have both IDs
+          if (
+            featuredArticleId &&
+            createdMagazine &&
+            typeof createdMagazine === "object" &&
+            'id' in createdMagazine &&
+            createdMagazine.id
+          ) {
             createMagazineArticle({
               magazine_id: createdMagazine.id,
               article_id: featuredArticleId,
@@ -128,7 +133,11 @@ const MagazineManager = () => {
           setOpen(false);
           resetForm();
           refetch();
-        }
+        },
+        onError: (e) => {
+          console.error('Error creating magazine:', e);
+          toast.error('Failed to create magazine');
+        },
       });
     } catch (error) {
       toast.error('Failed to create magazine');
@@ -161,8 +170,15 @@ const MagazineManager = () => {
       // 1. Update the magazine
       updateMagazine(updatedMagazine, {
         onSuccess: (magazine) => {
-          // 2. Optionally link featured_article_id via magazine_articles, if one is selected
-          if (featuredArticleId && magazine?.id) {
+          console.log('Updated magazine from onSuccess:', magazine);
+          // Only create a magazine_article relation if we have both IDs
+          if (
+            featuredArticleId &&
+            magazine &&
+            typeof magazine === "object" &&
+            'id' in magazine &&
+            magazine.id
+          ) {
             createMagazineArticle({
               magazine_id: magazine.id,
               article_id: featuredArticleId,
@@ -173,7 +189,11 @@ const MagazineManager = () => {
           setOpen(false);
           resetForm();
           refetch();
-        }
+        },
+        onError: (e) => {
+          console.error('Error updating magazine:', e);
+          toast.error('Failed to update magazine');
+        },
       });
     } catch (error) {
       toast.error('Failed to update magazine');
