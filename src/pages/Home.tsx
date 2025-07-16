@@ -11,28 +11,11 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import ClientLogos from "@/components/ClientLogos";
-import { useMagazines, useFeaturedMagazines } from "@/hooks/useMagazines";
-import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
+import { useMagazines } from "@/hooks/useMagazines";
+import { useArticles } from "@/hooks/useArticles";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { useUpcomingEditions } from "@/hooks/useUpcomingEditions";
 import { useSettings } from "@/hooks/useSettings";
-
-// Helper accessors
-function getMagCover(magObj: any) {
-  return magObj?.cover_image_url || magObj?.coverImage || magObj?.image_url || "/placeholder.svg";
-}
-function getMagTitle(magObj: any) {
-  return magObj?.title || magObj?.name || "Untitled";
-}
-function getMagDesc(magObj: any) {
-  return magObj?.description || "";
-}
-function getMagDate(magObj: any) {
-  return magObj?.publish_date || magObj?.publicationDate || "";
-}
-function getMagId(magObj: any) {
-  return magObj?.slug || magObj?.id;
-}
 
 // Defensive: fallback images and text for magazines
 function safeGetMagCover(magObj: any) {
@@ -54,11 +37,11 @@ function safeGetMagId(magObj: any) {
 const Home = () => {
   console.log("Rendering Home");
   // Articles & Magazines
-  const { data: newsDataRaw, isLoading: newsLoading } = useArticles();
-  const { data: magazineDataRaw, isLoading: magLoading } = useMagazines();
+  const { data: newsDataRaw } = useArticles();
+  const { data: magazineDataRaw } = useMagazines();
   const { data: testimonialsDataRaw } = useTestimonials();
   const { data: upcomingEditionsRaw } = useUpcomingEditions();
-  const { settings } = useSettings();
+  const { settings = {} } = useSettings();
 
   // Defensive fallback for all API data
   const newsData = Array.isArray(newsDataRaw) ? newsDataRaw : [];
@@ -115,8 +98,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [testimonialsData.length]);
 
-  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + Math.max(featuredNewsArr.length - 1, 1)) % Math.max(featuredNewsArr.length - 1, 1));
-  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % Math.max(featuredNewsArr.length - 1, 1));
 
   // Defensive: never try to access .slug, .title etc. if they're missing
   const hasCoverStory = !!coverStory && typeof coverStory === "object" && (coverStory.title || coverStory.slug);
