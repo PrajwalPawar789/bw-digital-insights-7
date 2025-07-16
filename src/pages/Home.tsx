@@ -16,7 +16,6 @@ import { useArticles } from "@/hooks/useArticles";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { useUpcomingEditions } from "@/hooks/useUpcomingEditions";
 
-
 // Defensive: fallback images and text for magazines
 function safeGetMagCover(magObj: any) {
   return magObj?.cover_image_url || magObj?.coverImage || magObj?.image_url || "/placeholder.svg";
