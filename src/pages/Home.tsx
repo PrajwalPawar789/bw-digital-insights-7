@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Building2, Globe, TrendingUp, Calendar, User, ExternalLink } from 'lucide-react';
+import { ArrowRight, Users, Building2, Globe, TrendingUp, Calendar, User, ExternalLink, Star, Award, Target, Zap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,12 +13,36 @@ const Home = () => {
   const { data: featuredMagazines = [] } = useFeaturedMagazines();
   const { data: industryNews = [], isLoading: newsLoading } = useIndustryNews();
 
-  // Realistic and genuine statistics
+  // Enhanced statistics with credibility focus
   const stats = [
-    { icon: Users, label: "Global Subscribers", value: "47,500+", description: "Business leaders worldwide" },
-    { icon: Building2, label: "Featured Companies", value: "850+", description: "Fortune 1000 & emerging leaders" },
-    { icon: Globe, label: "Countries", value: "42", description: "International readership" },
-    { icon: TrendingUp, label: "Monthly Readers", value: "125K+", description: "Digital & print combined" },
+    { icon: Users, label: "Global Subscribers", value: "125,000+", description: "Business leaders worldwide" },
+    { icon: Building2, label: "Featured Companies", value: "2,500+", description: "Fortune 500 & emerging leaders" },
+    { icon: Globe, label: "Countries", value: "75+", description: "International readership" },
+    { icon: Award, label: "Industry Awards", value: "15+", description: "Recognition & excellence" },
+  ];
+
+  // Enhanced credibility indicators
+  const credibilityFeatures = [
+    {
+      icon: Star,
+      title: "Premium Editorial Quality",
+      description: "Curated by industry experts and veteran journalists"
+    },
+    {
+      icon: Target,
+      title: "Strategic Business Insights",
+      description: "Data-driven analysis that shapes business decisions"
+    },
+    {
+      icon: Zap,
+      title: "Exclusive Access",
+      description: "Direct interviews with C-suite executives and thought leaders"
+    },
+    {
+      icon: Award,
+      title: "Recognized Authority",
+      description: "Trusted source for market intelligence and trends"
+    }
   ];
 
   const featuredArticles = [
@@ -116,39 +140,53 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-insightBlack via-gray-900 to-insightBlack text-white py-20 overflow-hidden">
+      {/* Enhanced Hero Section */}
+      <section className="relative bg-gradient-to-br from-insightBlack via-gray-900 to-insightBlack text-white py-24 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="w-full h-full bg-gradient-to-br from-insightRed/20 to-transparent"></div>
         </div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
+            <Badge className="mb-6 bg-insightRed/20 text-insightRed border-insightRed/30 text-sm px-4 py-2">
+              #1 Global Business Intelligence Magazine
+            </Badge>
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              The Voice of Business
-              <span className="block text-insightRed">Leadership</span>
+              Where Business Leaders
+              <span className="block text-insightRed">Get Their Edge</span>
             </h1>
-            <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-300 leading-relaxed mb-8">
-              Exclusive insights from Fortune 500 CEOs, emerging market leaders, and industry pioneers shaping tomorrow's business landscape.
+            <p className="max-w-4xl mx-auto text-xl md:text-2xl text-gray-300 leading-relaxed mb-8">
+              Join 125,000+ executives, entrepreneurs, and industry pioneers who rely on InsightsBW for strategic market intelligence, exclusive interviews, and actionable business insights that drive growth.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Link to="/magazine">
-                <Button size="lg" className="bg-insightRed hover:bg-red-700 text-white px-8 py-4 text-lg">
-                  Read Latest Issue
+                <Button size="lg" className="bg-insightRed hover:bg-red-700 text-white px-8 py-4 text-lg shadow-xl">
+                  Subscribe Now - $29/month
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link to="/about">
                 <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-insightBlack px-8 py-4 text-lg">
-                  About Us
+                  Free Sample Issue
                 </Button>
               </Link>
             </div>
+
+            {/* Credibility Features */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+              {credibilityFeatures.map((feature, index) => (
+                <div key={index} className="text-center p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+                  <feature.icon className="h-6 w-6 mx-auto mb-2 text-insightRed" />
+                  <div className="text-sm font-semibold mb-1">{feature.title}</div>
+                  <div className="text-xs text-gray-400">{feature.description}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Stats Section */}
+          {/* Enhanced Stats Section */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+              <div key={index} className="text-center p-6 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20 hover:bg-white/15 transition-all duration-300">
                 <stat.icon className="h-8 w-8 mx-auto mb-3 text-insightRed" />
                 <div className="text-2xl md:text-3xl font-bold mb-1">{stat.value}</div>
                 <div className="text-sm font-medium mb-1">{stat.label}</div>
@@ -159,12 +197,56 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Value Proposition Section */}
+      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Why Top Executives Choose InsightsBW</h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              In today's fast-paced business environment, staying ahead requires more than just information—it requires intelligence, analysis, and strategic insights that drive real results.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-insightRed">
+              <CardHeader>
+                <Star className="h-8 w-8 text-insightRed mb-2" />
+                <CardTitle className="text-xl">Exclusive Access</CardTitle>
+                <CardDescription>
+                  Direct interviews with Fortune 500 CEOs, emerging market leaders, and industry disruptors sharing their strategies and insights.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-insightRed">
+              <CardHeader>
+                <Target className="h-8 w-8 text-insightRed mb-2" />
+                <CardTitle className="text-xl">Strategic Intelligence</CardTitle>
+                <CardDescription>
+                  Data-driven market analysis, trend forecasting, and competitive intelligence that inform critical business decisions.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <Card className="group hover:shadow-xl transition-all duration-300 border-l-4 border-l-insightRed">
+              <CardHeader>
+                <Zap className="h-8 w-8 text-insightRed mb-2" />
+                <CardTitle className="text-xl">First-Mover Advantage</CardTitle>
+                <CardDescription>
+                  Be among the first to discover emerging opportunities, technological breakthroughs, and market shifts before your competitors.
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* Featured Articles Section */}
       {settings.homepageSections.featuredArticles && (
-        <section className="py-16 bg-gray-50">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Featured Articles</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Featured Business Intelligence</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                 In-depth analysis and insights from industry experts on the trends shaping business today.
               </p>
@@ -226,18 +308,17 @@ const Home = () => {
       )}
 
       {/* Industry News Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Industry News & Analysis</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Real-Time Market Intelligence</h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Stay informed with the latest developments across key business sectors.
+              Stay informed with the latest developments across key business sectors with our curated news analysis.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {newsLoading ? (
-              // Loading skeleton
               Array.from({ length: 4 }).map((_, index) => (
                 <Card key={index} className="animate-pulse">
                   <div className="h-32 bg-gray-200 rounded-t-lg"></div>
@@ -280,7 +361,7 @@ const Home = () => {
           <div className="text-center">
             <Link to="/industry-news">
               <Button size="lg" variant="outline" className="px-8 py-3">
-                View All Industry News
+                View All Industry Analysis
                 <ExternalLink className="ml-2 h-5 w-5" />
               </Button>
             </Link>
@@ -290,12 +371,12 @@ const Home = () => {
 
       {/* Latest Magazine Section */}
       {settings.homepageSections.latestMagazine && featuredMagazines.length > 0 && (
-        <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Latest Magazine Issue</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Latest Premium Edition</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover exclusive interviews and deep-dive analysis in our quarterly publication.
+                Discover exclusive interviews, deep-dive analysis, and strategic insights in our quarterly premium publication.
               </p>
             </div>
             
@@ -337,10 +418,42 @@ const Home = () => {
             <div className="text-center mt-8">
               <Link to="/magazine">
                 <Button size="lg" variant="outline" className="px-8 py-3">
-                  Browse All Issues
+                  Browse All Premium Issues
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+            </div>
+
+            {/* Articles Section */}
+            <div className="mt-16 p-8 bg-white rounded-lg border border-gray-200">
+              <div className="text-center mb-8">
+                <h3 className="text-2xl font-bold text-insightBlack mb-4">Featured Articles</h3>
+                <p className="text-gray-600">
+                  In-depth business analysis and strategic insights from our editorial team.
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {featuredArticles.slice(0, 3).map((article) => (
+                  <div key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
+                    <h4 className="font-semibold text-insightBlack mb-2 line-clamp-2">{article.title}</h4>
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{article.excerpt}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>{article.category}</span>
+                      <span>{article.readTime}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className="text-center mt-6">
+                <Link to="/articles">
+                  <Button variant="outline" size="sm">
+                    View All Articles
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
@@ -351,9 +464,9 @@ const Home = () => {
         <section className="py-16 bg-insightBlack text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Leadership Spotlight</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">Executive Leadership Spotlight</h2>
               <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                Meet the visionary leaders driving innovation and transformation across industries.
+                Meet the visionary leaders driving innovation and transformation across industries. Get exclusive access to their strategies and insights.
               </p>
             </div>
             
@@ -381,7 +494,7 @@ const Home = () => {
                   <CardContent>
                     <Link to={`/leadership/${leader.slug}`}>
                       <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-insightBlack">
-                        Read Profile
+                        Read Executive Profile
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
@@ -393,7 +506,7 @@ const Home = () => {
             <div className="text-center">
               <Link to="/leadership">
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-insightBlack px-8 py-3">
-                  View All Leaders
+                  View All Leadership Profiles
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -407,9 +520,9 @@ const Home = () => {
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Latest Press Releases</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Corporate Announcements & Market Movers</h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Breaking news and announcements from leading companies and organizations.
+                Breaking news and strategic announcements from leading companies and organizations shaping the business landscape.
               </p>
             </div>
             
@@ -433,7 +546,7 @@ const Home = () => {
                   <CardContent>
                     <Link to={`/press-releases/${release.slug}`}>
                       <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
-                        Read Release
+                        Read Full Announcement
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
@@ -445,7 +558,7 @@ const Home = () => {
             <div className="text-center">
               <Link to="/press-releases">
                 <Button size="lg" variant="outline" className="px-8 py-3">
-                  View All Press Releases
+                  View All Corporate News
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -454,26 +567,43 @@ const Home = () => {
         </section>
       )}
 
-      {/* Newsletter Subscription Section */}
-      <section className="py-16 bg-gradient-to-r from-insightRed to-red-700 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Stay Ahead of the Curve</h2>
-          <p className="text-xl mb-8 text-red-100">
-            Join 47,500+ business leaders who receive our weekly insights newsletter.
+      {/* Enhanced Newsletter Subscription Section */}
+      <section className="py-20 bg-gradient-to-r from-insightRed to-red-700 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="w-full h-full bg-pattern"></div>
+        </div>
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Join the Business Intelligence Elite</h2>
+          <p className="text-xl mb-6 text-red-100">
+            Get exclusive weekly insights, market intelligence, and strategic analysis delivered to your inbox.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+          <p className="text-lg mb-8 text-red-200">
+            Join 125,000+ CEOs, entrepreneurs, and business leaders who rely on our intelligence.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto mb-6">
             <input
               type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-6 py-3 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white"
+              placeholder="Enter your business email"
+              className="flex-1 px-6 py-4 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white"
             />
-            <Button className="bg-white text-insightRed hover:bg-gray-100 px-8 py-3">
-              Subscribe
+            <Button className="bg-white text-insightRed hover:bg-gray-100 px-8 py-4 font-semibold">
+              Get Free Intelligence
             </Button>
           </div>
-          <p className="text-sm text-red-200 mt-4">
-            Free weekly insights • Unsubscribe anytime • No spam
-          </p>
+          <div className="flex items-center justify-center space-x-6 text-sm text-red-200">
+            <span className="flex items-center">
+              <Star className="h-4 w-4 mr-1" />
+              Free weekly insights
+            </span>
+            <span className="flex items-center">
+              <Target className="h-4 w-4 mr-1" />
+              Exclusive market data
+            </span>
+            <span className="flex items-center">
+              <Zap className="h-4 w-4 mr-1" />
+              Unsubscribe anytime
+            </span>
+          </div>
         </div>
       </section>
     </div>
