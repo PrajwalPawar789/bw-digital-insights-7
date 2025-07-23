@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Building2, Globe, TrendingUp, Calendar, User, ExternalLink, Star, Award, Target, Zap } from 'lucide-react';
+import { ArrowRight, Users, Building2, Globe, TrendingUp, Calendar, User, ExternalLink, Star, Award, Target, Zap, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSettings } from '@/hooks/useSettings';
 import { useFeaturedMagazines } from '@/hooks/useMagazines';
 import { useIndustryNews } from '@/hooks/useIndustryNews';
+import { useFeaturedArticles } from '@/hooks/useArticles';
+import { useFeaturedLeadership } from '@/hooks/useLeadership';
+import { useFeaturedPressReleases } from '@/hooks/usePressReleases';
+import { formatDistanceToNow } from 'date-fns';
 
 const Home = () => {
   const { settings } = useSettings();
-  const { data: featuredMagazines = [] } = useFeaturedMagazines();
+  const { data: featuredMagazines = [], isLoading: magazinesLoading } = useFeaturedMagazines();
   const { data: industryNews = [], isLoading: newsLoading } = useIndustryNews();
+  const { data: featuredArticles = [], isLoading: articlesLoading } = useFeaturedArticles();
+  const { data: featuredLeadership = [], isLoading: leadershipLoading } = useFeaturedLeadership();
+  const { data: featuredPressReleases = [], isLoading: pressReleasesLoading } = useFeaturedPressReleases();
 
   // Enhanced statistics with credibility focus
   const stats = [
@@ -42,99 +49,6 @@ const Home = () => {
       icon: Award,
       title: "Recognized Authority",
       description: "Trusted source for market intelligence and trends"
-    }
-  ];
-
-  const featuredArticles = [
-    {
-      id: 1,
-      title: "The Future of Digital Banking: How Fintech is Reshaping Financial Services",
-      excerpt: "Explore how digital-first banks are revolutionizing customer experience and driving innovation in the financial sector.",
-      category: "Finance",
-      readTime: "8 min",
-      author: "Sarah Johnson",
-      date: "2025-01-20",
-      image: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600",
-      slug: "future-digital-banking-fintech-reshaping-financial-services"
-    },
-    {
-      id: 2,
-      title: "Sustainable Leadership: CEO Strategies for ESG Implementation",
-      excerpt: "Leading CEOs share their strategies for implementing Environmental, Social, and Governance practices that drive both profit and purpose.",
-      category: "Leadership",
-      readTime: "6 min",
-      author: "Michael Chen",
-      date: "2025-01-18",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=600",
-      slug: "sustainable-leadership-ceo-strategies-esg-implementation"
-    },
-    {
-      id: 3,
-      title: "AI in Manufacturing: Transforming Production Lines and Supply Chains",
-      excerpt: "How artificial intelligence is optimizing manufacturing processes and creating more resilient supply chain networks.",
-      category: "Technology",
-      readTime: "7 min",
-      author: "David Rodriguez",
-      date: "2025-01-15",
-      image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600",
-      slug: "ai-manufacturing-transforming-production-supply-chains"
-    }
-  ];
-
-  const leadershipProfiles = [
-    {
-      id: 1,
-      name: "Elena Rodriguez",
-      title: "CEO, GreenTech Solutions",
-      company: "GreenTech Solutions",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400",
-      excerpt: "Leading the charge in renewable energy innovation with breakthrough solar technology solutions.",
-      slug: "elena-rodriguez-greentech-solutions-ceo"
-    },
-    {
-      id: 2,
-      name: "James Mitchell",
-      title: "CTO, DataFlow Systems",
-      company: "DataFlow Systems",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
-      excerpt: "Pioneering data analytics platforms that help enterprises make smarter business decisions.",
-      slug: "james-mitchell-dataflow-systems-cto"
-    },
-    {
-      id: 3,
-      name: "Priya Patel",
-      title: "Founder, HealthBridge",
-      company: "HealthBridge",
-      image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400",
-      excerpt: "Transforming healthcare delivery through innovative telemedicine and digital health solutions.",
-      slug: "priya-patel-healthbridge-founder"
-    }
-  ];
-
-  const pressReleases = [
-    {
-      id: 1,
-      title: "TechCorp Announces $150M Series C Funding Round",
-      excerpt: "Leading enterprise software company secures major funding to accelerate AI-driven product development.",
-      date: "2025-01-22",
-      company: "TechCorp",
-      slug: "techcorp-announces-150m-series-c-funding"
-    },
-    {
-      id: 2,
-      title: "Global Manufacturing Leader Acquires Robotics Startup",
-      excerpt: "Strategic acquisition aims to enhance automation capabilities and expand into smart manufacturing solutions.",
-      date: "2025-01-20",
-      company: "IndustrialTech",
-      slug: "global-manufacturing-leader-acquires-robotics-startup"
-    },
-    {
-      id: 3,
-      title: "Renewable Energy Firm Reports 300% Growth in Q4",
-      excerpt: "Solar energy company exceeds projections with record-breaking quarterly performance and expansion plans.",
-      date: "2025-01-18",
-      company: "SolarDyne",
-      slug: "renewable-energy-firm-reports-300-percent-growth-q4"
     }
   ];
 
@@ -253,46 +167,58 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
-              {featuredArticles.map((article) => (
-                <Card key={article.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-48 object-cover transition-transform group-hover:scale-105"
-                    />
-                    <Badge className="absolute top-4 left-4 bg-insightRed hover:bg-red-700">
-                      {article.category}
-                    </Badge>
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl group-hover:text-insightRed transition-colors line-clamp-2">
-                      {article.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-3">
-                      {article.excerpt}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <div className="flex items-center">
-                        <User className="h-4 w-4 mr-1" />
-                        {article.author}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        {article.readTime}
-                      </div>
+              {articlesLoading ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="animate-pulse">
+                    <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                    <CardHeader>
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                    </CardHeader>
+                  </Card>
+                ))
+              ) : (
+                featuredArticles.slice(0, 3).map((article) => (
+                  <Card key={article.id} className="group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <div className="relative overflow-hidden rounded-t-lg">
+                      <img
+                        src={article.image_url || 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600'}
+                        alt={article.title}
+                        className="w-full h-48 object-cover transition-transform group-hover:scale-105"
+                      />
+                      <Badge className="absolute top-4 left-4 bg-insightRed hover:bg-red-700">
+                        {article.category}
+                      </Badge>
                     </div>
-                    <Link to={`/article/${article.slug}`}>
-                      <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
-                        Read Full Article
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardHeader>
+                      <CardTitle className="text-xl group-hover:text-insightRed transition-colors line-clamp-2">
+                        {article.title}
+                      </CardTitle>
+                      <CardDescription className="line-clamp-3">
+                        {article.excerpt}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+                        <div className="flex items-center">
+                          <User className="h-4 w-4 mr-1" />
+                          {article.author}
+                        </div>
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          5 min read
+                        </div>
+                      </div>
+                      <Link to={`/articles/${article.slug}`}>
+                        <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
+                          Read Full Article
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
             
             <div className="text-center">
@@ -369,50 +295,112 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Latest Magazine Section */}
-      {settings.homepageSections.latestMagazine && featuredMagazines.length > 0 && (
-        <section className="py-16 bg-white">
+      {/* Latest Premium Edition Section */}
+      {settings.homepageSections.latestMagazine && (
+        <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Latest Premium Edition</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">
+                Real-Time Market Intelligence
+              </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Discover exclusive interviews, deep-dive analysis, and strategic insights in our quarterly premium publication.
+                Stay informed with the latest market developments, financial insights, and business trends as they happen.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {featuredMagazines.slice(0, 3).map((magazine, index) => (
-                <Card key={magazine.id} className={`group transition-all duration-300 hover:shadow-xl ${index === 0 ? 'lg:col-span-2 lg:row-span-2' : ''}`}>
-                  <div className={`relative overflow-hidden ${index === 0 ? 'h-80' : 'h-48'}`}>
-                    <img
-                      src={magazine.cover_image_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800'}
-                      alt={magazine.title}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    <Badge className="absolute top-4 right-4 bg-insightRed hover:bg-red-700">
-                      {magazine.issue_number ? `Issue ${magazine.issue_number}` : 'Latest'}
-                    </Badge>
+              {/* Latest Magazine */}
+              <div className="lg:col-span-2">
+                <h3 className="text-2xl font-bold text-insightBlack mb-6 flex items-center">
+                  <FileText className="h-6 w-6 mr-2 text-insightRed" />
+                  Latest Magazine Issue
+                </h3>
+                {magazinesLoading ? (
+                  <div className="animate-pulse">
+                    <div className="bg-gray-200 h-64 rounded-lg"></div>
                   </div>
-                  <CardHeader className={index === 0 ? 'p-8' : 'p-6'}>
-                    <CardTitle className={`group-hover:text-insightRed transition-colors ${index === 0 ? 'text-2xl' : 'text-lg'} line-clamp-2`}>
-                      {magazine.title}
-                    </CardTitle>
-                    <CardDescription className={`${index === 0 ? 'text-base' : 'text-sm'} line-clamp-3`}>
-                      {magazine.description}
-                    </CardDescription>
-                    <div className="flex items-center justify-between text-sm text-gray-500 mt-4">
-                      <span>{new Date(magazine.publish_date).toLocaleDateString()}</span>
-                      <Link to={`/magazine/${magazine.slug}`}>
-                        <Button size={index === 0 ? 'default' : 'sm'} className="bg-insightRed hover:bg-red-700">
-                          Read Issue
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </Link>
+                ) : featuredMagazines?.[0] ? (
+                  <Card className="overflow-hidden hover:shadow-xl transition-shadow border-0 shadow-lg">
+                    <div className="md:flex">
+                      {featuredMagazines[0].cover_image_url && (
+                        <div className="md:w-48 h-64 bg-gray-100 overflow-hidden">
+                          <img 
+                            src={featuredMagazines[0].cover_image_url} 
+                            alt={featuredMagazines[0].title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="flex-1">
+                        <CardHeader>
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="secondary">Issue #{featuredMagazines[0].issue_number}</Badge>
+                            <div className="flex items-center text-sm text-gray-500">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              <span>{formatDistanceToNow(new Date(featuredMagazines[0].publish_date), { addSuffix: true })}</span>
+                            </div>
+                          </div>
+                          <CardTitle className="text-2xl text-insightBlack">
+                            {featuredMagazines[0].title}
+                          </CardTitle>
+                          <CardDescription className="text-gray-600">
+                            {featuredMagazines[0].description}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Button className="bg-insightRed hover:bg-red-700">
+                            <Link to={`/magazine/${featuredMagazines[0].slug}`} className="flex items-center">
+                              Read Full Issue
+                              <ExternalLink className="ml-2 h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </CardContent>
+                      </div>
                     </div>
-                  </CardHeader>
-                </Card>
-              ))}
+                  </Card>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No magazine issues available
+                  </div>
+                )}
+              </div>
+
+              {/* Market Trends */}
+              <div>
+                <h3 className="text-2xl font-bold text-insightBlack mb-6 flex items-center">
+                  <TrendingUp className="h-6 w-6 mr-2 text-insightRed" />
+                  Market Trends
+                </h3>
+                <div className="space-y-4">
+                  <Card className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-insightBlack">Tech Sector Growth</p>
+                        <p className="text-sm text-gray-600">+12.5% this quarter</p>
+                      </div>
+                      <div className="text-green-600 font-bold text-lg">↗</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-insightBlack">AI Investment</p>
+                        <p className="text-sm text-gray-600">$2.8B in funding</p>
+                      </div>
+                      <div className="text-green-600 font-bold text-lg">↗</div>
+                    </div>
+                  </Card>
+                  <Card className="p-4 hover:shadow-lg transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-insightBlack">ESG Adoption</p>
+                        <p className="text-sm text-gray-600">68% increase YoY</p>
+                      </div>
+                      <div className="text-green-600 font-bold text-lg">↗</div>
+                    </div>
+                  </Card>
+                </div>
+              </div>
             </div>
             
             <div className="text-center mt-8">
@@ -423,91 +411,94 @@ const Home = () => {
                 </Button>
               </Link>
             </div>
-
-            {/* Articles Section */}
-            <div className="mt-16 p-8 bg-white rounded-lg border border-gray-200">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-insightBlack mb-4">Featured Articles</h3>
-                <p className="text-gray-600">
-                  In-depth business analysis and strategic insights from our editorial team.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {featuredArticles.slice(0, 3).map((article) => (
-                  <div key={article.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                    <h4 className="font-semibold text-insightBlack mb-2 line-clamp-2">{article.title}</h4>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">{article.excerpt}</p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{article.category}</span>
-                      <span>{article.readTime}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="text-center mt-6">
-                <Link to="/articles">
-                  <Button variant="outline" size="sm">
-                    View All Articles
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
           </div>
         </section>
       )}
 
-      {/* Leadership Profiles Section */}
+      {/* Executive Leadership Spotlight Section - Redesigned */}
       {settings.homepageSections.leadershipProfiles && (
-        <section className="py-16 bg-insightBlack text-white">
+        <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Executive Leadership Spotlight</h2>
-              <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-                Meet the visionary leaders driving innovation and transformation across industries. Get exclusive access to their strategies and insights.
+            <div className="text-center mb-16">
+              <Badge className="mb-6 bg-insightRed/10 text-insightRed border-insightRed/20 text-sm px-6 py-2 font-semibold">
+                EXECUTIVE SPOTLIGHT
+              </Badge>
+              <h2 className="text-4xl md:text-5xl font-bold text-insightBlack mb-6 leading-tight">
+                Leadership Excellence
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Meet the visionary leaders driving innovation and transformation across industries worldwide.
               </p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-              {leadershipProfiles.map((leader) => (
-                <Card key={leader.id} className="bg-white/10 backdrop-blur-sm border-white/20 text-white group hover:bg-white/20 transition-all duration-300">
-                  <div className="relative overflow-hidden rounded-t-lg">
-                    <img
-                      src={leader.image}
-                      alt={leader.name}
-                      className="w-full h-56 object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                  <CardHeader>
-                    <CardTitle className="text-xl group-hover:text-insightRed transition-colors">
-                      {leader.name}
-                    </CardTitle>
-                    <CardDescription className="text-gray-300">
-                      {leader.title}
-                    </CardDescription>
-                    <p className="text-sm text-gray-400 mt-2 line-clamp-2">
-                      {leader.excerpt}
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <Link to={`/leadership/${leader.slug}`}>
-                      <Button variant="outline" className="w-full border-white text-white hover:bg-white hover:text-insightBlack">
-                        Read Executive Profile
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {leadershipLoading ? (
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="animate-pulse border-0 shadow-lg">
+                    <div className="h-80 bg-gray-200 rounded-lg"></div>
+                    <CardHeader className="p-6">
+                      <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                    </CardHeader>
+                  </Card>
+                ))
+              ) : (
+                featuredLeadership.slice(0, 3).map((leader) => (
+                  <Card key={leader.id} className="group hover:shadow-2xl transition-all duration-500 border-0 shadow-lg overflow-hidden">
+                    <div className="relative">
+                      <div className="h-80 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                        <img
+                          src={leader.image_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400'}
+                          alt={leader.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <Badge className="bg-insightRed/90 text-white border-none mb-2">
+                          FEATURED EXECUTIVE
+                        </Badge>
+                      </div>
+                    </div>
+                    <CardHeader className="p-6 bg-white">
+                      <CardTitle className="text-2xl font-bold text-insightBlack group-hover:text-insightRed transition-colors duration-300 mb-2">
+                        {leader.name}
+                      </CardTitle>
+                      <div className="space-y-1">
+                        <p className="text-lg font-semibold text-insightRed">
+                          {leader.title}
+                        </p>
+                        {leader.company && (
+                          <p className="text-gray-600 font-medium">
+                            {leader.company}
+                          </p>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 pt-0">
+                      <Link to={`/leadership/${leader.slug}`}>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-insightRed to-red-700 hover:from-red-700 hover:to-insightRed text-white font-semibold py-3 transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                          View Executive Profile
+                          <ArrowRight className="ml-2 h-5 w-5" />
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
             
             <div className="text-center">
               <Link to="/leadership">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-insightBlack px-8 py-3">
+                <Button 
+                  size="lg" 
+                  variant="outline"
+                  className="border-2 border-insightRed text-insightRed hover:bg-insightRed hover:text-white px-12 py-4 text-lg font-semibold transition-all duration-300"
+                >
                   View All Leadership Profiles
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-3 h-6 w-6" />
                 </Button>
               </Link>
             </div>
@@ -515,53 +506,86 @@ const Home = () => {
         </section>
       )}
 
-      {/* Press Releases Section */}
+      {/* Corporate Announcements & Market Movers Section */}
       {settings.homepageSections.pressReleases && (
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">Corporate Announcements & Market Movers</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-insightBlack mb-4">
+                Corporate Announcements & Market Movers
+              </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Breaking news and strategic announcements from leading companies and organizations shaping the business landscape.
+                Stay updated with the latest corporate news, strategic partnerships, and market-moving announcements.
               </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {pressReleases.map((release) => (
-                <Card key={release.id} className="group hover:shadow-lg transition-all duration-300">
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {release.company}
-                      </Badge>
-                      <span className="text-xs text-gray-500">{release.date}</span>
-                    </div>
-                    <CardTitle className="text-lg group-hover:text-insightRed transition-colors line-clamp-2">
-                      {release.title}
-                    </CardTitle>
-                    <CardDescription className="line-clamp-3">
-                      {release.excerpt}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Link to={`/press-releases/${release.slug}`}>
-                      <Button variant="outline" className="w-full group-hover:bg-insightRed group-hover:text-white group-hover:border-insightRed">
-                        Read Full Announcement
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            
-            <div className="text-center">
-              <Link to="/press-releases">
-                <Button size="lg" variant="outline" className="px-8 py-3">
-                  View All Corporate News
+
+            {pressReleasesLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="bg-gray-200 h-48 rounded-lg mb-4"></div>
+                    <div className="bg-gray-200 h-4 rounded mb-2"></div>
+                    <div className="bg-gray-200 h-4 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {featuredPressReleases?.slice(0, 3).map((release) => (
+                  <Card key={release.id} className="overflow-hidden hover:shadow-xl transition-shadow group border-0 shadow-lg">
+                    {release.image_url && (
+                      <div className="h-48 bg-gray-100 overflow-hidden">
+                        <img 
+                          src={release.image_url} 
+                          alt={release.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <CardHeader className="pb-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant="secondary">Press Release</Badge>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <Calendar className="h-4 w-4 mr-1" />
+                          <span>{formatDistanceToNow(new Date(release.date), { addSuffix: true })}</span>
+                        </div>
+                      </div>
+                      <CardTitle className="text-xl group-hover:text-insightRed transition-colors line-clamp-2">
+                        <Link to={`/press-releases/${release.slug}`}>
+                          {release.title}
+                        </Link>
+                      </CardTitle>
+                      <CardDescription className="text-gray-600 line-clamp-3">
+                        {release.excerpt}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center text-sm text-gray-500">
+                          <User className="h-4 w-4 mr-1" />
+                          <span>{release.author}</span>
+                        </div>
+                        <Link
+                          to={`/press-releases/${release.slug}`}
+                          className="text-insightRed hover:text-insightBlack font-semibold text-sm flex items-center"
+                        >
+                          Read More
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            <div className="text-center mt-12">
+              <Button size="lg" variant="outline" className="border-insightRed text-insightRed hover:bg-insightRed hover:text-white">
+                <Link to="/press-releases" className="flex items-center">
+                  View All Announcements
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </div>
         </section>
