@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { pressReleaseData, PressRelease } from '../data/pressReleaseData';
 import { ChevronLeft, Calendar, Share2, ArrowUpRight, Globe, FileText } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 
 const PressReleaseDetail = () => {
@@ -110,11 +110,7 @@ const PressReleaseDetail = () => {
       .catch((error) => console.log('Error sharing', error));
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: "Link copied!",
-        description: "Press release link copied to clipboard",
-        duration: 3000,
-      });
+      toast.success("Link copied to clipboard!");
     }
   };
 

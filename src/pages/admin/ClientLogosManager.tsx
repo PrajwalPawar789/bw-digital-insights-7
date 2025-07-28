@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Table,
   TableHeader,
@@ -65,7 +65,6 @@ const deleteLogo = async (id: string) => {
 };
 
 const ClientLogosManager = () => {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Section heading
@@ -80,22 +79,22 @@ const ClientLogosManager = () => {
 
   // Mutations
   const createMutation = useMutation({ mutationFn: createLogo, 
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); setForm({ id: "", name: "", logo_url: "", website_url: "" }); toast({ title: "Logo added!" }); }
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); setForm({ id: "", name: "", logo_url: "", website_url: "" }); toast.success("Logo added!"); }
   });
 
   const updateMutation = useMutation({
     mutationFn: updateLogo,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); setForm({ id: "", name: "", logo_url: "", website_url: "" }); setEditingId(null); toast({ title: "Logo updated!" }); }
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); setForm({ id: "", name: "", logo_url: "", website_url: "" }); setEditingId(null); toast.success("Logo updated!"); }
   });
 
   const deleteMutation = useMutation({
     mutationFn: deleteLogo,
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); toast({ title: "Logo deleted!" }); }
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["client_logos"] }); toast.success("Logo deleted!"); }
   });
 
   const headingMutation = useMutation({
     mutationFn: setHeading,
-    onSuccess: () => { refetchHeading(); setIsEditingHeading(false); toast({ title: "Section heading updated!" }); }
+    onSuccess: () => { refetchHeading(); setIsEditingHeading(false); toast.success("Section heading updated!"); }
   });
 
   // For editing
