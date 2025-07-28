@@ -19,7 +19,6 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import Documentation from "./pages/Documentation";
-import IndustryNews from "./pages/IndustryNews";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
 const queryClient = new QueryClient();
@@ -39,7 +38,6 @@ const App = () => (
                 <Route path="/magazine" element={<Magazine />} />
                 <Route path="/magazine/:slug" element={<MagazineDetail />} />
                 <Route path="/articles" element={<Articles />} />
-                <Route path="/industry-news" element={<IndustryNews />} />
                 <Route path="/leadership" element={<Leadership />} />
                 <Route path="/leadership/:slug" element={<LeadershipProfile />} />
                 <Route path="/press-releases" element={<PressReleases />} />
