@@ -2,8 +2,10 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useArticles } from "@/hooks/useArticles";
 import { useMagazines } from "@/hooks/useMagazines";
+import { useLeadershipProfiles } from "@/hooks/useLeadership";
+import { usePressReleases } from "@/hooks/usePressReleases";
 import { useSettings } from "@/hooks/useSettings";
-import { Calendar, ChevronRight, Newspaper, Star, BookOpen } from "lucide-react";
+import { Calendar, ChevronRight, Newspaper, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,8 @@ const Home = () => {
   const { data: rawArticles = [] } = useArticles();
   const { data: rawMagazines = [] } = useMagazines();
   const { settings } = useSettings();
+  const { data: leadership = [] } = useLeadershipProfiles();
+  const { data: press = [] } = usePressReleases();
 
   const articles = Array.isArray(rawArticles) ? rawArticles : [];
   const magazines = Array.isArray(rawMagazines) ? rawMagazines : [];
@@ -87,17 +91,22 @@ const Home = () => {
           {/* Center: Main Feature */}
           <div className="lg:col-span-6 space-y-6">
             {main && (
-              <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg">
-                <div className="relative aspect-[16/9]">
-                  <img src={imgOf(main)} alt={titleOf(main)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"/>
-                  <div className="absolute bottom-0 p-6 text-white">
-                    <div className="inline-flex px-3 py-1 rounded bg-insightRed text-white text-xs font-bold mb-3">{categoryOf(main)}</div>
-                    <h1 className="text-3xl md:text-4xl font-bold leading-tight mb-2">{titleOf(main)}</h1>
-                    <p className="text-white/85 line-clamp-2">{excerptOf(main)}</p>
+              <>
+                <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg">
+                  <div className="relative aspect-[16/9] bg-black">
+                    <img src={imgOf(main)} alt={titleOf(main)} className="w-full h-full object-contain"/>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"/>
+                    <div className="absolute bottom-0 p-6 text-white">
+                      <div className="inline-flex px-3 py-1 rounded bg-insightRed text-white text-xs font-bold mb-3">{categoryOf(main)}</div>
+                      <h1 className="text-3xl md:text-4xl font-bold leading-tight">{titleOf(main)}</h1>
+                    </div>
                   </div>
+                </Link>
+                <div className="text-gray-700 leading-relaxed">
+                  <p className="line-clamp-2 md:line-clamp-3">{excerptOf(main)}</p>
+                  <Link to={`/article/${slugOf(main)}`} className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium mt-2">Read full story <ChevronRight className="ml-1 h-4 w-4"/></Link>
                 </div>
-              </Link>
+              </>
             )}
 
             {/* Headlines list under hero */}
@@ -125,7 +134,7 @@ const Home = () => {
             {secondary.map((a: any, i: number) => (
               <Link key={slugOf(a) + i} to={`/article/${slugOf(a)}`} className="block group rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition">
                 <div className="relative aspect-video">
-                  <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain bg-black" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-0 p-4 text-white">
                     <div className="inline-flex px-2 py-0.5 rounded bg-insightRed text-white text-[10px] font-bold mb-2">{categoryOf(a)}</div>
@@ -138,7 +147,7 @@ const Home = () => {
             <Card className="overflow-hidden">
               <div className="relative">
                 <div className="aspect-[3/4] overflow-hidden">
-                  <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt={latestMagazine?.title || "Latest Magazine"} className="w-full h-full object-cover"/>
+                  <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt={latestMagazine?.title || "Latest Magazine"} className="w-full h-full object-contain bg-black"/>
                 </div>
                 <Badge className="absolute top-3 left-3 bg-insightRed text-white">Latest Issue</Badge>
               </div>
@@ -164,7 +173,7 @@ const Home = () => {
             {latestGrid.map((a: any, i: number) => (
               <Card key={slugOf(a) + i} className="group overflow-hidden hover:shadow-lg transition">
                 <div className="relative aspect-video">
-                  <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+                  <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain bg-black"/>
                   <div className="absolute top-3 left-3">
                     <span className="inline-flex items-center px-2 py-0.5 bg-white/90 text-insightBlack text-xs font-semibold rounded">
                       {categoryOf(a)}
@@ -176,6 +185,50 @@ const Home = () => {
                   <div className="text-xs text-gray-500 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
                 </CardContent>
               </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Leadership Spotlight */}
+      <section className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-insightBlack">Leadership Spotlight</h2>
+            <Link to="/leadership" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {(leadership || []).slice(0,3).map((l:any)=> (
+              <Link key={l.id} to={`/leadership/${l.slug}`} className="group rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition">
+                <div className="aspect-[4/3] bg-black overflow-hidden">
+                  <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-contain"/>
+                </div>
+                <div className="p-4">
+                  <div className="text-insightRed font-semibold text-sm">{l.title}</div>
+                  <h3 className="font-semibold text-lg group-hover:text-insightRed">{l.name}</h3>
+                  {l.company && <div className="text-sm text-gray-500">{l.company}</div>}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Press Releases */}
+      <section className="py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-insightBlack">Press Releases</h2>
+            <Link to="/press-releases" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {(press || []).slice(0,3).map((p:any)=> (
+              <Link key={p.id} to={`/press-releases/${p.slug}`} className="group rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition p-5 bg-white">
+                <div className="text-xs font-bold text-insightRed uppercase tracking-wide mb-2">{p.category || 'Update'}</div>
+                <h3 className="font-semibold text-lg group-hover:text-insightRed line-clamp-2">{p.title}</h3>
+                <p className="text-gray-600 text-sm mt-2 line-clamp-3">{p.excerpt}</p>
+                <div className="text-xs text-gray-500 mt-3 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(p)}</div>
+              </Link>
             ))}
           </div>
         </div>
