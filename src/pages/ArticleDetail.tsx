@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useArticleBySlug, useArticles } from '@/hooks/useArticles';
 import { ChevronLeft, Calendar, User, Clock, Share2, Bookmark, MessageSquare, Tag } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from 'date-fns';
 
 const ArticleDetail = () => {
@@ -35,12 +35,20 @@ const ArticleDetail = () => {
       .catch((error) => console.log('Error sharing', error));
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success("Link copied to clipboard!");
+      toast({
+        title: "Link copied!",
+        description: "Article link copied to clipboard",
+        duration: 3000,
+      });
     }
   };
 
   const handleBookmark = () => {
-    toast.success("Article bookmarked!");
+    toast({
+      title: "Article bookmarked!",
+      description: "This article has been saved to your bookmarks",
+      duration: 3000,
+    });
   };
 
   const handleRelatedArticleClick = (articleSlug: string) => {

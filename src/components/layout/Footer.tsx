@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSettings } from '@/hooks/useSettings';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import React, { useRef, useState } from "react";
 
 const Footer = () => {
@@ -20,7 +20,11 @@ const Footer = () => {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
-      toast.error("Please enter a valid email address.");
+      toast({
+        title: "Email is required",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -29,19 +33,35 @@ const Footer = () => {
       const { error } = await supabase.from("newsletter_subscribers").insert([{ email: email.trim() }]);
       if (error) {
         if (error.code === '23505') {
-          toast.info("This email is already subscribed to the newsletter.");
+          toast({
+            title: "Already Subscribed",
+            description: "This email is already subscribed to the newsletter.",
+            variant: "default",
+          });
         } else {
-          toast.error(error.message);
+          toast({
+            title: "Subscription failed",
+            description: error.message,
+            variant: "destructive",
+          });
         }
       } else {
-        toast.success("Thank you for subscribing! You have been added to our newsletter.");
+        toast({
+          title: "Thank you for subscribing!",
+          description: "You have been added to our newsletter.",
+          variant: "default",
+        });
         setEmail('');
         if (inputRef.current) {
           inputRef.current.value = '';
         }
       }
     } catch (err: any) {
-      toast.error(err.message);
+      toast({
+        title: "Subscription failed",
+        description: err.message,
+        variant: "destructive",
+      });
     }
     setLoading(false);
   };
