@@ -19,6 +19,7 @@ import { useSettings } from "@/hooks/useSettings";
 import PremiumHero from "@/components/home/PremiumHero";
 import PremiumCoverStory from "@/components/home/PremiumCoverStory";
 import PremiumMagazineShowcase from "@/components/home/PremiumMagazineShowcase";
+import EditorialFrontPage from "@/components/home/EditorialFrontPage";
 
 // Helper accessors
 function getMagCover(magObj: any) {
