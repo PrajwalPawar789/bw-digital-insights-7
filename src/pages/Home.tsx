@@ -146,6 +146,9 @@ const Home = () => {
         companyName={settings.companyName}
       />
 
+      {/* Editorial Front Page Grid */}
+      <EditorialFrontPage articles={newsData} />
+
       {/* Premium Cover Story */}
       <PremiumCoverStory coverStory={coverStory} />
 
