@@ -110,8 +110,23 @@
   * {
     @apply border-border;
   }
+  html {
+    font-family: var(--font-modern);
+  }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-modern);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-premium);
+    letter-spacing: 0.2px;
+  }
+  ::selection {
+    background: hsl(var(--insight-red));
+    color: white;
   }
 }
 
