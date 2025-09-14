@@ -18,148 +18,85 @@ const PremiumHero = ({ latestMagazine, magazineData = [], companyName = "Insight
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-insightBlack via-insightBlack-light to-insightBlack min-h-[90vh] flex items-center">
-      {/* Premium Background Pattern */}
-      <div className="absolute inset-0 bg-pattern opacity-20"></div>
-      
-      {/* Floating Elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-insightRed/10 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-20 right-10 w-80 h-80 bg-insightGold/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
-          <div className="space-y-8 text-white">
-            {/* Premium Badge */}
-            <div className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-insightRed to-insightRed-dark rounded-full text-sm font-semibold shadow-magazine animate-fade-in">
-              <Crown className="w-5 h-5 mr-2" />
-              <span>Premium Business Intelligence</span>
+    <section className="relative overflow-hidden min-h-[88vh] flex items-stretch">
+      {/* Background layer */}
+      <div className="absolute inset-0 bg-gradient-to-br from-insightBlack via-gray-900 to-insightBlack" />
+      <div className="absolute inset-0 bg-pattern opacity-10" />
+      <div className="absolute -top-24 -left-24 w-[32rem] h-[32rem] bg-insightRed/20 rounded-full blur-3xl" />
+      <div className="absolute -bottom-24 -right-24 w-[36rem] h-[36rem] bg-insightGold/10 rounded-full blur-3xl" />
+
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+          {/* Headline column */}
+          <div className="lg:col-span-7 flex flex-col justify-center text-white">
+            <div className="inline-flex items-center px-5 py-2 rounded-full bg-insightRed text-white text-sm font-semibold w-max shadow-magazine">
+              <Crown className="w-4 h-4 mr-2" /> Business Minds Edition
             </div>
-            
-            {/* Main Headlines */}
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                <span className="block">Where</span>
-                <span className="block text-transparent bg-gradient-to-r from-insightRed to-insightGold bg-clip-text animate-gradient">
-                  C-Suite Leaders
-                </span>
-                <span className="block">Get Insights</span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-xl">
-                Exclusive interviews, strategic analysis, and actionable insights from the world's most successful business leaders.
-              </p>
-            </div>
-            
-            {/* Value Proposition */}
-            <div className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-insightRed rounded-full flex items-center justify-center mt-1">
-                  <Star className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Exclusive CEO Interviews</h3>
-                  <p className="text-gray-400">Direct access to Fortune 500 leadership insights</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start space-x-3">
-                <div className="w-6 h-6 bg-insightGold rounded-full flex items-center justify-center mt-1">
-                  <TrendingUp className="w-3 h-3 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">Strategic Market Analysis</h3>
-                  <p className="text-gray-400">Data-driven insights for competitive advantage</p>
-                </div>
-              </div>
-            </div>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+
+            <h1 className="mt-6 font-premium text-5xl md:text-6xl leading-[1.1] tracking-tight">
+              {companyName}:
+              <span className="block text-transparent bg-gradient-to-r from-insightRed to-insightGold bg-clip-text animate-gradient">C‑Suite Intelligence</span>
+              For Bold Decisions
+            </h1>
+
+            <p className="mt-5 text-xl text-gray-300 max-w-2xl">
+              Interviews, strategy, and market signals distilled for founders, CEOs, and operators. Read what leaders are reading.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
               <Link to="/magazine">
-                <Button 
-                  size="lg" 
-                  className="btn-premium w-full sm:w-auto text-lg px-8 py-4 animate-premium-pulse"
-                >
-                  <BookOpen className="mr-2 h-5 w-5" />
-                  Read Latest Issue
+                <Button size="lg" className="btn-premium w-full sm:w-auto text-lg px-8 py-4">
+                  <BookOpen className="mr-2 h-5 w-5" /> Read Latest Issue
                 </Button>
               </Link>
               <Link to="/about">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="w-full sm:w-auto text-lg px-8 py-4 border-white/30 text-white hover:bg-white/10 hover:border-white/50"
-                >
-                  Learn More
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg px-8 py-4 border-white/30 text-white hover:bg-white/10 hover:border-white/50">
+                  About Us
                 </Button>
               </Link>
             </div>
-            
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-8">
-              {stats.map((stat, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <stat.icon className="w-6 h-6 text-insightRed" />
+
+            {/* Stats strip */}
+            <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6">
+              {stats.map((s, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                    <s.icon className="w-5 h-5 text-insightRed" />
                   </div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-sm text-gray-400">{stat.label}</div>
+                  <div>
+                    <div className="text-2xl font-bold">{s.value}</div>
+                    <div className="text-sm text-gray-400">{s.label}</div>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
-          
-          {/* Right Content - Magazine Stack */}
-          <div className="relative flex justify-center lg:justify-end">
-            <div className="relative">
-              {/* Main Magazine Cover */}
-              {latestMagazine && (
-                <div className="magazine-cover relative z-20 transform rotate-6 hover:rotate-3 transition-all duration-700">
-                  <img
-                    src={latestMagazine.cover_image_url || '/placeholder.svg'}
-                    alt={latestMagazine.title}
-                    className="w-80 h-auto rounded-xl shadow-elevated"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent rounded-xl"></div>
-                  <Badge className="absolute top-4 left-4 bg-insightRed text-white">
-                    Latest Issue
-                  </Badge>
-                </div>
-              )}
-              
-              {/* Second Magazine */}
-              {magazineData[1] && (
-                <div className="magazine-cover absolute -left-16 top-8 z-10 transform -rotate-6 hover:-rotate-3 transition-all duration-700">
-                  <img
-                    src={magazineData[1].cover_image_url || '/placeholder.svg'}
-                    alt={magazineData[1].title}
-                    className="w-72 h-auto rounded-xl shadow-magazine opacity-90"
-                  />
-                </div>
-              )}
-              
-              {/* Third Magazine */}
-              {magazineData[2] && (
-                <div className="magazine-cover absolute -right-12 top-16 z-0 transform rotate-12 hover:rotate-6 transition-all duration-700">
-                  <img
-                    src={magazineData[2].cover_image_url || '/placeholder.svg'}
-                    alt={magazineData[2].title}
-                    className="w-64 h-auto rounded-xl shadow-gold opacity-80"
-                  />
-                </div>
-              )}
-              
-              {/* Floating Badge */}
-              <div className="absolute -top-6 -right-6 z-30 bg-insightGold text-insightBlack rounded-full p-4 shadow-gold animate-premium-pulse">
-                <Crown className="h-8 w-8" />
+
+          {/* Feature column */}
+          <div className="lg:col-span-5">
+            <div className="h-full rounded-2xl overflow-hidden bg-white/5 border border-white/10 backdrop-blur relative shadow-elevated">
+              {/* Feature image */}
+              <div className="relative aspect-[4/5] md:aspect-[3/4] lg:aspect-[4/5]">
+                <img
+                  src={latestMagazine?.cover_image_url || magazineData?.[0]?.cover_image_url || '/placeholder.svg'}
+                  alt={latestMagazine?.title || magazineData?.[0]?.title || 'Latest Issue'}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <Badge className="absolute top-4 left-4 bg-insightRed text-white">Latest Issue</Badge>
               </div>
-              
-              {/* Premium Label */}
-              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 z-30">
-                <Badge className="bg-gradient-to-r from-insightRed to-insightGold text-white px-6 py-2 text-lg font-semibold">
-                  Premium Access
-                </Badge>
+
+              {/* Feature content */}
+              <div className="p-6 text-white">
+                <h3 className="text-2xl font-bold mb-2 line-clamp-2">
+                  {latestMagazine?.title || magazineData?.[0]?.title || 'Exclusive Leadership Issue'}
+                </h3>
+                <p className="text-gray-300 line-clamp-3 mb-4">
+                  {latestMagazine?.description || magazineData?.[0]?.description || 'Executive playbooks, industry shifts, and founder stories — curated for decision‑makers.'}
+                </p>
+                <Link to={latestMagazine?.slug ? `/magazine/${latestMagazine.slug}` : '/magazine'} className="inline-flex items-center font-semibold text-insightRed hover:text-white transition-colors">
+                  Read now
+                </Link>
               </div>
             </div>
           </div>
