@@ -11,27 +11,11 @@ import {
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import ClientLogos from "@/components/ClientLogos";
-import { useMagazines, useFeaturedMagazines } from "@/hooks/useMagazines";
-import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
+import { useMagazines } from "@/hooks/useMagazines";
+import { useArticles } from "@/hooks/useArticles";
 import { useTestimonials } from "@/hooks/useTestimonials";
 import { useUpcomingEditions } from "@/hooks/useUpcomingEditions";
 
-// Helper accessors
-function getMagCover(magObj: any) {
-  return magObj?.cover_image_url || magObj?.coverImage || magObj?.image_url || "/placeholder.svg";
-}
-function getMagTitle(magObj: any) {
-  return magObj?.title || magObj?.name || "Untitled";
-}
-function getMagDesc(magObj: any) {
-  return magObj?.description || "";
-}
-function getMagDate(magObj: any) {
-  return magObj?.publish_date || magObj?.publicationDate || "";
-}
-function getMagId(magObj: any) {
-  return magObj?.slug || magObj?.id;
-}
 
 // Defensive: fallback images and text for magazines
 function safeGetMagCover(magObj: any) {
@@ -51,10 +35,9 @@ function safeGetMagId(magObj: any) {
 }
 
 const Home = () => {
-  console.log("Rendering Home");
   // Articles & Magazines
-  const { data: newsDataRaw, isLoading: newsLoading } = useArticles();
-  const { data: magazineDataRaw, isLoading: magLoading } = useMagazines();
+  const { data: newsDataRaw } = useArticles();
+  const { data: magazineDataRaw } = useMagazines();
   const { data: testimonialsDataRaw } = useTestimonials();
   const { data: upcomingEditionsRaw } = useUpcomingEditions();
 
@@ -63,10 +46,6 @@ const Home = () => {
   const magazineData = Array.isArray(magazineDataRaw) ? magazineDataRaw : [];
   const testimonialsData = Array.isArray(testimonialsDataRaw) ? testimonialsDataRaw : [];
   const upcomingEditions = Array.isArray(upcomingEditionsRaw) ? upcomingEditionsRaw : [];
-  if (!Array.isArray(newsDataRaw)) console.log("newsData is not an array", newsDataRaw);
-  if (!Array.isArray(magazineDataRaw)) console.log("magazineData is not an array", magazineDataRaw);
-  if (!Array.isArray(testimonialsDataRaw)) console.log("testimonialsData is not an array", testimonialsDataRaw);
-  if (!Array.isArray(upcomingEditionsRaw)) console.log("upcomingEditions is not an array", upcomingEditionsRaw);
 
   // Pick featured news (cover story, editor's picks)
   const featuredNewsArr = newsData.filter((n: any) => n?.featured);
@@ -113,8 +92,6 @@ const Home = () => {
     return () => clearInterval(interval);
   }, [testimonialsData.length]);
 
-  const prevSlide = () => setActiveSlide((prev) => (prev - 1 + Math.max(featuredNewsArr.length - 1, 1)) % Math.max(featuredNewsArr.length - 1, 1));
-  const nextSlide = () => setActiveSlide((prev) => (prev + 1) % Math.max(featuredNewsArr.length - 1, 1));
 
   // Defensive: never try to access .slug, .title etc. if they're missing
   const hasCoverStory = !!coverStory && typeof coverStory === "object" && (coverStory.title || coverStory.slug);
@@ -124,133 +101,81 @@ const Home = () => {
   const hasTestimonials = Array.isArray(testimonialsData) && testimonialsData.length > 0;
 
   // Debugging: log counts to identify bad data early
-  console.log({
-    newsCount: newsData.length,
-    magazineCount: magazineData.length,
-    testimonialsCount: testimonialsData.length,
-    upcomingEditionsCount: upcomingEditions.length
-  });
+  // console.log({
+  //   newsCount: newsData.length,
+  //   magazineCount: magazineData.length,
+  //   testimonialsCount: testimonialsData.length,
+  //   upcomingEditionsCount: upcomingEditions.length
+  // });
 
   return (
     <div className="min-h-screen">
-      {/* Hero */}
-      <section className="bg-gradient-to-r from-insightBlack to-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center px-4 py-2 bg-insightRed rounded-full text-sm font-medium">
-                <Star className="w-4 h-4 mr-2" /> The Leading Business Magazine
-              </div>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-                Exclusive Insights from <span className="text-insightRed">C-Suite Leaders</span>
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden min-h-screen flex items-center">
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')] opacity-10 bg-cover bg-center"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                <span className="block">Where Business</span>
+                <span className="block text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text">
+                  Leaders Connect
+                </span>
               </h1>
-              <p className="text-lg md:text-xl text-gray-300">
-                Spotlighting the strategic minds behind global business success. Discover exclusive interviews, success stories, and expert insights from the world's top executives.
+              <p className="text-xl md:text-2xl text-gray-300 leading-relaxed">
+                Exclusive insights, strategic analysis, and the stories that shape tomorrow's business landscape.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  to="/magazine"
-                  className="inline-flex items-center px-6 py-3 bg-insightRed hover:bg-red-700 text-white rounded-md font-medium transition-colors"
-                >
-                  Latest Issue <ChevronRight className="ml-2 h-5 w-5" />
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link to="/magazine" className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition-colors flex items-center">
+                  <BookOpen className="mr-2 h-6 w-6" />
+                  Explore Latest Issue
                 </Link>
-                <Link
-                  to="/leadership"
-                  className="inline-flex items-center px-6 py-3 border border-white/30 hover:bg-white/20 text-white rounded-md font-medium transition-colors"
-                >
-                  Meet The Executives <ChevronRight className="ml-2 h-5 w-5" />
+                <Link to="/about" className="border border-white/30 text-white hover:bg-white/10 px-8 py-4 rounded-lg text-lg font-semibold transition-colors">
+                  Learn More
                 </Link>
               </div>
             </div>
-            <div className="hidden lg:flex justify-end">
-              <div className="relative">
-                <img
-                  src={safeGetMagCover(magazineData[0])}
-                  alt={safeGetMagTitle(magazineData[0])}
-                  className="rounded-lg shadow-2xl w-80 h-auto transform rotate-6 z-10"
-                />
-                {magazineData[1] && (
+            {hasMagazines && (
+              <div className="relative flex justify-center">
+                <div className="relative transform rotate-6 hover:rotate-3 transition-transform duration-500">
                   <img
-                    src={safeGetMagCover(magazineData[1])}
-                    alt={safeGetMagTitle(magazineData[1])}
-                    className="absolute -left-10 -bottom-5 rounded-lg shadow-xl w-72 h-auto transform -rotate-6"
+                    src={safeGetMagCover(latestMagazine)}
+                    alt={safeGetMagTitle(latestMagazine)}
+                    className="w-80 h-auto rounded-xl shadow-2xl"
                   />
-                )}
-                <div className="absolute -right-8 -top-8 bg-insightRed text-white rounded-full p-4 shadow-lg z-20">
-                  <BookOpen className="h-8 w-8" />
+                  <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                    Latest Issue
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
 
       {/* Cover Story */}
-      {hasCoverStory ? (
-        <section className="py-16 bg-gray-50">
+      {hasCoverStory && (
+        <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-3xl font-bold text-insightBlack">Cover Story</h2>
-              </div>
-              <Link
-                to={`/article/${coverStory.slug || ""}`}
-                className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium transition-colors"
-              >
-                Read Full Story <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="lg:col-span-3 relative h-[400px] rounded-xl overflow-hidden">
-                <img
-                  src={coverStory.image_url || "/placeholder.svg"}
-                  alt={coverStory.title || "Cover Story"}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-6 text-white">
-                  <div className="flex items-center mb-4">
-                    <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">Cover Story</span>
-                  </div>
-                  <h3 className="text-3xl font-bold mb-2 max-w-xl">{coverStory.title || "Untitled"}</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="relative">
+                <img src={coverStory.image_url || "/placeholder.svg"} alt={coverStory.title} className="w-full h-[500px] object-cover rounded-xl shadow-lg" />
+                <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                  Cover Story
                 </div>
               </div>
-              {/* ... Highlights -- skip for now */}
-              <div className="lg:col-span-2 space-y-8">
-                <div className="flex items-start space-x-4">
-                  <span className="text-insightRed font-bold text-5xl">01</span>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">The Leadership Approach That's Reshaping Industries</h4>
-                    <p className="text-gray-600">
-                      Explore how today's C-level executives are implementing transformative strategies that drive unprecedented growth and innovation.
-                    </p>
-                  </div>
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <span className="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-md">{coverStory.category}</span>
+                  <span className="text-sm text-gray-500">{coverStory.date}</span>
                 </div>
-                <div className="flex items-start space-x-4">
-                  <span className="text-insightRed font-bold text-5xl">02</span>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">Key Insights from the Interview</h4>
-                    <p className="text-gray-600">
-                      Strategic thinking, bold decision-making, and innovative approaches to market disruption defined our conversation with industry leaders.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <span className="text-insightRed font-bold text-5xl">03</span>
-                  <div>
-                    <h4 className="text-xl font-bold mb-2">What's Next for Industry Leaders</h4>
-                    <p className="text-gray-600">
-                      Examining future trends and upcoming challenges that will shape the next generation of executive leadership and business strategy.
-                    </p>
-                  </div>
-                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">{coverStory.title}</h2>
+                <Link to={`/article/${coverStory.slug}`} className="inline-flex items-center bg-red-600 text-white hover:bg-red-700 px-6 py-3 rounded-lg font-semibold transition-colors">
+                  Read Full Story <ChevronRight className="ml-2 h-5 w-5" />
+                </Link>
               </div>
             </div>
           </div>
-        </section>
-      ) : (
-        <section className="py-16 bg-gray-50 text-center">
-          <p className="text-gray-400">No Cover Story Available</p>
         </section>
       )}
 
@@ -260,7 +185,7 @@ const Home = () => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-insightBlack">Editor's Picks</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Editor's Picks</h2>
               </div>
             </div>
             <div className="relative overflow-hidden rounded-lg shadow-lg">
@@ -278,13 +203,13 @@ const Home = () => {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
                       <div className="absolute bottom-0 left-0 p-8 text-white max-w-3xl">
                         <div className="flex items-center gap-3 mb-4">
-                          <span className="bg-insightRed text-white px-3 py-1 text-sm font-bold rounded-md">{news.category}</span>
+                          <span className="bg-red-600 text-white px-3 py-1 text-sm font-bold rounded-md">{news.category}</span>
                           <span className="text-sm text-gray-300">{news.date}</span>
                         </div>
                         <h3 className="text-3xl md:text-4xl font-bold mb-3">{news.title}</h3>
                         <a
                           href={`/article/${news.slug}`}
-                          className="inline-flex items-center text-white bg-insightRed hover:bg-red-700 px-6 py-3 rounded-md text-base font-medium transition-colors"
+                          className="inline-flex items-center text-white bg-red-600 hover:bg-red-700 px-6 py-3 rounded-md text-base font-medium transition-colors"
                         >
                           Read Full Article <ChevronRight className="ml-2 h-5 w-5" />
                         </a>
@@ -334,12 +259,12 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex items-center justify-between mb-12">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
+              <div className="inline-flex items-center px-3 py-1 bg-red-600/10 text-red-600 rounded-full text-sm font-medium mb-4">
                 <BookOpen className="w-4 h-4 mr-2" /> Premium Business Publications
               </div>
-              <h2 className="text-4xl font-bold text-insightBlack mb-4 relative">
+              <h2 className="text-4xl font-bold text-gray-900 mb-4 relative">
                 Our Exclusive C-Suite Magazine Collection
-                <span className="absolute -bottom-2 left-0 w-24 h-1 bg-insightRed"></span>
+                <span className="absolute -bottom-2 left-0 w-24 h-1 bg-red-600"></span>
               </h2>
               <p className="text-gray-600 text-lg">
                 Discover in-depth interviews, strategic insights, and success stories from the world's most influential business leaders.
@@ -359,7 +284,7 @@ const Home = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                             <div className="absolute bottom-0 left-0 w-full h-[40%] bg-gradient-to-t from-white/20 to-transparent transform scale-y-[-1] opacity-0 group-hover:opacity-40 transition-opacity duration-500 blur-sm"></div>
                             <div className="absolute top-0 right-0 m-4">
-                              <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-insightBlack text-sm font-semibold rounded-full">
+                              <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-sm font-semibold rounded-full">
                                 {safeGetMagDate(magazine)}
                               </span>
                             </div>
@@ -381,8 +306,8 @@ const Home = () => {
               )}
             </CarouselContent>
             <div className="flex justify-center mt-12 space-x-4">
-              <CarouselPrevious className="relative static bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl transition-all hover:scale-105" />
-              <CarouselNext className="relative static bg-white hover:bg-gray-50 text-insightBlack border-insightRed shadow-lg hover:shadow-xl transition-all hover:scale-105" />
+              <CarouselPrevious className="relative static bg-white hover:bg-gray-50 text-gray-900 border-red-600 shadow-lg hover:shadow-xl transition-all hover:scale-105" />
+              <CarouselNext className="relative static bg-white hover:bg-gray-50 text-gray-900 border-red-600 shadow-lg hover:shadow-xl transition-all hover:scale-105" />
             </div>
           </Carousel>
         </div>
@@ -392,10 +317,10 @@ const Home = () => {
       <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center px-3 py-1 bg-red-600/10 text-red-600 rounded-full text-sm font-medium mb-4">
               <BookOpen className="w-4 h-4 mr-2" /> Coming Soon
             </div>
-            <h2 className="text-4xl font-bold text-insightBlack mb-4">Upcoming Editions</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Upcoming Editions</h2>
             <p className="text-lg text-gray-600">
               A sneak peek at our future editions currently in development
             </p>
@@ -416,11 +341,11 @@ const Home = () => {
                     />
                     <div className="absolute inset-0 z-20 flex flex-col justify-end p-6 text-white">
                       <div className="inline-flex items-center gap-3 mb-4">
-                        <span className="bg-insightRed text-white px-3 py-1 bg-white/20 backdrop-blur-sm text-sm font-medium rounded-full">
+                        <span className="bg-red-600 text-white px-3 py-1 bg-white/20 backdrop-blur-sm text-sm font-medium rounded-full">
                           {edition.release_date || "Coming Soon"}
                         </span>
                       </div>
-                      <h3 className="text-2xl font-bold mb-3 tracking-tight group-hover:text-insightRed transition-colors">
+                      <h3 className="text-2xl font-bold mb-3 tracking-tight group-hover:text-red-600 transition-colors">
                         {edition.title || "Upcoming Edition"}
                       </h3>
                       <p className="text-gray-200 mb-5 line-clamp-3 group-hover:line-clamp-none transition-all duration-500">
@@ -431,7 +356,7 @@ const Home = () => {
                       </div>
                     </div>
                     <div className="absolute top-4 right-4 z-30">
-                      <span className="inline-flex items-center px-3 py-1 bg-insightRed/90 backdrop-blur-sm text-white text-sm font-bold rounded-full group-hover:shadow-glow animate-pulse">
+                      <span className="inline-flex items-center px-3 py-1 bg-red-600/90 backdrop-blur-sm text-white text-sm font-bold rounded-full animate-pulse">
                         {edition.status || "Planned"}
                       </span>
                     </div>
@@ -449,10 +374,10 @@ const Home = () => {
       <section className="py-16 bg-gradient-to-b from-white to-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center px-3 py-1 bg-insightRed/10 text-insightRed rounded-full text-sm font-medium mb-4">
+            <div className="inline-flex items-center px-3 py-1 bg-red-600/10 text-red-600 rounded-full text-sm font-medium mb-4">
               <TrendingUp className="w-4 h-4 mr-2" /> Executive Intelligence
             </div>
-            <h2 className="text-4xl font-bold text-insightBlack mb-4">Business Insights from Top Leaders</h2>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Business Insights from Top Leaders</h2>
             <p className="text-lg text-gray-600">
               Expert analysis, market trends, and strategic perspectives from C-suite executives shaping the future of business.
             </p>
@@ -463,7 +388,7 @@ const Home = () => {
                 <TabsTrigger
                   key={category}
                   value={category}
-                  className="px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-md data-[state=active]:text-insightRed transition-all"
+                  className="px-8 py-3 data-[state=active]:bg-white data-[state=active]:shadow-md rounded-md data-[state=active]:text-red-600 transition-all"
                 >
                   {category}
                 </TabsTrigger>
@@ -483,19 +408,19 @@ const Home = () => {
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                           <div className="absolute top-0 right-0 m-4">
-                            <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-insightBlack text-sm font-semibold rounded-full">
+                            <span className="inline-flex items-center px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-sm font-semibold rounded-full">
                               {news.category}
                             </span>
                           </div>
                         </div>
                         <CardContent className="p-6">
-                          <h3 className="text-xl font-bold mb-3 group-hover:text-insightRed transition-colors line-clamp-2">
+                          <h3 className="text-xl font-bold mb-3 group-hover:text-red-600 transition-colors line-clamp-2">
                             {news.title}
                           </h3>
                           <p className="text-gray-600 mb-4 line-clamp-2">{news.excerpt}</p>
                           <div className="flex justify-between items-center">
                             <span className="text-sm text-gray-500">{news.date}</span>
-                            <a href={`/article/${news.slug}`} className="inline-flex items-center text-insightRed hover:text-insightBlack text-sm font-medium transition-colors">
+                            <a href={`/article/${news.slug}`} className="inline-flex items-center text-red-600 hover:text-gray-900 text-sm font-medium transition-colors">
                               Read Full Article <ChevronRight className="ml-1 h-4 w-4" />
                             </a>
                           </div>
@@ -529,7 +454,7 @@ const Home = () => {
             <div className="inline-flex items-center px-3 py-1 bg-gray-200 rounded-full text-sm font-medium mb-2">
               <TrendingUp className="w-4 h-4 mr-2" /> Reader Insights
             </div>
-            <h2 className="text-3xl font-bold text-insightBlack">What Industry Leaders Say</h2>
+            <h2 className="text-3xl font-bold text-gray-900">What Industry Leaders Say</h2>
             <p className="text-gray-600 mt-2">Feedback from our community of business professionals</p>
           </div>
           <div className="relative px-8 md:px-16">
@@ -541,7 +466,7 @@ const Home = () => {
                     className={`absolute inset-0 transition-opacity duration-500 ${index === activeTestimonial ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                   >
                     <div className="flex flex-col items-center text-center">
-                      <div className="w-24 h-24 mb-6 rounded-full overflow-hidden border-2 border-insightRed">
+                      <div className="w-24 h-24 mb-6 rounded-full overflow-hidden border-2 border-red-600">
                         <img
                           src={testimonial.avatar_url || "/placeholder.svg"}
                           alt={testimonial.name || "Avatar"}
@@ -552,8 +477,8 @@ const Home = () => {
                         "{testimonial.quote || "No testimonial provided."}"
                       </blockquote>
                       <div>
-                        <cite className="font-semibold text-insightBlack text-lg not-italic">{testimonial.name || "Anonymous"}</cite>
-                        <p className="text-insightRed font-medium">
+                        <cite className="font-semibold text-gray-900 text-lg not-italic">{testimonial.name || "Anonymous"}</cite>
+                        <p className="text-red-600 font-medium">
                           {(testimonial.title || "") + (testimonial.company ? `, ${testimonial.company}` : "")}
                         </p>
                       </div>
@@ -570,7 +495,7 @@ const Home = () => {
                   <button
                     key={index}
                     onClick={() => setActiveTestimonial(index)}
-                    className={`h-3 rounded-full transition-all ${index === activeTestimonial ? "bg-insightRed w-8" : "bg-gray-300 w-3"}`}
+                    className={`h-3 rounded-full transition-all ${index === activeTestimonial ? "bg-red-600 w-8" : "bg-gray-300 w-3"}`}
                     aria-label={`Go to testimonial ${index + 1}`}
                   ></button>
                 ))}
@@ -580,7 +505,7 @@ const Home = () => {
         </div>
       </section>
       {/* Call to Action */}
-      <section className="py-16 bg-insightRed text-white">
+      <section className="py-16 bg-red-600 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             <div>
@@ -591,7 +516,7 @@ const Home = () => {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/magazine"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-white text-insightRed hover:bg-gray-100 rounded-md font-medium transition-colors"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-white text-red-600 hover:bg-gray-100 rounded-md font-medium transition-colors"
                 >
                   Explore Latest Issue
                 </Link>
