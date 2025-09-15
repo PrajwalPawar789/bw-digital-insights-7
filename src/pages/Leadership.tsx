@@ -46,31 +46,40 @@ const Leadership = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO */}
-      <div className="relative w-full h-[360px] sm:h-[420px] md:h-[480px] lg:h-[520px] flex items-end">
-        <div className="absolute inset-0 w-full h-full bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=1200&q=80')" }} />
-        <div className="absolute inset-0 bg-black/65" />
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-20">
-          <div className="flex items-center gap-6 mb-6">
-            <div className="p-3 bg-insightRed/10 rounded-full"><Users className="h-8 w-8 text-insightRed"/></div>
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white">Leadership Profiles</h1>
-              <p className="text-gray-200 mt-2">Profiles of visionary leaders driving transformation across industries.</p>
+      {/* NEW HERO */}
+      <section className="py-12 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-insightRed/10 rounded-full">
+                  <Users className="h-6 w-6 text-insightRed" />
+                </div>
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-insightBlack">Leadership Profiles</h1>
+                  <p className="text-gray-600 mt-1 max-w-2xl">Meet the visionary leaders shaping the future of business and technology. Browse profiles, explore expertise, and connect with executives driving transformation.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full md:w-auto">
+              <div className="flex items-center gap-3">
+                <Input placeholder="Search leaders, titles, companies..." value={query} onChange={(e:any)=>setQuery(e.target.value)} className="w-72" />
+                <select value={filter} onChange={(e)=>setFilter(e.target.value)} className="h-10 rounded-md border px-3 text-sm">
+                  {industries.map((i)=> <option key={i} value={i}>{i === 'all' ? 'All industries' : i}</option>)}
+                </select>
+                <Button onClick={()=>{ setQuery(''); setFilter('all'); }} className="hidden sm:inline-flex">Reset</Button>
+              </div>
+
+              <div className="mt-3 text-sm text-gray-500">
+                Showing {filtered.length} profiles
+              </div>
             </div>
           </div>
-
-          {/* Controls */}
-          <div className="mt-6 flex items-center gap-4">
-            <Input placeholder="Search leaders, titles, companies..." value={query} onChange={(e:any)=>setQuery(e.target.value)} className="w-full max-w-lg" />
-            <select value={filter} onChange={(e)=>setFilter(e.target.value)} className="h-10 rounded-md border px-3 text-sm">
-              {industries.map((i)=> <option key={i} value={i}>{i === 'all' ? 'All industries' : i}</option>)}
-            </select>
-            <Button onClick={()=>{ setQuery(''); setFilter('all'); }}>Reset</Button>
-          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Featured carousel */}
         {featured.length > 0 && (
           <section className="mb-12">
