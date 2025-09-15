@@ -73,6 +73,37 @@ const Magazine = () => {
     if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
   };
 
+  const updateScales = () => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const children = Array.from(el.children) as HTMLElement[];
+    const rect = el.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const maxDist = rect.width / 2;
+    children.forEach((child) => {
+      const childRect = child.getBoundingClientRect();
+      const childCenter = childRect.left + childRect.width / 2;
+      const dist = Math.abs(centerX - childCenter);
+      const t = Math.max(0, Math.min(1, 1 - dist / maxDist));
+      const scale = 0.85 + t * 0.35; // between 0.85 and 1.2
+      const translateY = -6 * t; // lift center
+      const imgWrapper = child.querySelector('div');
+      if (imgWrapper) {
+        (imgWrapper as HTMLElement).style.transform = `translateY(${translateY}px) scale(${scale})`;
+      }
+    });
+  };
+
+  // ensure initial scales are set
+  React.useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    updateScales();
+    const handleResize = () => updateScales();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [featuredMagazines, allMagazines]);
+
   // derive categories (simple heuristics + titles)
   const categories = useMemo(() => {
     const found = new Set<string>();
@@ -201,15 +232,15 @@ const Magazine = () => {
 
             <div className="w-full lg:w-1/2">
               <div className="relative overflow-hidden rounded-xl shadow-lg">
-                <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} className="flex gap-3 overflow-x-auto py-6 px-4">
-                  {(featuredMagazines.length ? featuredMagazines : allMagazines.slice(0,4)).map((m: any) => (
-                    <Link key={m.id} to={`/magazine/${m.slug}`} className="min-w-[260px] w-[260px] shrink-0 group rounded-lg overflow-hidden bg-black">
-                      <div className="aspect-[3/4] bg-black flex items-center justify-center">
+                <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} onScroll={() => updateScales()} className="flex gap-3 overflow-x-auto py-6 px-4 no-scrollbar">
+                  {(featuredMagazines.length ? featuredMagazines : allMagazines.slice(0,6)).map((m: any, idx:number) => (
+                    <Link key={m.id} to={`/magazine/${m.slug}`} className="mag-scroller-item min-w-[180px] w-[180px] shrink-0 group rounded-lg overflow-hidden bg-black">
+                      <div className="aspect-[3/4] bg-black flex items-center justify-center transform transition-transform duration-500 will-change-transform">
                         <img src={m.cover_image_url || '/placeholder.svg'} alt={m.title} className="w-full h-full object-cover" />
                       </div>
-                      <div className="p-3 bg-white">
-                        <h3 className="font-semibold text-sm line-clamp-2 group-hover:text-insightRed">{m.title}</h3>
-                        <div className="text-xs text-gray-500 mt-2">{m.publish_date ? new Date(m.publish_date).toLocaleDateString() : ''}</div>
+                      <div className="p-2 bg-white">
+                        <h3 className="font-semibold text-xs line-clamp-2 group-hover:text-insightRed">{m.title}</h3>
+                        <div className="text-[11px] text-gray-500 mt-1">{m.publish_date ? new Date(m.publish_date).toLocaleDateString() : ''}</div>
                       </div>
                     </Link>
                   ))}
