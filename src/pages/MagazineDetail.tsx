@@ -180,6 +180,7 @@ const MagazineDetail = () => {
             title={magazine.title}
             onFullScreen={toggleFullScreen}
             fullScreen={fullScreen}
+            initialPage={initialPage}
           />
         </div>
 
