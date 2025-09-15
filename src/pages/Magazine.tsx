@@ -86,8 +86,10 @@ const Magazine = () => {
       const childCenter = childRect.left + childRect.width / 2;
       const offset = (childCenter - centerX) / maxDist; // -1..1
       const t = Math.max(0, 1 - Math.abs(offset)); // 0..1
-    const scale = 0.7 + t * 0.9; // 0.7 .. 1.6
-    const translateY = -22 * t; // lift center more
+    const maxScale = 1.3; // center scale when t===1
+    const minScale = 1.0; // side scale when t===0
+    const scale = minScale + t * (maxScale - minScale); // 1 .. 1.3
+    const translateY = -12 * t; // gentler lift for center
     const rotateY = offset * -12; // tilt sides
     const z = Math.round(t * 100);
 
