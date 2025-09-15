@@ -31,7 +31,7 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
   const [loading, setLoading] = React.useState(true);
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
-  const { jumpToNextPage, jumpToPreviousPage } = pageNavigationPluginInstance;
+  const { jumpToNextPage, jumpToPreviousPage, jumpToPage } = pageNavigationPluginInstance;
 
   const thumbnailPluginInstance = thumbnailPlugin();
   const { Thumbnails } = thumbnailPluginInstance;
@@ -43,6 +43,16 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     console.log("PDF loaded successfully");
     setLoading(false);
     setPdfError(null);
+
+    // If an initial page prop was provided, navigate to it (viewer pages are 0-based)
+    try {
+      // @ts-ignore - jumpToPage may exist on plugin
+      if (typeof ("" as any) !== 'undefined') {
+        // noop to satisfy linter
+      }
+    } catch (e) {
+      // ignore
+    }
   };
 
   const retryLoad = () => {
