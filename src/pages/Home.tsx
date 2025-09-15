@@ -169,7 +169,7 @@ const Home = () => {
             <Link to="/articles" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {latestGrid.map((a: any, i: number) => (
+            {(featured && featured.length ? featured : latestGrid).map((a: any, i: number) => (
               <Card key={slugOf(a) + i} className="group overflow-hidden hover:shadow-lg transition">
                 <div className="relative aspect-video">
                   <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain bg-black"/>
