@@ -91,22 +91,20 @@ const Home = () => {
           {/* Center: Main Feature */}
           <div className="lg:col-span-6 space-y-6">
             {main && (
-              <>
-                <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg">
-                  <div className="relative aspect-[16/9] bg-black">
-                    <img src={imgOf(main)} alt={titleOf(main)} className="w-full h-full object-contain"/>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"/>
-                    <div className="absolute bottom-0 p-6 text-white">
-                      <div className="inline-flex px-3 py-1 rounded bg-insightRed text-white text-xs font-bold mb-3">{categoryOf(main)}</div>
-                      <h1 className="text-3xl md:text-4xl font-bold leading-tight">{titleOf(main)}</h1>
-                    </div>
+              <article className="space-y-4">
+                <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg bg-black">
+                  <div className="w-full aspect-[16/9] bg-black flex items-center justify-center">
+                    <img src={imgOf(main)} alt={titleOf(main)} className="w-full h-full object-contain" />
                   </div>
                 </Link>
-                <div className="text-gray-700 leading-relaxed">
-                  <p className="line-clamp-2 md:line-clamp-3">{excerptOf(main)}</p>
-                  <Link to={`/article/${slugOf(main)}`} className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium mt-2">Read full story <ChevronRight className="ml-1 h-4 w-4"/></Link>
+
+                <div className="p-4 bg-white rounded-md">
+                  <div className="inline-flex px-3 py-1 rounded bg-insightRed text-white text-xs font-bold mb-3">{categoryOf(main)}</div>
+                  <h1 className="text-3xl md:text-4xl font-bold leading-tight text-insightBlack">{titleOf(main)}</h1>
+                  <p className="text-gray-700 mt-2 line-clamp-2 md:line-clamp-3">{excerptOf(main)}</p>
+                  <Link to={`/article/${slugOf(main)}`} className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium mt-3">Read full story <ChevronRight className="ml-1 h-4 w-4"/></Link>
                 </div>
-              </>
+              </article>
             )}
 
             {/* Headlines list under hero */}
