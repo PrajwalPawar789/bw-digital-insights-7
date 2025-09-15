@@ -147,12 +147,22 @@ const MagazineDetail = () => {
                         <p className="text-gray-600 text-sm mb-3 line-clamp-2">{magazineArticle.articles.excerpt}</p>
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-500">By {magazineArticle.articles.author}</span>
-                          <Link
-                            to={`/article/${magazineArticle.articles.slug}`}
-                            className="text-insightRed hover:text-insightBlack font-medium text-sm flex items-center"
-                          >
-                            Read Article <ArrowRight className="ml-1 h-3 w-3" />
-                          </Link>
+                          <div className="flex items-center gap-3">
+                            <Button size="sm" onClick={() => {
+                              const page = magazineArticle.page_number || 1;
+                              setInitialPage(page);
+                              document.getElementById('pdf-viewer')?.scrollIntoView({ behavior: 'smooth' });
+                              // open viewer in reading mode
+                              setFullScreen(true);
+                            }} className="bg-insightBlack text-white hover:bg-black/90">Preview</Button>
+
+                            <Link
+                              to={`/article/${magazineArticle.articles.slug}`}
+                              className="text-insightRed hover:text-insightBlack font-medium text-sm flex items-center"
+                            >
+                              Read Article <ArrowRight className="ml-1 h-3 w-3" />
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </div>
