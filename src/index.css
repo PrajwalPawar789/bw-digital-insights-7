@@ -287,7 +287,7 @@
 .mag-scroller-item {
   scroll-snap-align: center;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
-  margin: 0 -18px; /* overlap neighbors */
+  margin: 0 -28px; /* stronger overlap neighbors */
   will-change: transform;
 }
 .mag-scroller-item > .cover-wrapper {
@@ -297,11 +297,16 @@
 .mag-scroller-item img {
   object-fit: contain;
   background: transparent;
+  border-radius: 10px;
 }
 
 /* overlay label */
 .mag-scroller-item .absolute {
   pointer-events: none;
+}
+
+.scroller-strip {
+  overflow: visible; /* allow extending */
 }
 
 /* Premium buttons */
