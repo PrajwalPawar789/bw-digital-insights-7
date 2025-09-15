@@ -287,9 +287,21 @@
 .mag-scroller-item {
   scroll-snap-align: center;
   transition: transform 0.35s ease, box-shadow 0.35s ease;
+  margin: 0 -18px; /* overlap neighbors */
+  will-change: transform;
 }
-.mag-scroller-item > div:first-child {
+.mag-scroller-item > .cover-wrapper {
   transition: transform 0.35s ease;
+}
+
+.mag-scroller-item img {
+  object-fit: contain;
+  background: transparent;
+}
+
+/* overlay label */
+.mag-scroller-item .absolute {
+  pointer-events: none;
 }
 
 /* Premium buttons */
