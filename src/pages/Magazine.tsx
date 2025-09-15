@@ -242,16 +242,17 @@ const Magazine = () => {
             </div>
 
             <div className="w-full lg:w-1/2">
-              <div className="relative overflow-hidden rounded-xl shadow-lg">
-                <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} onScroll={() => updateScales()} className="scroller-strip flex gap-4 overflow-x-auto py-6 px-6 no-scrollbar">
+              <div className="relative overflow-visible rounded-xl shadow-lg">
+                <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} onScroll={() => updateScales()} className="scroller-strip flex gap-6 overflow-x-auto py-6 px-6 no-scrollbar">
                   {(featuredMagazines.length ? featuredMagazines : allMagazines.slice(0,6)).map((m: any, idx:number) => (
-                    <Link key={m.id} to={`/magazine/${m.slug}`} className="mag-scroller-item min-w-[180px] w-[180px] shrink-0 group rounded-lg overflow-hidden bg-black">
-                      <div className="aspect-[3/4] bg-black flex items-center justify-center transform transition-transform duration-500 will-change-transform">
-                        <img src={m.cover_image_url || '/placeholder.svg'} alt={m.title} className="w-full h-full object-cover" />
+                    <Link key={m.id} to={`/magazine/${m.slug}`} className="mag-scroller-item relative min-w-[160px] w-[160px] shrink-0 group rounded-lg overflow-visible bg-transparent">
+                      <div className="aspect-[3/4] cover-wrapper bg-transparent flex items-center justify-center transform transition-transform duration-500 will-change-transform overflow-visible">
+                        <img src={m.cover_image_url || '/placeholder.svg'} alt={m.title} className="w-full h-full object-contain p-3 bg-transparent" />
+                        <div className="absolute inset-0 pointer-events-none" />
                       </div>
-                      <div className="p-2 bg-white">
-                        <h3 className="font-semibold text-xs line-clamp-2 group-hover:text-insightRed">{m.title}</h3>
-                        <div className="text-[11px] text-gray-500 mt-1">{m.publish_date ? new Date(m.publish_date).toLocaleDateString() : ''}</div>
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-6 bg-black/60 text-white text-xs rounded-md px-3 py-1 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="font-semibold line-clamp-1">{m.title}</div>
+                        <div className="text-[11px] text-gray-200">{m.publish_date ? new Date(m.publish_date).toLocaleDateString() : ''}</div>
                       </div>
                     </Link>
                   ))}
