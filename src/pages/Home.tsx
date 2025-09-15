@@ -23,6 +23,7 @@ function excerptOf(a: any) { return a?.excerpt || ""; }
 const Home = () => {
   const { data: rawArticles = [] } = useArticles();
   const { data: rawMagazines = [] } = useMagazines();
+  const { data: featured = [] } = useFeaturedArticles();
   const { settings } = useSettings();
   const { data: leadership = [] } = useLeadershipProfiles();
   const { data: press = [] } = usePressReleases();
