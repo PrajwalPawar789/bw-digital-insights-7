@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MinimalButton, ScrollMode, SpecialZoomLevel, Viewer, ViewMode, Worker } from '@react-pdf-viewer/core';
 import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
@@ -18,6 +17,7 @@ interface MagazinePDFViewerProps {
   onDownload?: () => void;
   onFullScreen?: () => void;
   fullScreen?: boolean;
+  initialPage?: number; // 1-based page index
 }
 
 const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({ 
