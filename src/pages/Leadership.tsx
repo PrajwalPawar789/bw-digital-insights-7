@@ -46,38 +46,53 @@ const Leadership = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* NEW HERO */}
-      <section className="py-12 bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-insightRed/10 rounded-full">
-                  <Users className="h-6 w-6 text-insightRed" />
-                </div>
-                <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-insightBlack">Leadership Profiles</h1>
-                  <p className="text-gray-600 mt-1 max-w-2xl">Meet the visionary leaders shaping the future of business and technology. Browse profiles, explore expertise, and connect with executives driving transformation.</p>
+      {/* HERO: Full-bleed editorial banner using featured leader */}
+      <section className="bg-white">
+        <div className="relative w-full overflow-hidden">
+          {featured[0] ? (
+            <div className="relative">
+              <div className="w-full h-[420px] md:h-[520px] lg:h-[600px] bg-black">
+                <img src={featured[0].image_url || '/placeholder.svg'} alt={featured[0].name} className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
+
+              <div className="absolute left-6 right-6 bottom-6 max-w-4xl text-white">
+                <span className="inline-block bg-insightRed px-3 py-1 rounded text-xs font-semibold mb-3">Featured Leader</span>
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight">{featured[0].name}</h1>
+                <p className="mt-3 text-lg max-w-2xl opacity-90">{featured[0].title}{featured[0].company ? ` • ${featured[0].company}` : ''}</p>
+                <div className="mt-5">
+                  <Button onClick={()=>{ setPreviewLeader(featured[0]); setPreviewOpen(true); }} className="bg-white text-insightBlack mr-3">Read Profile</Button>
+                  <Link to={`/leadership/${featured[0].slug}`} className="inline-flex items-center text-white/90 hover:text-white">View Full Profile <ArrowRight className="ml-2 h-4 w-4"/></Link>
                 </div>
               </div>
             </div>
-
-            <div className="w-full md:w-auto">
-              <div className="flex items-center gap-3">
-                <Input placeholder="Search leaders, titles, companies..." value={query} onChange={(e:any)=>setQuery(e.target.value)} className="w-72" />
-                <select value={filter} onChange={(e)=>setFilter(e.target.value)} className="h-10 rounded-md border px-3 text-sm">
-                  {industries.map((i)=> <option key={i} value={i}>{i === 'all' ? 'All industries' : i}</option>)}
-                </select>
-                <Button onClick={()=>{ setQuery(''); setFilter('all'); }} className="hidden sm:inline-flex">Reset</Button>
+          ) : (
+            <div className="w-full h-40 bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold">Leadership Profiles</h2>
+                <p className="text-sm text-gray-500 mt-2">Discover profiles of the leaders shaping industry</p>
               </div>
+            </div>
+          )}
+        </div>
 
-              <div className="mt-3 text-sm text-gray-500">
-                Showing {filtered.length} profiles
-              </div>
+        {/* Controls row under banner */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+          <div className="bg-white rounded-lg shadow -mt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 flex items-center gap-4">
+              <Input placeholder="Search leaders, titles, companies..." value={query} onChange={(e:any)=>setQuery(e.target.value)} className="w-full max-w-lg" />
+              <select value={filter} onChange={(e)=>setFilter(e.target.value)} className="h-10 rounded-md border px-3 text-sm">
+                {industries.map((i)=> <option key={i} value={i}>{i === 'all' ? 'All industries' : i}</option>)}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-600">Showing {filtered.length} profiles</div>
+              <Button onClick={()=>{ setQuery(''); setFilter('all'); }} variant="outline">Reset</Button>
             </div>
           </div>
         </div>
       </section>
+
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Featured carousel */}
