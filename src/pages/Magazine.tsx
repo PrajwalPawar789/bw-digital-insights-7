@@ -28,6 +28,51 @@ const Magazine = () => {
   const { data: allMagazines = [], isLoading } = useMagazines();
   const { data: featuredMagazines = [] } = useFeaturedMagazines();
 
+  // Horizontal scroller for featured magazines — mouse-driven smooth scroll
+  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
+  const rafRef = React.useRef<number | null>(null);
+  const targetScroll = React.useRef(0);
+
+  React.useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
+  const onScrollerMouseMove = (e: React.MouseEvent) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const pct = Math.max(0, Math.min(1, x / rect.width));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    targetScroll.current = pct * maxScroll;
+
+    if (!rafRef.current) {
+      const step = () => {
+        const elNow = scrollerRef.current;
+        if (!elNow) {
+          if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+          return;
+        }
+        const current = elNow.scrollLeft;
+        const t = targetScroll.current;
+        const next = current + (t - current) * 0.15;
+        elNow.scrollLeft = next;
+        if (Math.abs(next - t) > 0.5) {
+          rafRef.current = requestAnimationFrame(step);
+        } else {
+          rafRef.current = null;
+        }
+      };
+      rafRef.current = requestAnimationFrame(step);
+    }
+  };
+
+  const onScrollerLeave = () => {
+    if (rafRef.current) { cancelAnimationFrame(rafRef.current); rafRef.current = null; }
+  };
+
   // derive categories (simple heuristics + titles)
   const categories = useMemo(() => {
     const found = new Set<string>();
@@ -156,7 +201,7 @@ const Magazine = () => {
 
             <div className="w-full lg:w-1/2">
               <div className="relative overflow-hidden rounded-xl shadow-lg">
-                <div className="flex gap-3 overflow-x-auto py-6 px-4">
+                <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} className="flex gap-3 overflow-x-auto py-6 px-4">
                   {(featuredMagazines.length ? featuredMagazines : allMagazines.slice(0,4)).map((m: any) => (
                     <Link key={m.id} to={`/magazine/${m.slug}`} className="min-w-[260px] w-[260px] shrink-0 group rounded-lg overflow-hidden bg-black">
                       <div className="aspect-[3/4] bg-black flex items-center justify-center">
