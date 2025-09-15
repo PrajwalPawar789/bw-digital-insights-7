@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useArticles } from "@/hooks/useArticles";
+import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
 import { useMagazines } from "@/hooks/useMagazines";
 import { useLeadershipProfiles } from "@/hooks/useLeadership";
 import { usePressReleases } from "@/hooks/usePressReleases";
