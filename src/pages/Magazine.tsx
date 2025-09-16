@@ -327,8 +327,8 @@ const Magazine = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {currentMagazines.length > 0 ? currentMagazines.map((magazine:any)=> (
                 <Card key={magazine.id} className="group relative overflow-hidden rounded-xl hover:shadow-xl transition">
-                  <div className="aspect-[3/4] bg-black overflow-hidden">
-                    <img src={magazine.cover_image_url || '/placeholder.svg'} alt={magazine.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  <div className="aspect-[3/4] bg-white overflow-hidden flex items-center justify-center">
+                    <img src={magazine.cover_image_url || '/placeholder.svg'} alt={magazine.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
                   </div>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-4">
