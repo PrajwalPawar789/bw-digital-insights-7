@@ -1,10 +1,37 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useLeadershipProfiles } from '@/hooks/useLeadership';
 import { Link } from 'react-router-dom';
-import { Linkedin, Twitter, ArrowRight, Users, Award, Building2 } from 'lucide-react';
+import { Linkedin, Twitter, ArrowRight, Users, Award, Building2, Mail } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 
 const Leadership = () => {
   const { data: leaders, isLoading } = useLeadershipProfiles();
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<string>('all');
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLeader, setPreviewLeader] = useState<any | null>(null);
+
+  const allLeaders = Array.isArray(leaders) ? leaders : [];
+
+  const industries = useMemo(() => {
+    const set = new Set<string>();
+    allLeaders.forEach((l:any) => { if (l.industry) set.add(l.industry); });
+    return ['all', ...Array.from(set)];
+  }, [allLeaders]);
+
+  const filtered = useMemo(() => {
+    return allLeaders.filter((l:any) => {
+      if (filter !== 'all' && l.industry !== filter) return false;
+      if (!query) return true;
+      const q = query.toLowerCase();
+      return (l.name || '').toLowerCase().includes(q) || (l.title || '').toLowerCase().includes(q) || (l.company || '').toLowerCase().includes(q);
+    });
+  }, [allLeaders, query, filter]);
+
+  const featured = filtered.filter((l:any) => l.featured).slice(0,5);
+  const regular = filtered.filter((l:any) => !l.featured);
 
   if (isLoading) {
     return (
@@ -14,254 +41,123 @@ const Leadership = () => {
     );
   }
 
-  const featuredLeaders = Array.isArray(leaders) ? leaders.filter((leader) => leader.featured) : [];
-  const regularLeaders = Array.isArray(leaders) ? leaders.filter((leader) => !leader.featured) : [];
+  const openPreview = (leader:any) => { setPreviewLeader(leader); setPreviewOpen(true); };
+  const closePreview = () => { setPreviewOpen(false); setPreviewLeader(null); };
 
   return (
     <div className="min-h-screen bg-white">
-      {/* HERO SECTION with BG IMAGE */}
-      <div className="relative w-full h-[360px] sm:h-[420px] md:h-[480px] lg:h-[520px] flex items-end">
-        <div
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=1200&q=80')"
-          }}
-        />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-black/60" />
-        {/* Content */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-20 flex flex-col items-center text-center">
-          <div className="flex justify-center mb-6">
-            <div className="p-3 bg-insightRed/10 rounded-full">
-              <Users className="h-8 w-8 text-insightRed" />
+      {/* HERO: Full-bleed editorial banner using featured leader */}
+      <section className="bg-white">
+        <div className="relative w-full overflow-hidden">
+          {featured[0] ? (
+            <div className="relative">
+              <div className="w-full h-[420px] md:h-[520px] lg:h-[600px] bg-black">
+                <img src={featured[0].image_url || '/placeholder.svg'} alt={featured[0].name} className="w-full h-full object-cover" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />
+
+              <div className="absolute left-6 right-6 bottom-6 max-w-4xl text-white">
+                <span className="inline-block bg-insightRed px-3 py-1 rounded text-xs font-semibold mb-3">Featured Leader</span>
+                <h1 className="text-4xl md:text-5xl font-bold leading-tight">{featured[0].name}</h1>
+                <p className="mt-3 text-lg max-w-2xl opacity-90">{featured[0].title}{featured[0].company ? ` • ${featured[0].company}` : ''}</p>
+                <div className="mt-5">
+                  <Button onClick={()=>{ setPreviewLeader(featured[0]); setPreviewOpen(true); }} className="bg-white text-insightBlack mr-3">Read Profile</Button>
+                  <Link to={`/leadership/${featured[0].slug}`} className="inline-flex items-center text-white/90 hover:text-white">View Full Profile <ArrowRight className="ml-2 h-4 w-4"/></Link>
+                </div>
+              </div>
             </div>
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow">
-            Leadership Profiles
-          </h1>
-          <p className="text-xl text-gray-200 max-w-3xl mx-auto drop-shadow">
-            Meet the visionary leaders shaping the future of business and technology. 
-            Our featured profiles showcase industry pioneers, innovative CEOs, and transformational executives.
-          </p>
+          ) : (
+            <div className="w-full h-40 bg-gray-50 flex items-center justify-center">
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold">Leadership Profiles</h2>
+                <p className="text-sm text-gray-500 mt-2">Discover profiles of the leaders shaping industry</p>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
-        {/* Featured Leaders Section */}
-        {featuredLeaders.length > 0 && (
-          <div className="mb-16">
-            <div className="flex items-center mb-8">
-              <Award className="h-6 w-6 text-insightRed mr-3" />
+        {/* Controls row under banner */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10">
+          <div className="bg-white rounded-lg shadow -mt-6 p-4 flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 flex items-center gap-4">
+              <Input placeholder="Search leaders, titles, companies..." value={query} onChange={(e:any)=>setQuery(e.target.value)} className="w-full max-w-lg" />
+              <select value={filter} onChange={(e)=>setFilter(e.target.value)} className="h-10 rounded-md border px-3 text-sm">
+                {industries.map((i)=> <option key={i} value={i}>{i === 'all' ? 'All industries' : i}</option>)}
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-sm text-gray-600">Showing {filtered.length} profiles</div>
+              <Button onClick={()=>{ setQuery(''); setFilter('all'); }} variant="outline">Reset</Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Featured carousel */}
+        {featured.length > 0 && (
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold text-insightBlack">Featured Leaders</h2>
+              <Link to="/leadership" className="text-sm text-insightRed">View all</Link>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* First featured leader - larger card */}
-              {featuredLeaders.length > 0 && (
-                <div className="lg:col-span-2 lg:row-span-2">
-                  <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 h-full">
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={featuredLeaders[0].image_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800'}
-                        alt={featuredLeaders[0].name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                      />
+            <div className="overflow-visible relative">
+              <div className="flex gap-6 overflow-x-auto py-6 px-6 no-scrollbar">
+                {featured.map((l:any, idx:number)=> (
+                  <div key={l.id} className="min-w-[220px] w-[220px] shrink-0 relative group cursor-pointer" onClick={()=>openPreview(l)}>
+                    <div className="aspect-[3/4] overflow-visible">
+                      <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-contain p-2 rounded-lg shadow-lg" />
                     </div>
-                    <div className="p-8">
-                      <div className="flex items-center mb-4">
-                        <span className="bg-insightRed text-white px-3 py-1 rounded-full text-sm font-medium">
-                          Featured Leader
-                        </span>
-                      </div>
-                      <h3 className="text-2xl font-bold text-insightBlack mb-2">
-                        {featuredLeaders[0].name}
-                      </h3>
-                      <p className="text-insightRed font-semibold mb-2">
-                        {featuredLeaders[0].title}
-                      </p>
-                      {featuredLeaders[0].company && (
-                        <div className="flex items-center text-gray-600 mb-4">
-                          <Building2 className="h-4 w-4 mr-2" />
-                          <span>{featuredLeaders[0].company}</span>
-                        </div>
-                      )}
-                      <p className="text-gray-600 mb-6 line-clamp-4">
-                        {featuredLeaders[0].bio}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex space-x-3">
-                          {featuredLeaders[0].linkedin_url && (
-                            <a
-                              href={featuredLeaders[0].linkedin_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-blue-600 transition-colors"
-                            >
-                              <Linkedin className="h-5 w-5" />
-                            </a>
-                          )}
-                          {featuredLeaders[0].twitter_url && (
-                            <a
-                              href={featuredLeaders[0].twitter_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-gray-400 hover:text-blue-400 transition-colors"
-                            >
-                              <Twitter className="h-5 w-5" />
-                            </a>
-                          )}
-                        </div>
-                        <Link
-                          to={`/leadership/${featuredLeaders[0].slug}`}
-                          className="inline-flex items-center text-insightRed hover:text-insightBlack font-medium transition-colors"
-                        >
-                          Read Profile <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </div>
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-6 bg-black/60 text-white text-xs rounded-md px-3 py-1 backdrop-blur-sm opacity-90">
+                      <div className="font-semibold">{l.name}</div>
+                      <div className="text-[11px] text-gray-200">{l.title}</div>
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Other featured leaders - smaller cards */}
-              {featuredLeaders.length > 1 && (
-                <div className="lg:col-span-1 space-y-8">
-                  {featuredLeaders.slice(1, 3).map((leader) => (
-                    <div key={leader.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                      <div className="aspect-[4/3] overflow-hidden">
-                        <img
-                          src={leader.image_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'}
-                          alt={leader.name}
-                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        />
-                      </div>
-                      <div className="p-6">
-                        <span className="bg-insightRed text-white px-2 py-1 rounded-full text-xs font-medium mb-3 inline-block">
-                          Featured
-                        </span>
-                        <h3 className="text-xl font-bold text-insightBlack mb-2">
-                          {leader.name}
-                        </h3>
-                        <p className="text-insightRed font-semibold mb-2">
-                          {leader.title}
-                        </p>
-                        {leader.company && (
-                          <div className="flex items-center text-gray-600 mb-3">
-                            <Building2 className="h-4 w-4 mr-2" />
-                            <span className="text-sm">{leader.company}</span>
-                          </div>
-                        )}
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {leader.bio}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex space-x-2">
-                            {leader.linkedin_url && (
-                              <a
-                                href={leader.linkedin_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-blue-600 transition-colors"
-                              >
-                                <Linkedin className="h-4 w-4" />
-                              </a>
-                            )}
-                            {leader.twitter_url && (
-                              <a
-                                href={leader.twitter_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-blue-400 transition-colors"
-                              >
-                                <Twitter className="h-4 w-4" />
-                              </a>
-                            )}
-                          </div>
-                          <Link
-                            to={`/leadership/${leader.slug}`}
-                            className="text-insightRed hover:text-insightBlack font-medium text-sm transition-colors"
-                          >
-                            View Profile
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
         )}
 
-        {/* All Leaders Section */}
-        {regularLeaders.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold text-insightBlack mb-8">All Leadership Profiles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {regularLeaders.map((leader) => (
-                <div key={leader.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                  <div className="aspect-[4/3] overflow-hidden">
-                    <img
-                      src={leader.image_url || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'}
-                      alt={leader.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
+        {/* Grid */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-bold text-insightBlack mb-6">All Leadership Profiles</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {regular.map((l:any)=> (
+              <div key={l.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+                <div className="p-6 flex items-start gap-4">
+                  <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
+                    <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-contain p-2" />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-insightBlack mb-2">
-                      {leader.name}
-                    </h3>
-                    <p className="text-insightRed font-semibold mb-2">
-                      {leader.title}
-                    </p>
-                    {leader.company && (
-                      <div className="flex items-center text-gray-600 mb-3">
-                        <Building2 className="h-4 w-4 mr-2" />
-                        <span className="text-sm">{leader.company}</span>
-                      </div>
-                    )}
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                      {leader.bio}
-                    </p>
+                  <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <div className="flex space-x-2">
-                        {leader.linkedin_url && (
-                          <a
-                            href={leader.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-blue-600 transition-colors"
-                          >
-                            <Linkedin className="h-4 w-4" />
-                          </a>
-                        )}
-                        {leader.twitter_url && (
-                          <a
-                            href={leader.twitter_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-blue-400 transition-colors"
-                          >
-                            <Twitter className="h-4 w-4" />
-                          </a>
-                        )}
+                      <div>
+                        <h3 className="text-lg font-semibold text-insightBlack">{l.name}</h3>
+                        <div className="text-insightRed text-sm font-medium">{l.title}</div>
+                        {l.company && <div className="text-sm text-gray-500 mt-1">{l.company}</div>}
                       </div>
-                      <Link
-                        to={`/leadership/${leader.slug}`}
-                        className="text-insightRed hover:text-insightBlack font-medium text-sm transition-colors"
-                      >
-                        View Profile
-                      </Link>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="flex items-center gap-2">
+                          {l.linkedin_url && <a href={l.linkedin_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-600"><Linkedin className="h-4 w-4"/></a>}
+                          {l.twitter_url && <a href={l.twitter_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400"><Twitter className="h-4 w-4"/></a>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" onClick={()=>openPreview(l)} className="bg-insightBlack text-white">Quick View</Button>
+                          <Link to={`/leadership/${l.slug}`} className="text-insightRed hover:text-insightBlack text-sm">View</Link>
+                        </div>
+                      </div>
                     </div>
+                    <p className="text-gray-600 text-sm mt-3 line-clamp-3">{l.bio}</p>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        )}
+        </section>
 
         {/* Empty state */}
-        {(Array.isArray(leaders) && leaders.length === 0) && (
+        {allLeaders.length === 0 && (
           <div className="text-center py-16">
             <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-gray-900 mb-2">No Leadership Profiles Available</h3>
@@ -269,6 +165,40 @@ const Leadership = () => {
           </div>
         )}
       </div>
+
+      {/* Quick View Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{previewLeader?.name}</DialogTitle>
+            <DialogDescription>{previewLeader?.title} {previewLeader?.company ? ` • ${previewLeader.company}` : ''}</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+            <div className="md:col-span-1">
+              <img src={previewLeader?.image_url || '/placeholder.svg'} alt={previewLeader?.name} className="w-full h-auto rounded-lg object-contain" />
+              <div className="mt-4 flex gap-3">
+                {previewLeader?.linkedin_url && <a href={previewLeader.linkedin_url} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-blue-600"><Linkedin className="h-5 w-5"/></a>}
+                {previewLeader?.twitter_url && <a href={previewLeader.twitter_url} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-blue-400"><Twitter className="h-5 w-5"/></a>}
+                {previewLeader?.email && <a href={`mailto:${previewLeader.email}`} className="text-gray-600 hover:text-gray-900"><Mail className="h-5 w-5"/></a>}
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <h3 className="text-xl font-semibold mb-2">About</h3>
+              <p className="text-gray-700 mb-4">{previewLeader?.bio}</p>
+              <h4 className="font-semibold">Key Expertise</h4>
+              <div className="flex flex-wrap gap-2 mt-2 mb-4">
+                {(previewLeader?.expertise || ['Leadership','Strategy','Digital Transformation']).slice(0,6).map((e:any,i:number)=> (
+                  <span key={i} className="text-xs bg-gray-100 px-2 py-1 rounded">{e}</span>
+                ))}
+              </div>
+              <div className="flex items-center gap-3 mt-4">
+                <Link to={`/leadership/${previewLeader?.slug}`} className="inline-flex items-center text-insightRed hover:text-insightBlack">Read full profile <ArrowRight className="ml-2 h-4 w-4"/></Link>
+                <Button variant="outline" onClick={()=>{ navigator.clipboard?.writeText(window.location.href); }} className="ml-2">Share</Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

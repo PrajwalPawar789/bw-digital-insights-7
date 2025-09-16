@@ -268,6 +268,47 @@
   transform: rotateY(10deg) scale(1.05);
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Safari and Chrome */
+}
+
+/* Scroller container */
+.scroller-strip {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 8px;
+}
+
+.mag-scroller-item {
+  scroll-snap-align: center;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+  margin: 0 -28px; /* stronger overlap neighbors */
+  will-change: transform;
+}
+.mag-scroller-item > .cover-wrapper {
+  transition: transform 0.35s ease;
+}
+
+.mag-scroller-item img {
+  object-fit: contain;
+  background: transparent;
+  border-radius: 10px;
+}
+
+/* overlay label */
+.mag-scroller-item .absolute {
+  pointer-events: none;
+}
+
+.scroller-strip {
+  overflow: visible; /* allow extending */
+}
+
 /* Premium buttons */
 .btn-premium {
   background: var(--gradient-premium);

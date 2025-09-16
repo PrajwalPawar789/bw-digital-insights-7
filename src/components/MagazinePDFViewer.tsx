@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MinimalButton, ScrollMode, SpecialZoomLevel, Viewer, ViewMode, Worker } from '@react-pdf-viewer/core';
 import { NextIcon, pageNavigationPlugin, PreviousIcon } from '@react-pdf-viewer/page-navigation';
@@ -18,20 +17,22 @@ interface MagazinePDFViewerProps {
   onDownload?: () => void;
   onFullScreen?: () => void;
   fullScreen?: boolean;
+  initialPage?: number; // 1-based page index
 }
 
-const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({ 
-  fileUrl, 
-  title, 
-  onDownload, 
+const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
+  fileUrl,
+  title,
+  onDownload,
   onFullScreen,
-  fullScreen = false 
+  fullScreen = false,
+  initialPage,
 }) => {
   const [pdfError, setPdfError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   const pageNavigationPluginInstance = pageNavigationPlugin();
-  const { jumpToNextPage, jumpToPreviousPage } = pageNavigationPluginInstance;
+  const { jumpToNextPage, jumpToPreviousPage, jumpToPage } = pageNavigationPluginInstance;
 
   const thumbnailPluginInstance = thumbnailPlugin();
   const { Thumbnails } = thumbnailPluginInstance;
@@ -43,7 +44,42 @@ const MagazinePDFViewer: React.FC<MagazinePDFViewerProps> = ({
     console.log("PDF loaded successfully");
     setLoading(false);
     setPdfError(null);
+
+    // If an initial page prop was provided, navigate to it (viewer pages are 0-based)
+    try {
+      if (typeof initialPage === 'number' && initialPage >= 1 && typeof jumpToPage === 'function') {
+        jumpToPage(Math.max(0, initialPage - 1));
+      }
+    } catch (e) {
+      console.warn('Failed to jump to initial page', e);
+    }
   };
+
+  // Keyboard navigation for reading experience
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        try { jumpToNextPage(); } catch (_) {}
+      } else if (e.key === 'ArrowLeft') {
+        try { jumpToPreviousPage(); } catch (_) {}
+      } else if (e.key === 'f' || e.key === 'F') {
+        if (onFullScreen) onFullScreen();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [jumpToNextPage, jumpToPreviousPage, onFullScreen]);
+
+  // respond to initialPage prop changes after load
+  React.useEffect(() => {
+    if (!loading && typeof initialPage === 'number' && typeof jumpToPage === 'function') {
+      try {
+        jumpToPage(Math.max(0, initialPage - 1));
+      } catch (err) {
+        console.warn('Failed to jump to page on prop change', err);
+      }
+    }
+  }, [initialPage, loading, jumpToPage]);
 
   const retryLoad = () => {
     setLoading(true);
