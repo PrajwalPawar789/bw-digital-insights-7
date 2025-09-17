@@ -126,29 +126,28 @@ const Leadership = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {regular.map((l:any)=> (
               <div key={l.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-                <div className="p-6 flex items-start gap-4">
-                  <div className="w-24 h-24 flex-shrink-0 rounded-md overflow-hidden bg-gray-100">
-                    <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-contain p-2" />
+                <div className="relative">
+                  <div className="aspect-video bg-gray-100">
+                    <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold text-insightBlack">{l.name}</h3>
-                        <div className="text-insightRed text-sm font-medium">{l.title}</div>
-                        {l.company && <div className="text-sm text-gray-500 mt-1">{l.company}</div>}
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="flex items-center gap-2">
-                          {l.linkedin_url && <a href={l.linkedin_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-600"><Linkedin className="h-4 w-4"/></a>}
-                          {l.twitter_url && <a href={l.twitter_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400"><Twitter className="h-4 w-4"/></a>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" onClick={()=>openPreview(l)} className="bg-insightBlack text-white">Quick View</Button>
-                          <Link to={`/leadership/${l.slug}`} className="text-insightRed hover:text-insightBlack text-sm">View</Link>
-                        </div>
-                      </div>
+                  {l.industry && (
+                    <span className="absolute top-3 left-3 bg-white/90 text-insightBlack text-xs font-semibold px-2 py-1 rounded">{l.industry}</span>
+                  )}
+                </div>
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-insightBlack mb-1">{l.name}</h3>
+                  <div className="text-insightRed text-sm font-medium">{l.title}</div>
+                  {l.company && <div className="text-sm text-gray-500 mt-1">{l.company}</div>}
+                  <p className="text-gray-600 text-sm mt-3 line-clamp-3">{l.bio}</p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {l.linkedin_url && <a href={l.linkedin_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-600"><Linkedin className="h-4 w-4"/></a>}
+                      {l.twitter_url && <a href={l.twitter_url} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-blue-400"><Twitter className="h-4 w-4"/></a>}
                     </div>
-                    <p className="text-gray-600 text-sm mt-3 line-clamp-3">{l.bio}</p>
+                    <div className="flex items-center gap-3">
+                      <Button size="sm" onClick={()=>openPreview(l)} variant="outline">Quick View</Button>
+                      <Link to={`/leadership/${l.slug}`} className="text-insightRed hover:text-insightBlack text-sm inline-flex items-center">Read profile <ArrowRight className="ml-1 h-4 w-4"/></Link>
+                    </div>
                   </div>
                 </div>
               </div>
