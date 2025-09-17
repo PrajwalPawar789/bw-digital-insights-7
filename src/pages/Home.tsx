@@ -155,7 +155,7 @@ const Home = () => {
             <Link to="/articles" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
           </div>
 
-          <div className="flex gap-4 overflow-x-auto py-2 -mx-4 px-4">
+          <div className="flex gap-4 overflow-x-auto py-2 -mx-4 px-4 snap-x snap-mandatory no-scrollbar">
             {(featured && featured.length ? featured : latestGrid).map((a:any,i:number)=>(
               <Link key={slugOf(a)+i} to={`/article/${slugOf(a)}`} className="min-w-[260px] max-w-[320px] bg-white rounded-lg shadow group overflow-hidden">
                 <div className="aspect-[16/10] bg-black flex items-center justify-center">
@@ -201,7 +201,7 @@ const Home = () => {
 
           <div className="mt-8">
             <h3 className="text-lg font-semibold mb-3 text-insightBlack">Trending</h3>
-            <div className="flex gap-4 overflow-x-auto py-2 -mx-4 px-4">
+            <div className="flex gap-4 overflow-x-auto py-2 -mx-4 px-4 snap-x snap-mandatory no-scrollbar">
               {articles.slice(0,10).map((a:any,i:number)=> (
                 <Link key={slugOf(a)+i} to={`/article/${slugOf(a)}`} className="min-w-[220px] bg-white rounded-md shadow-sm overflow-hidden group">
                   <div className="flex items-center gap-3 p-3">
