@@ -139,7 +139,7 @@ const Home = () => {
             ))}
 
             <Card className="overflow-hidden">
-              <div className="aspect-[3/4] bg-black">
+              <div className="aspect-[3/4] bg-gray-100">
                 <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt={latestMagazine?.title || "Latest Magazine"} className="w-full h-full object-cover"/>
               </div>
             </Card>
