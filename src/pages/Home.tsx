@@ -263,7 +263,7 @@ const Home = () => {
             {(leadership || []).slice(0,3).map((l:any)=> (
               <Card key={l.id} className="overflow-hidden hover:shadow-lg">
                 <div className="flex items-stretch gap-0 md:gap-0">
-                  <div className="w-1/3 hidden md:block bg-black">
+                  <div className="w-1/3 hidden md:block bg-gray-100">
                     <img src={l.image_url || '/placeholder.svg'} alt={l.name} className="w-full h-full object-cover"/>
                   </div>
                   <div className="p-4 flex-1">
