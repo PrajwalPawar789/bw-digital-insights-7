@@ -93,8 +93,8 @@ const Home = () => {
           <div className="lg:col-span-6 space-y-6">
             {main && (
               <article className="space-y-4">
-                <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg bg-black">
-                  <div className="w-full aspect-[16/9] bg-black flex items-center justify-center">
+                <Link to={`/article/${slugOf(main)}`} className="block group rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <div className="w-full aspect-[16/9] bg-gray-100 flex items-center justify-center">
                     <img src={imgOf(main)} alt={titleOf(main)} className="w-full h-full object-cover" />
                   </div>
                 </Link>
@@ -132,7 +132,7 @@ const Home = () => {
           <aside className="lg:col-span-3 space-y-6">
             {secondary.map((a: any, i: number) => (
               <Link key={slugOf(a) + i} to={`/article/${slugOf(a)}`} className="block group rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition">
-                <div className="aspect-video bg-black">
+                <div className="aspect-video bg-gray-100">
                   <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-cover" />
                 </div>
               </Link>
