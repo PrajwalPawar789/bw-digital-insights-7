@@ -288,7 +288,7 @@ const Home = () => {
           <div className="space-y-4">
             {(press || []).slice(0,4).map((p:any)=> (
               <Link key={p.id} to={`/press-releases/${p.slug}`} className="flex items-start gap-4 group rounded-lg p-4 border border-gray-100 hover:shadow-md bg-white">
-                <img src={p.image_url||'/placeholder.svg'} alt={p.title} className="w-28 h-20 object-cover bg-black rounded"/>
+                <img src={p.image_url||'/placeholder.svg'} alt={p.title} className="w-28 h-20 object-cover rounded"/>
                 <div>
                   <div className="text-xs font-bold text-insightRed uppercase tracking-wide mb-1">{p.category||'Update'}</div>
                   <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{p.title}</h3>
