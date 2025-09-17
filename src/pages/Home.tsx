@@ -236,7 +236,7 @@ const Home = () => {
                     <div className="space-y-3">
                       {items.map((it:any,i:number)=> (
                         <Link key={slugOf(it)+i} to={`/article/${slugOf(it)}`} className="flex items-center gap-3 group">
-                          <img src={imgOf(it)} alt={titleOf(it)} className="w-20 h-14 object-contain bg-black rounded"/>
+                          <img src={imgOf(it)} alt={titleOf(it)} className="w-20 h-14 object-cover rounded"/>
                           <div>
                             <h5 className="font-medium line-clamp-2 group-hover:text-insightRed">{titleOf(it)}</h5>
                             <div className="text-xs text-gray-400">{dateOf(it)}</div>
