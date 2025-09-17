@@ -72,7 +72,7 @@ const Home = () => {
           <aside className="lg:col-span-3 space-y-4">
             <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
               <div className="px-5 py-3 border-b border-gray-200 font-semibold uppercase tracking-wide text-sm text-insightBlack">Most Read</div>
-              <ul className="divide-y divide-gray-200 max-h-[560px] overflow-auto">
+              <ul className="divide-y divide-gray-200 max-h-[560px] overflow-auto no-scrollbar">
                 {mostRead.map((a: any, i: number) => (
                   <li key={slugOf(a) + i} className="p-4 hover:bg-white transition">
                     <Link to={`/article/${slugOf(a)}`} className="flex gap-3 group items-start">
