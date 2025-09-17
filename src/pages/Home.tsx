@@ -189,7 +189,7 @@ const Home = () => {
                   <div className="aspect-[16/9] bg-gray-100 overflow-hidden flex items-center justify-center rounded-t-lg">
                     <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain"/>
                   </div>
-                  <CardContent>
+                  <CardContent className="p-4">
                     <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
                     <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{titleOf(a)}</h3>
                     <div className="text-xs text-gray-400 mt-2 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
