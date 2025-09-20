@@ -37,7 +37,7 @@ const Home = () => {
     const main = featuredFirst[0];
     const secondary = featuredFirst.slice(1, 3);
     const headlines = featuredFirst.slice(3, 11);
-    const mostRead = byDate.slice(0, 6);
+    const mostRead = byDate.slice(0, 5);
     const latestGrid = byDate.slice(11, 15);
     const latestMagazine = magazines[0] || null;
     return { main, secondary, headlines, mostRead, latestGrid, latestMagazine };
@@ -109,24 +109,6 @@ const Home = () => {
               </article>
             )}
 
-            {/* Headlines list under hero */}
-            <div className="bg-gray-50 rounded-xl border border-gray-200">
-              <div className="px-5 py-3 border-b border-gray-200 font-semibold uppercase tracking-wide text-sm text-insightBlack">Latest Headlines</div>
-              <ul className="divide-y divide-gray-200">
-                {headlines.map((a: any, i: number) => (
-                  <li key={slugOf(a) + i} className="p-4 hover:bg-white transition">
-                    <Link to={`/article/${slugOf(a)}`} className="flex items-start gap-4 group">
-                      <span className="mt-1 inline-block w-6 h-6 rounded-full bg-insightRed/10 text-insightRed text-xs font-bold flex items-center justify-center">{i + 1}</span>
-                      <div className="flex-1">
-                        <h4 className="font-semibold group-hover:text-insightRed line-clamp-2">{titleOf(a)}</h4>
-                        <div className="text-xs text-gray-500 mt-1">{dateOf(a)}</div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-insightRed"/>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
 
           {/* Right: Secondary cards + Magazine promo */}
@@ -140,8 +122,8 @@ const Home = () => {
             ))}
 
             <Card className="overflow-hidden">
-              <div className="aspect-[3/4] bg-black">
-                <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt={latestMagazine?.title || "Latest Magazine"} className="w-full h-full object-cover"/>
+              <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt={latestMagazine?.title || "Latest Magazine"} className="max-h-full max-w-full object-contain"/>
               </div>
             </Card>
           </aside>
