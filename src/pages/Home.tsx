@@ -95,7 +95,7 @@ const Home = () => {
             
             {/* Main Featured Story - Takes Center Stage */}
             <div className="lg:col-span-8 space-y-6">
-              {main && (
+              {main ? (
                 <article className="group">
                   <Link to={`/article/${slugOf(main)}`} className="block">
                     <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-insightBlack">
@@ -106,9 +106,8 @@ const Home = () => {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                         />
                       </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-insightBlack/90 via-insightBlack/40 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-insightBlack/90 via-insightBlack/40 to-transparent" />
                       
-                      {/* Content Overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-8">
                         <Badge className="bg-insightRed text-white mb-4 font-bold uppercase tracking-wider">
                           {categoryOf(main)}
@@ -125,13 +124,12 @@ const Home = () => {
                             {dateOf(main)}
                           </span>
                           <span>•</span>
-                          <span>{main?.author || 'Editorial Team'}</span>
+                          <span>{main?.author || "Editorial Team"}</span>
                         </div>
                       </div>
                     </div>
                   </Link>
 
-                  {/* Secondary Featured Stories - Side by Side */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
                     {secondary.map((a: any, i: number) => (
                       <Link 
@@ -165,13 +163,14 @@ const Home = () => {
                     ))}
                   </div>
                 </article>
+              ) : (
+                <div className="text-center py-12 text-gray-500">No featured articles available</div>
               )}
             </div>
 
             {/* Right Sidebar - Magazine & Trending */}
             <aside className="lg:col-span-4 space-y-6">
-              {/* Latest Magazine Showcase */}
-              {latestMagazine && (
+              {latestMagazine ? (
                 <div className="bg-gradient-to-br from-insightBlack to-gray-900 rounded-2xl p-6 text-white shadow-2xl">
                   <div className="flex items-center gap-2 mb-4">
                     <BookOpen className="h-5 w-5 text-insightRed" />
@@ -196,9 +195,8 @@ const Home = () => {
                     </Button>
                   </Link>
                 </div>
-              )}
+              ) : null}
 
-              {/* Most Read Section */}
               <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                   <h3 className="font-bold uppercase tracking-wider text-sm text-insightBlack">
