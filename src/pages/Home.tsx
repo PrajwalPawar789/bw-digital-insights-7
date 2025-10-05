@@ -187,16 +187,18 @@ const Home = () => {
               const sorted = [...articles].filter(Boolean).sort((a:any,b:any)=>new Date(b?.date||0).getTime()-new Date(a?.date||0).getTime());
               const top = sorted.slice(0,6);
               return top.map((a:any,i:number)=> (
-                <Card key={slugOf(a)+i} className="overflow-hidden group hover:shadow-lg transition">
-                  <div className="aspect-[16/10] bg-black flex items-center justify-center">
-                    <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain"/>
-                  </div>
-                  <CardContent>
-                    <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
-                    <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{titleOf(a)}</h3>
-                    <div className="text-xs text-gray-400 mt-2 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
-                  </CardContent>
-                </Card>
+                <Link key={slugOf(a)+i} to={`/article/${slugOf(a)}`}>
+                  <Card className="overflow-hidden group hover:shadow-lg transition">
+                    <div className="aspect-[16/10] bg-black flex items-center justify-center">
+                      <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain"/>
+                    </div>
+                    <CardContent className="pt-4">
+                      <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
+                      <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{titleOf(a)}</h3>
+                      <div className="text-xs text-gray-400 mt-2 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
+                    </CardContent>
+                  </Card>
+                </Link>
               ))
             })()}
           </div>
