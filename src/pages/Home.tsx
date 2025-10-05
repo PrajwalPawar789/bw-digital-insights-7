@@ -299,43 +299,182 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Press Releases */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-insightBlack">Press Releases</h2>
-            <Link to="/press-releases" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
-          </div>
-          <div className="space-y-4">
-            {(press || []).slice(0,4).map((p:any)=> (
-              <Link key={p.id} to={`/press-releases/${p.slug}`} className="flex items-start gap-4 group rounded-lg p-4 border border-gray-100 hover:shadow-md bg-white">
-                <img src={p.image_url||'/placeholder.svg'} alt={p.title} className="w-28 h-20 object-cover bg-black rounded"/>
-                <div>
-                  <div className="text-xs font-bold text-insightRed uppercase tracking-wide mb-1">{p.category||'Update'}</div>
-                  <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{p.title}</h3>
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">{p.excerpt}</p>
-                  <div className="text-xs text-gray-400 mt-2">{dateOf(p)}</div>
-                </div>
+      {/* Magazine journey */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="lg:col-span-5 space-y-5">
+            <h2 className="text-3xl font-bold text-insightBlack">Experience the magazine journey</h2>
+            <p className="text-gray-600 text-lg">
+              Each digital issue blends narrative journalism with practical playbooks. From boardroom alignment to front-line enablement, explore how visionary teams stay accountable to progress.
+            </p>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-insightRed/10 text-insightRed">
+                  <LineChart className="h-4 w-4" />
+                </span>
+                Precision insights on transformation programs and operating models.
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-insightRed/10 text-insightRed">
+                  <Target className="h-4 w-4" />
+                </span>
+                Customer journeys decoded to reveal the rituals that keep loyalty compounding.
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-insightRed/10 text-insightRed">
+                  <Shield className="h-4 w-4" />
+                </span>
+                Accountability frameworks that translate ambition into measurable commitments.
+              </li>
+            </ul>
+            <div className="flex gap-4 pt-4">
+              <Link to="/magazine">
+                <Button size="lg" className="bg-insightRed text-white hover:bg-insightRed/90">
+                  Browse magazine editions
+                </Button>
               </Link>
-            ))}
+              <Link to="/contact" className="inline-flex items-center text-insightRed font-semibold">
+                Talk to our editorial team
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          <div className="lg:col-span-7">
+            <div className="rounded-3xl border border-gray-200 bg-gray-50 p-6 flex flex-col md:flex-row gap-6 items-center">
+              <div className="md:w-72 w-full">
+                <div className="aspect-[3/4] rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden">
+                  <img
+                    src={latestMagazine?.cover_image_url || "/placeholder.svg"}
+                    alt={latestMagazine?.title || "Latest magazine"}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+              <div className="flex-1 space-y-4 text-center md:text-left">
+                <h3 className="text-2xl font-semibold text-insightBlack">
+                  {latestMagazine?.title || "Our premium magazine experience"}
+                </h3>
+                <p className="text-gray-600">
+                  {latestMagazine?.description || "Dive into strategic narratives, leadership dialogues, and architecture diagrams that show how bold ideas become disciplined execution."}
+                </p>
+                <div className="text-xs uppercase tracking-wide text-gray-500">
+                  {latestMagazine?.release_date ? `Published ${dateOf(latestMagazine)}` : "Digital + interactive formats"}
+                </div>
+                <Link to={latestMagazine ? `/magazine/${latestMagazine.slug}` : "/magazine"} className="inline-flex items-center text-insightRed font-semibold">
+                  Open the latest issue
+                  <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-16 bg-insightRed text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div>
-            <h3 className="text-3xl font-bold mb-3">Subscribe to {settings.companyName}</h3>
-            <p className="text-white/90 mb-5">Monthly strategies and interviews for leaders. No noise, just signal.</p>
-            <Link to="/magazine">
-              <Button size="lg" className="bg-white text-insightRed hover:bg-gray-100">
-                <BookOpen className="mr-2 h-5 w-5"/> Explore Issues
-              </Button>
-            </Link>
+      {pressHighlights.length > 0 && (
+        <section className="py-16 bg-gray-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+              <div>
+                <h2 className="text-3xl font-bold text-insightBlack">Signals from the field</h2>
+                <p className="text-gray-600 mt-2 max-w-2xl">
+                  Case studies and announcements that show how customers translate magazine insights into measurable wins.
+                </p>
+              </div>
+              <Link to="/press-releases" className="inline-flex items-center text-insightRed font-semibold">
+                View all updates
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {pressHighlights.map((item: any) => (
+                <Card key={item.id} className="h-full flex flex-col border border-gray-200">
+                  <div className="aspect-[16/9] bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <img src={item.image_url || "/placeholder.svg"} alt={item.title} className="h-full w-full object-cover" />
+                  </div>
+                  <CardContent className="p-5 flex flex-col gap-3 flex-1">
+                    <div className="text-xs uppercase tracking-wide text-insightRed font-semibold">
+                      {item.category || "Update"}
+                    </div>
+                    <h3 className="text-lg font-semibold text-insightBlack line-clamp-2">{item.title}</h3>
+                    <p className="text-sm text-gray-600 line-clamp-3 flex-1">{item.excerpt}</p>
+                    <div className="text-xs text-gray-400 flex items-center gap-2">
+                      <Calendar className="h-3 w-3" />
+                      {dateOf(item)}
+                    </div>
+                    <Link to={`/press-releases/${item.slug}`} className="inline-flex items-center text-insightRed font-semibold text-sm">
+                      Read more
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-          <div className="hidden lg:block justify-self-end">
-            <img src={latestMagazine?.cover_image_url || "/placeholder.svg"} alt="Latest" className="w-64 rounded-lg shadow-2xl -rotate-6"/>
+        </section>
+      )}
+
+      {/* Dark CTA */}
+      <section className="py-20 bg-insightBlack text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <h2 className="text-3xl md:text-4xl font-bold">Stay accountable to the future you are building</h2>
+            <p className="text-white/80 text-lg">
+              Subscribe to The CIO Vision and get the weekly Field Notes briefing—strategies tested by operators, distilled for leaders who demand momentum.
+            </p>
+            <ul className="space-y-3 text-sm text-white/80">
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                  <Users className="h-4 w-4" />
+                </span>
+                Stories that elevate people-first transformation.
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                  <Layers className="h-4 w-4" />
+                </span>
+                Process maps and accountability scorecards you can deploy immediately.
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                  <TrendingUp className="h-4 w-4" />
+                </span>
+                Growth signals sourced from the actions of past customers.
+              </li>
+            </ul>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/magazine">
+                <Button size="lg" className="bg-insightRed text-white hover:bg-insightRed/90">
+                  Subscribe now
+                </Button>
+              </Link>
+              <Link to="/contact" className="inline-flex items-center text-white font-semibold">
+                Partner with our newsroom
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8 space-y-6">
+            <h3 className="text-2xl font-semibold">Inside this week's Field Notes</h3>
+            <div className="space-y-4 text-sm text-white/80">
+              <div className="border-l-4 border-insightRed pl-4">
+                <p className="font-semibold text-white">Culture as an engineering discipline</p>
+                <p className="text-white/70 mt-1">
+                  Three operating cadences high-growth teams use to turn values into measurable behaviors.
+                </p>
+              </div>
+              <div className="border-l-4 border-insightRed pl-4">
+                <p className="font-semibold text-white">Customer co-creation rituals</p>
+                <p className="text-white/70 mt-1">
+                  Workshops and retrospectives that convert feedback into product roadmaps your teams can rally behind.
+                </p>
+              </div>
+              <div className="border-l-4 border-insightRed pl-4">
+                <p className="font-semibold text-white">Accountability scorecard blueprint</p>
+                <p className="text-white/70 mt-1">
+                  A step-by-step template for tracking commitments across marketing, sales, and delivery squads.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
