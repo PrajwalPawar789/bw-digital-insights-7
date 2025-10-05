@@ -7,7 +7,6 @@ import { usePressReleases } from "@/hooks/usePressReleases";
 import { useSettings } from "@/hooks/useSettings";
 import { Calendar, ChevronRight, Newspaper, BookOpen, ArrowRight, Users, Briefcase, Layers, Shield, TrendingUp, LineChart, Target, Handshake } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 function imgOf(a: any) { return a?.image_url || "/placeholder.svg"; }
