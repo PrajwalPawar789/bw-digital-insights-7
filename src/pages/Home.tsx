@@ -133,7 +133,7 @@ const Home = () => {
                 <span className="h-1 w-8 bg-yellow-400 rounded-full" />
                 <h2 className="text-3xl font-black text-insightBlack">Business</h2>
               </div>
-              <Link to="/category/business" className="flex items-center gap-2 bg-yellow-400 text-insightBlack px-6 py-2 rounded-full font-bold text-sm hover:bg-yellow-500 transition-colors">
+              <Link to="/category/business" className="flex items-center gap-2 bg-insightGold text-insightBlack px-6 py-2 rounded-full font-bold text-sm hover:bg-insightGold/90 transition-colors">
                 View all
                 <ArrowRight className="h-4 w-4" />
               </Link>
