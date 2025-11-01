@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
 import { useMagazines } from "@/hooks/useMagazines";
