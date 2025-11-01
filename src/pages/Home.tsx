@@ -314,7 +314,7 @@ const Home = () => {
                           {categoryOf(securityArticles[0])}
                         </Badge>
                       </div>
-                      <h3 className="text-3xl font-black text-white leading-tight group-hover:text-yellow-300 transition-colors">
+                      <h3 className="text-3xl font-black text-white leading-tight group-hover:text-insightGold transition-colors">
                         {titleOf(securityArticles[0])}
                       </h3>
                       {excerptOf(securityArticles[0]) && (
