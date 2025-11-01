@@ -71,20 +71,24 @@ const Home = () => {
         return null;
       }
 
+      const badgeLabel = item.badge || (article ? categoryOf(article) : item.badge) || "Feature";
+      const accentColor = badgeLabel ? categoryColorMap.get(badgeLabel) : undefined;
+
       return {
         slug: resolvedSlug,
         title: item.title || titleOf(article),
         summary: item.summary || excerptOf(article),
         image: item.image_url || imgOf(article),
-        badge: item.badge || (article ? categoryOf(article) : item.badge) || "Feature",
+        badge: badgeLabel,
         date: article ? dateOf(article) : "",
         author: article?.author || "Editorial Team",
         actionLabel: item.action_label,
         actionUrl: item.action_url,
         featured: item.featured,
+        accentColor,
       };
     },
-    [articleMap]
+    [articleMap, categoryColorMap]
   );
 
   const [searchQuery, setSearchQuery] = useState("");
