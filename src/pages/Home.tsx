@@ -360,15 +360,9 @@ const Home = () => {
                       ))}
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-insightBlack line-clamp-2">{titleOf(story)}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-3 flex-1">{excerptOf(story)}</p>
-                  <div className="text-xs text-gray-400 flex items-center gap-2">
-                    <Calendar className="h-3 w-3" />
-                    {dateOf(story)}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                );
+              });
+            })()}
           </div>
         </div>
       </section>
@@ -454,8 +448,8 @@ const Home = () => {
               </Button>
             </Link>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Dark CTA */}
       <section className="py-20 bg-insightBlack text-white">
