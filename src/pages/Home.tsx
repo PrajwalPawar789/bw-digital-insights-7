@@ -225,15 +225,15 @@ const Home = () => {
                             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                           </div>
                           <div className="relative z-10 space-y-2">
-                            {index === 0 && (
-                              <Badge className="bg-yellow-400 text-insightBlack text-xs font-bold w-fit px-2 py-1">
-                                Featured
-                              </Badge>
-                            )}
-                            <h4 className="text-base font-bold text-white leading-snug line-clamp-2 group-hover:text-yellow-300 transition-colors">
-                              {titleOf(article)}
-                            </h4>
-                          </div>
+                      {index === 0 && (
+                        <Badge className="bg-insightGold text-insightBlack text-xs font-bold w-fit px-2 py-1">
+                          Featured
+                        </Badge>
+                      )}
+                      <h4 className="text-base font-bold text-white leading-snug line-clamp-2 group-hover:text-insightGold transition-colors">
+                        {titleOf(article)}
+                      </h4>
+                    </div>
                         </article>
                       </Link>
                     ))}
