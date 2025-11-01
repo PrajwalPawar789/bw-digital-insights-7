@@ -31,9 +31,48 @@ const Home = () => {
   const { data: categories = [] } = useCategories();
   const { data: leadership = [] } = useLeadershipProfiles();
   const { data: press = [] } = usePressReleases();
+  const { data: curatedSections = [] } = useHomeSections();
 
   const articles = Array.isArray(rawArticles) ? rawArticles : [];
   const magazines = Array.isArray(rawMagazines) ? rawMagazines : [];
+
+  const articleMap = useMemo(() => {
+    const map = new Map<string, any>();
+    articles.forEach((article) => {
+      const slug = slugOf(article);
+      if (slug) {
+        map.set(slug, article);
+      }
+    });
+    return map;
+  }, [articles]);
+
+  const mapSectionItemToDisplay = useCallback(
+    (item?: HomeSectionItem | null) => {
+      if (!item) return null;
+      const article = item.article_slug ? articleMap.get(item.article_slug) : undefined;
+      const resolvedSlug = item.article_slug || slugOf(article);
+
+      if (!resolvedSlug) {
+        return null;
+      }
+
+      return {
+        slug: resolvedSlug,
+        title: item.title || titleOf(article),
+        summary: item.summary || excerptOf(article),
+        image: item.image_url || imgOf(article),
+        badge: item.badge || (article ? categoryOf(article) : item.badge) || "Feature",
+        date: article ? dateOf(article) : "",
+        author: article?.author || "Editorial Team",
+        actionLabel: item.action_label,
+        actionUrl: item.action_url,
+        featured: item.featured,
+        accentColor: (article && article.color) || undefined,
+      };
+    },
+    [articleMap]
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
