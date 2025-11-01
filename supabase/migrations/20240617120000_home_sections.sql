@@ -1,26 +1,20 @@
 create extension if not exists "pgcrypto";
 
-create table if not exists public.categories (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  slug text not null unique,
-  description text,
-  accent_color text,
-  icon_url text,
-  created_at timestamptz not null default now(),
-  order_index integer not null default 0
-);
+alter table public.categories
+  add column if not exists order_index integer not null default 0;
 
-create unique index if not exists categories_name_key on public.categories (lower(name));
-
-insert into public.categories (name, slug, description, accent_color, order_index)
+insert into public.categories (name, slug, description, color, order_index)
 values
   ('Business', 'business', 'Market intelligence, corporate strategy, and growth insights.', '#f97316', 10),
   ('Technology', 'technology', 'Emerging tech, digital transformation, and innovation coverage.', '#2563eb', 20),
   ('Security', 'security', 'Cybersecurity trends, risk management, and resilience planning.', '#7c3aed', 30),
   ('Leadership', 'leadership', 'Executive leadership, culture, and people strategy features.', '#16a34a', 40),
   ('Markets', 'markets', 'Global markets, economics, and financial outlook.', '#ea580c', 50)
-on conflict (slug) do nothing;
+on conflict (slug) do update set
+  name = excluded.name,
+  description = excluded.description,
+  color = excluded.color,
+  order_index = excluded.order_index;
 
 create table if not exists public.home_sections (
   id uuid primary key default gen_random_uuid(),
