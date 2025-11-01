@@ -5,8 +5,8 @@ import { useMagazines } from "@/hooks/useMagazines";
 import { useLeadershipProfiles } from "@/hooks/useLeadership";
 import { usePressReleases } from "@/hooks/usePressReleases";
 import { useSettings } from "@/hooks/useSettings";
-import { useCategories, useArticlesByCategory } from "@/hooks/useCategories";
-import { Calendar, ChevronRight, Search, Newspaper, BookOpen, ArrowRight, Shield, TrendingUp } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { Calendar, ChevronRight, Search, Newspaper, BookOpen, TrendingUp, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -77,102 +77,124 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-white text-insightBlack">
-      {/* Header Banner */}
-      <section className="bg-insightBlack text-white border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-widest text-insightRed mb-2">Premium News & Insights</p>
-              <h1 className="text-4xl md:text-5xl font-bold">Breaking Business News</h1>
-              <p className="text-white/70 mt-2">Your daily source for leadership insights, market trends, and industry updates</p>
+      {/* Premium Header Banner */}
+      <section className="bg-insightBlack text-white py-10 border-b border-insightRed/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-widest text-insightRed font-bold">Premium News & Insights</p>
+              <h1 className="text-5xl md:text-6xl font-black leading-tight max-w-2xl">Breaking Business News</h1>
+              <p className="text-lg text-white/80 leading-relaxed max-w-xl">
+                Your daily source for leadership insights, market trends, and industry updates
+              </p>
             </div>
-            <div className="hidden md:block text-right">
-              <Newspaper className="h-16 w-16 text-insightRed opacity-50" />
+            <div className="hidden lg:flex h-32 w-32 items-center justify-center rounded-lg bg-insightRed/10">
+              <Newspaper className="h-20 w-20 text-insightRed opacity-80" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Search Bar */}
+      {/* Search & Filter Bar */}
       <section className="bg-gray-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex gap-2 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex gap-3 flex-wrap mb-6">
             <div className="flex-1 min-w-[280px] relative">
+              <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Search articles, topics, and insights..."
+                placeholder="Search articles, topics, insights..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-3 rounded-lg border border-gray-300"
+                className="pl-10 py-3 rounded-lg border border-gray-300 focus:border-insightRed focus:ring-2 focus:ring-insightRed/10 transition-all text-base"
               />
-              <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
             </div>
-            <Button 
-              onClick={() => setSelectedCategory("")}
-              variant={selectedCategory === "" ? "default" : "outline"}
-              className="whitespace-nowrap"
-            >
-              All Categories
-            </Button>
-          </div>
-          <div className="flex gap-2 mt-4 flex-wrap">
-            {categories.slice(0, 6).map((cat: any) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.name === selectedCategory ? "" : cat.name)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedCategory === cat.name
-                    ? "bg-insightRed text-white"
-                    : "bg-white border border-gray-200 text-gray-700 hover:border-insightRed"
-                }`}
+            {(searchQuery || selectedCategory) && (
+              <Button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("");
+                }}
+                variant="outline"
+                size="sm"
+                className="gap-2"
               >
-                {cat.name}
-              </button>
-            ))}
+                <X className="h-4 w-4" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-gray-600 font-semibold">Filter by Category</p>
+            <div className="flex gap-2 flex-wrap">
+              {categories.slice(0, 6).map((cat: any) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.name === selectedCategory ? "" : cat.name)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    selectedCategory === cat.name
+                      ? "bg-insightRed text-white shadow-lg shadow-insightRed/30"
+                      : "bg-white border-2 border-gray-200 text-gray-700 hover:border-insightRed hover:text-insightRed"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Content Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Main Column */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Featured Article - Magazine Cover Style */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* Featured Article with Premium Styling */}
             {mainStory && (
-              <section className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-8 bg-insightRed" />
-                  <h2 className="text-2xl font-bold">Featured Story</h2>
+              <section>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-1 w-8 bg-insightRed rounded-full" />
+                  <h2 className="text-3xl font-black tracking-tight">Featured Story</h2>
                 </div>
 
                 <Link to={`/article/${slugOf(mainStory)}`} className="group block">
-                  <article className="relative overflow-hidden rounded-2xl shadow-2xl bg-gradient-to-br from-gray-900 to-insightBlack">
-                    <div className="aspect-[16/9] flex items-center justify-center overflow-hidden">
+                  <article className="relative overflow-hidden rounded-3xl shadow-2xl">
+                    <div className="aspect-[16/9] flex items-center justify-center overflow-hidden bg-black">
                       <img
                         src={imgOf(mainStory)}
                         alt={titleOf(mainStory)}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-insightBlack/95 via-insightBlack/40 to-transparent" />
-                    <div className="absolute inset-x-0 bottom-0 p-8">
-                      <Badge className="bg-insightRed text-white mb-4 text-xs font-bold uppercase tracking-widest">
+                    
+                    {/* Golden Frame Effect */}
+                    <div className="absolute inset-12 rounded-2xl border-2 border-amber-400/50 pointer-events-none hidden md:block" />
+                    
+                    {/* Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent" />
+                    
+                    {/* Content */}
+                    <div className="absolute inset-x-0 bottom-0 p-10 md:p-12 space-y-6">
+                      <Badge className="bg-insightRed text-white text-xs font-bold uppercase tracking-widest px-3 py-1 w-fit">
                         {categoryOf(mainStory)}
                       </Badge>
-                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 group-hover:text-insightRed/90 transition-colors">
-                        {titleOf(mainStory)}
-                      </h3>
-                      <p className="text-white/80 text-lg mb-4 line-clamp-2">
-                        {excerptOf(mainStory)}
-                      </p>
-                      <div className="flex items-center gap-4 text-white/70">
+                      <div className="space-y-4">
+                        <h3 className="text-4xl md:text-5xl font-black text-white leading-tight group-hover:text-amber-300 transition-colors duration-300">
+                          {titleOf(mainStory)}
+                        </h3>
+                        <p className="text-lg text-white/90 line-clamp-2 leading-relaxed">
+                          {excerptOf(mainStory)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-6 text-white/70 text-sm pt-4">
                         <span className="flex items-center gap-2">
                           <Calendar className="h-4 w-4" />
-                          {dateOf(mainStory)}
+                          <span className="font-medium">{dateOf(mainStory)}</span>
                         </span>
                         <span>•</span>
-                        <span>{mainStory.author || "Editorial Team"}</span>
+                        <span className="font-medium">{mainStory.author || "Editorial Team"}</span>
                       </div>
                     </div>
                   </article>
@@ -180,43 +202,43 @@ const Home = () => {
               </section>
             )}
 
-            {/* Secondary Stories Grid */}
+            {/* Latest News Grid */}
             {secondaryStories.length > 0 && (
-              <section className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <div className="h-1 w-8 bg-insightRed" />
-                  <h2 className="text-2xl font-bold">Latest News</h2>
+              <section>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-1 w-8 bg-insightRed rounded-full" />
+                  <h2 className="text-3xl font-black tracking-tight">Latest News</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {secondaryStories.map((article: any, index: number) => (
                     <Link
                       key={slugOf(article) + index}
                       to={`/article/${slugOf(article)}`}
                       className="group"
                     >
-                      <Card className="h-full overflow-hidden border border-gray-200 shadow-sm hover:shadow-lg transition-shadow">
-                        <div className="aspect-[16/10] bg-gray-100 flex items-center justify-center overflow-hidden">
+                      <Card className="h-full overflow-hidden border border-gray-200 hover:border-insightRed shadow-md hover:shadow-2xl transition-all duration-300">
+                        <div className="aspect-[16/10] bg-gray-900 flex items-center justify-center overflow-hidden">
                           <img
                             src={imgOf(article)}
                             alt={titleOf(article)}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         </div>
-                        <CardContent className="p-5 space-y-3">
-                          <div className="flex items-center justify-between">
-                            <Badge variant="outline" className="text-xs">
+                        <CardContent className="p-6 space-y-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <Badge variant="outline" className="text-xs font-semibold uppercase tracking-wide">
                               {categoryOf(article)}
                             </Badge>
-                            <span className="text-xs text-gray-500">{dateOf(article)}</span>
+                            <span className="text-xs text-gray-500 font-medium">{dateOf(article)}</span>
                           </div>
-                          <h3 className="font-bold text-lg line-clamp-2 group-hover:text-insightRed transition-colors">
+                          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-insightRed transition-colors leading-tight">
                             {titleOf(article)}
                           </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2">
+                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
                             {excerptOf(article)}
                           </p>
-                          <div className="flex items-center text-insightRed text-sm font-semibold">
+                          <div className="flex items-center text-insightRed text-sm font-bold pt-2 group-hover:gap-2 transition-all">
                             Read more <ChevronRight className="ml-1 h-4 w-4" />
                           </div>
                         </CardContent>
@@ -227,25 +249,25 @@ const Home = () => {
               </section>
             )}
 
-            {/* Category Sections */}
+            {/* Category Sections with Cards */}
             {categories.length > 0 && (
-              <section className="space-y-8">
+              <section className="space-y-12">
                 {categories.slice(0, 3).map((category: any) => {
                   const categoryArticles = (categoryBreakdown[category.name] || []).slice(0, 4);
                   if (categoryArticles.length === 0) return null;
 
                   return (
-                    <div key={category.id} className="space-y-4">
+                    <div key={category.id} className="space-y-6">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1 w-8 bg-insightRed" />
-                          <h3 className="text-2xl font-bold">{category.name}</h3>
+                        <div className="flex items-center gap-3">
+                          <div className="h-1 w-8 bg-insightRed rounded-full" />
+                          <h3 className="text-3xl font-black tracking-tight">{category.name}</h3>
                         </div>
                         <Link
                           to={`/category/${category.slug}`}
-                          className="text-insightRed hover:text-insightBlack font-semibold flex items-center"
+                          className="text-insightRed hover:text-insightBlack font-bold flex items-center gap-1 text-sm uppercase tracking-wide transition-colors group"
                         >
-                          View all <ChevronRight className="ml-1 h-4 w-4" />
+                          View all <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                       </div>
 
@@ -254,26 +276,28 @@ const Home = () => {
                           <Link
                             key={slugOf(article) + idx}
                             to={`/article/${slugOf(article)}`}
-                            className="group flex gap-4 p-4 border border-gray-200 rounded-lg hover:border-insightRed hover:bg-insightRed/5 transition-all"
+                            className="group"
                           >
-                            <div className="w-24 h-20 flex-shrink-0 bg-gray-100 rounded overflow-hidden">
-                              <img
-                                src={imgOf(article)}
-                                alt={titleOf(article)}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                                <Calendar className="h-3 w-3" />
-                                {dateOf(article)}
+                            <div className="flex gap-5 p-5 border-2 border-gray-200 rounded-xl hover:border-insightRed hover:bg-insightRed/5 transition-all duration-300">
+                              <div className="w-28 h-20 flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-md">
+                                <img
+                                  src={imgOf(article)}
+                                  alt={titleOf(article)}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
                               </div>
-                              <h4 className="font-semibold line-clamp-2 group-hover:text-insightRed transition-colors">
-                                {titleOf(article)}
-                              </h4>
-                              <p className="text-sm text-gray-600 line-clamp-1 mt-1">
-                                {excerptOf(article)}
-                              </p>
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <div className="flex items-center gap-2 text-xs text-gray-600 font-bold uppercase tracking-wide">
+                                  <Calendar className="h-3 w-3" />
+                                  {dateOf(article)}
+                                </div>
+                                <h4 className="font-bold text-base line-clamp-2 group-hover:text-insightRed transition-colors leading-snug">
+                                  {titleOf(article)}
+                                </h4>
+                                <p className="text-sm text-gray-600 line-clamp-1">
+                                  {excerptOf(article)}
+                                </p>
+                              </div>
                             </div>
                           </Link>
                         ))}
@@ -284,18 +308,18 @@ const Home = () => {
               </section>
             )}
 
-            {/* No Results */}
+            {/* No Results State */}
             {filteredArticles.length === 0 && (
-              <div className="text-center py-12">
-                <Newspaper className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No articles found matching your search.</p>
+              <div className="text-center py-16">
+                <Newspaper className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-700 mb-2">No articles found</h3>
+                <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria.</p>
                 <Button
                   onClick={() => {
                     setSearchQuery("");
                     setSelectedCategory("");
                   }}
-                  variant="outline"
-                  className="mt-4"
+                  className="bg-insightRed hover:bg-insightRed/90"
                 >
                   Clear filters
                 </Button>
@@ -305,31 +329,33 @@ const Home = () => {
 
           {/* Sidebar */}
           <aside className="space-y-8">
-            {/* Latest Magazine */}
+            {/* Latest Magazine Card */}
             {latestMagazine && (
-              <Card className="overflow-hidden border border-gray-200 shadow-lg sticky top-24">
-                <div className="bg-insightBlack text-white p-6 space-y-4">
+              <Card className="overflow-hidden border-2 border-insightRed/30 shadow-xl sticky top-24">
+                <div className="bg-gradient-to-br from-insightBlack to-insightBlack/90 text-white p-6 space-y-5">
                   <div className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-insightRed" />
-                    <h3 className="font-bold uppercase tracking-wider">Latest Issue</h3>
+                    <h3 className="font-black uppercase tracking-widest text-sm">Latest Issue</h3>
                   </div>
+                  
                   <Link to="/magazine" className="block group">
-                    <div className="aspect-[3/4] bg-gray-200 rounded-lg overflow-hidden mb-4 shadow-lg">
+                    <div className="aspect-[3/4] bg-gray-300 rounded-xl overflow-hidden mb-5 shadow-2xl">
                       <img
                         src={latestMagazine.cover_image_url || "/placeholder.svg"}
                         alt={latestMagazine.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <h4 className="font-bold text-lg group-hover:text-insightRed transition-colors">
+                    <h4 className="text-xl font-black group-hover:text-amber-300 transition-colors line-clamp-2">
                       {latestMagazine.title}
                     </h4>
-                    <p className="text-sm text-white/70 mt-2 line-clamp-2">
+                    <p className="text-sm text-white/70 mt-3 line-clamp-2 leading-relaxed">
                       {latestMagazine.description}
                     </p>
                   </Link>
-                  <Link to="/magazine">
-                    <Button className="w-full bg-insightRed hover:bg-insightRed/90 text-white">
+                  
+                  <Link to="/magazine" className="block pt-2">
+                    <Button className="w-full bg-insightRed hover:bg-insightRed/90 text-white font-bold uppercase tracking-wider">
                       Read Magazine
                     </Button>
                   </Link>
@@ -339,28 +365,28 @@ const Home = () => {
 
             {/* Trending Articles */}
             {trendingArticles.length > 0 && (
-              <Card className="overflow-hidden border border-gray-200">
-                <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <Card className="overflow-hidden border-2 border-gray-200 shadow-lg">
+                <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b-2 border-gray-200">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-5 w-5 text-insightRed" />
-                    <h3 className="font-bold uppercase tracking-wider">Trending Now</h3>
+                    <h3 className="font-black uppercase tracking-widest text-sm">Trending Now</h3>
                   </div>
                 </div>
                 <ul className="divide-y divide-gray-200">
                   {trendingArticles.slice(0, 6).map((article: any, index: number) => (
-                    <li key={slugOf(article) + index} className="hover:bg-gray-50 transition-colors">
+                    <li key={slugOf(article) + index} className="hover:bg-insightRed/5 transition-colors duration-200">
                       <Link
                         to={`/article/${slugOf(article)}`}
-                        className="flex gap-3 p-4 group"
+                        className="flex gap-4 p-5 group"
                       >
-                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-insightRed/10 text-insightRed font-bold flex items-center justify-center text-xs">
+                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-insightRed/10 text-insightRed font-bold flex items-center justify-center text-xs font-black">
                           {index + 1}
                         </span>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-semibold line-clamp-2 group-hover:text-insightRed transition-colors">
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <h4 className="text-sm font-bold line-clamp-2 group-hover:text-insightRed transition-colors leading-snug">
                             {titleOf(article)}
                           </h4>
-                          <div className="text-xs text-gray-500 mt-1">{dateOf(article)}</div>
+                          <div className="text-xs text-gray-500 font-medium">{dateOf(article)}</div>
                         </div>
                       </Link>
                     </li>
@@ -369,22 +395,22 @@ const Home = () => {
               </Card>
             )}
 
-            {/* Newsletter CTA */}
-            <Card className="bg-gradient-to-br from-insightRed to-insightBlack text-white overflow-hidden">
+            {/* Newsletter Signup */}
+            <Card className="overflow-hidden bg-gradient-to-br from-insightRed to-insightRed/90 text-white border-0 shadow-xl">
               <CardContent className="p-6 space-y-4">
-                <div>
-                  <h3 className="text-xl font-bold mb-2">Newsletter</h3>
-                  <p className="text-sm text-white/80">
-                    Get the latest business news delivered to your inbox.
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black">Newsletter</h3>
+                  <p className="text-sm text-white/90 leading-relaxed">
+                    Get the latest business news delivered to your inbox daily.
                   </p>
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-3 pt-2">
                   <Input
                     type="email"
                     placeholder="Enter your email"
-                    className="bg-white/20 border-white/30 text-white placeholder:text-white/60"
+                    className="bg-white/20 border border-white/30 text-white placeholder:text-white/60 rounded-lg font-medium focus:bg-white/30 focus:border-white transition-all"
                   />
-                  <Button className="w-full bg-white text-insightRed hover:bg-gray-100 font-semibold">
+                  <Button className="w-full bg-white text-insightRed hover:bg-gray-100 font-bold uppercase tracking-wider">
                     Subscribe
                   </Button>
                 </div>
@@ -392,41 +418,49 @@ const Home = () => {
             </Card>
 
             {/* Quick Links */}
-            <Card className="border border-gray-200">
-              <CardContent className="p-6 space-y-3">
-                <h3 className="font-bold text-lg mb-4">Quick Links</h3>
-                <Link to="/magazine" className="block text-insightRed hover:text-insightBlack font-semibold">
-                  → Magazine
-                </Link>
-                <Link to="/articles" className="block text-insightRed hover:text-insightBlack font-semibold">
-                  → All Articles
-                </Link>
-                <Link to="/leadership" className="block text-insightRed hover:text-insightBlack font-semibold">
-                  → Leadership
-                </Link>
-                <Link to="/about" className="block text-insightRed hover:text-insightBlack font-semibold">
-                  → About Us
-                </Link>
+            <Card className="border-2 border-gray-200">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="font-black text-lg uppercase tracking-wide">Quick Links</h3>
+                <nav className="space-y-3">
+                  <Link to="/magazine" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    Magazine
+                  </Link>
+                  <Link to="/articles" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    All Articles
+                  </Link>
+                  <Link to="/leadership" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    Leadership
+                  </Link>
+                  <Link to="/about" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    About Us
+                  </Link>
+                </nav>
               </CardContent>
             </Card>
           </aside>
         </div>
       </div>
 
-      {/* Newsletter Subscription CTA */}
-      <section className="bg-insightBlack text-white py-16 mt-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Stay Updated</h2>
-          <p className="text-white/80 text-lg mb-8">
-            Never miss breaking news, industry insights, or exclusive stories. Subscribe to {settings?.companyName || "our"} newsletter.
-          </p>
-          <div className="flex gap-2 max-w-md mx-auto">
+      {/* Newsletter CTA Section */}
+      <section className="bg-insightBlack text-white py-16 border-t border-insightRed/20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black leading-tight">Stay Updated</h2>
+            <p className="text-lg text-white/80 leading-relaxed">
+              Never miss breaking news, industry insights, or exclusive stories. Subscribe to {settings?.companyName || "our"} newsletter today.
+            </p>
+          </div>
+          <div className="flex gap-3 max-w-sm mx-auto">
             <Input
               type="email"
               placeholder="Enter your email"
-              className="bg-white text-insightBlack"
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/50 rounded-lg focus:border-insightRed transition-all"
             />
-            <Button className="bg-insightRed hover:bg-insightRed/90">
+            <Button className="bg-insightRed hover:bg-insightRed/90 text-white font-bold uppercase tracking-wider px-8">
               Subscribe
             </Button>
           </div>
