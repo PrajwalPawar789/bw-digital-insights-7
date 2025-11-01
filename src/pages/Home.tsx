@@ -1,13 +1,17 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useArticles, useFeaturedArticles } from "@/hooks/useArticles";
 import { useMagazines } from "@/hooks/useMagazines";
 import { useLeadershipProfiles } from "@/hooks/useLeadership";
 import { usePressReleases } from "@/hooks/usePressReleases";
 import { useSettings } from "@/hooks/useSettings";
-import { Calendar, ChevronRight, Newspaper, BookOpen, ArrowRight, Users, Briefcase, Layers, Shield, TrendingUp, LineChart, Target, Handshake } from "lucide-react";
+import { useCategories } from "@/hooks/useCategories";
+import { useHomeSections, HomeSection, HomeSectionItem } from "@/hooks/useHomeSections";
+import { Calendar, ChevronRight, Search, Newspaper, BookOpen, TrendingUp, X, ArrowUpRight, Sparkles, Flame } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 
 function imgOf(a: any) { return a?.image_url || "/placeholder.svg"; }
 function titleOf(a: any) { return a?.title || "Untitled"; }
@@ -20,505 +24,644 @@ function categoryOf(a: any) { return a?.category || "Business"; }
 function excerptOf(a: any) { return a?.excerpt || ""; }
 
 const Home = () => {
-  const { data: rawArticles = [], isLoading: articlesLoading } = useArticles();
-  const { data: rawMagazines = [], isLoading: magazinesLoading } = useMagazines();
+  const { data: rawArticles = [] } = useArticles();
+  const { data: rawMagazines = [] } = useMagazines();
   const { data: featured = [] } = useFeaturedArticles();
   const { settings } = useSettings();
+  const { data: categories = [] } = useCategories();
   const { data: leadership = [] } = useLeadershipProfiles();
   const { data: press = [] } = usePressReleases();
+  const { data: curatedSections = [] } = useHomeSections();
 
   const articles = Array.isArray(rawArticles) ? rawArticles : [];
   const magazines = Array.isArray(rawMagazines) ? rawMagazines : [];
 
-  const { main, secondary, headlines, mostRead, latestGrid, latestMagazine } = useMemo(() => {
-    const byDate = [...articles].filter(Boolean).sort((a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
-    const featuredFirst = [...byDate].sort((a, b) => (b?.featured ? 1 : 0) - (a?.featured ? 1 : 0));
-    const main = featuredFirst[0];
-    const secondary = featuredFirst.slice(1, 3);
-    const headlines = featuredFirst.slice(3, 11);
-    const mostRead = byDate.slice(0, 5);
-    const latestGrid = byDate.slice(11, 15);
+  const articleMap = useMemo(() => {
+    const map = new Map<string, any>();
+    articles.forEach((article) => {
+      const slug = slugOf(article);
+      if (slug) {
+        map.set(slug, article);
+      }
+    });
+    return map;
+  }, [articles]);
+
+  const categoryColorMap = useMemo(() => {
+    const map = new Map<string, string>();
+    categories.forEach((cat: any) => {
+      if (!cat) return;
+      if (cat.slug) {
+        map.set(cat.slug, cat.color || "#ef4444");
+      }
+      if (cat.name) {
+        map.set(cat.name, cat.color || "#ef4444");
+      }
+    });
+    return map;
+  }, [categories]);
+
+  const mapSectionItemToDisplay = useCallback(
+    (item?: HomeSectionItem | null) => {
+      if (!item) return null;
+      const article = item.article_slug ? articleMap.get(item.article_slug) : undefined;
+      const resolvedSlug = item.article_slug || slugOf(article);
+
+      if (!resolvedSlug) {
+        return null;
+      }
+
+      const badgeLabel = item.badge || (article ? categoryOf(article) : item.badge) || "Feature";
+      const accentColor = badgeLabel ? categoryColorMap.get(badgeLabel) : undefined;
+
+      return {
+        slug: resolvedSlug,
+        title: item.title || titleOf(article),
+        summary: item.summary || excerptOf(article),
+        image: item.image_url || imgOf(article),
+        badge: badgeLabel,
+        date: article ? dateOf(article) : "",
+        author: article?.author || "Editorial Team",
+        actionLabel: item.action_label,
+        actionUrl: item.action_url,
+        featured: item.featured,
+        accentColor: accentColor || "#ef4444",
+      };
+    },
+    [articleMap, categoryColorMap]
+  );
+
+  const mapArticleToDisplay = useCallback(
+    (article: any) => {
+      if (!article) return null;
+      const badgeLabel = categoryOf(article);
+      const accentColor = badgeLabel ? categoryColorMap.get(badgeLabel) : undefined;
+
+      return {
+        slug: slugOf(article),
+        title: titleOf(article),
+        summary: excerptOf(article),
+        image: imgOf(article),
+        badge: badgeLabel,
+        date: dateOf(article),
+        author: article?.author || "Editorial Team",
+        actionLabel: undefined,
+        actionUrl: undefined,
+        featured: false,
+        accentColor: accentColor || "#ef4444",
+      };
+    },
+    [categoryColorMap]
+  );
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  const filteredArticles = useMemo(() => {
+    let filtered = articles;
+    
+    if (selectedCategory) {
+      filtered = filtered.filter(a => a.category === selectedCategory);
+    }
+    
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(a => 
+        titleOf(a).toLowerCase().includes(query) || 
+        excerptOf(a).toLowerCase().includes(query) ||
+        categoryOf(a).toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered.sort((a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
+  }, [articles, searchQuery, selectedCategory]);
+
+  const { mainStory, secondaryStories, trendingArticles, latestMagazine } = useMemo(() => {
+    const sorted = [...articles].filter(Boolean).sort((a, b) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
+    const mainStory = sorted[0] || null;
+    const secondaryStories = sorted.slice(1, 5);
+    const trendingArticles = sorted.slice(0, 10);
     const latestMagazine = magazines[0] || null;
-    return { main, secondary, headlines, mostRead, latestGrid, latestMagazine };
+    return { mainStory, secondaryStories, trendingArticles, latestMagazine };
   }, [articles, magazines]);
 
-  const { supportingStories, insightStories, leadershipSpotlight, pressHighlights } = useMemo(() => {
-    const sorted = [...articles]
-      .filter(Boolean)
-      .sort((a: any, b: any) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
+  const heroSection = useMemo(() => {
+    return curatedSections.find((section: HomeSection) => section.layout_type === "hero");
+  }, [curatedSections]);
 
-    const supportingStories = sorted.slice(1, 4);
-    const insightStories = (featured && featured.length ? featured : sorted.slice(4, 10)).slice(0, 6);
-    const leadershipSpotlight = (leadership || []).slice(0, 3);
-    const pressHighlights = (press || []).slice(0, 3);
+  const heroDisplay = useMemo(() => {
+    if (!heroSection) return null;
+    const items = heroSection.home_section_items || [];
+    if (!items.length) return null;
 
-    return { supportingStories, insightStories, leadershipSpotlight, pressHighlights };
-  }, [articles, featured, leadership, press]);
+    const sortedItems = [...items].sort((a, b) => a.order_index - b.order_index);
+    const primaryItem = sortedItems.find((item) => item.featured) || sortedItems[0];
+    const primary = mapSectionItemToDisplay(primaryItem);
+    const secondary = sortedItems
+      .filter((item) => item.id !== (primaryItem?.id || ""))
+      .map(mapSectionItemToDisplay)
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
-  const growthPillars = [
-    {
-      title: "People",
-      description: "Build cultures where experts feel seen, heard, and empowered to challenge the status quo.",
-      icon: Users,
-    },
-    {
-      title: "Culture",
-      description: "Translate purpose into everyday rituals that keep innovation grounded in shared values.",
-      icon: Briefcase,
-    },
-    {
-      title: "Process",
-      description: "Engineer repeatable momentum with systems that scale from pilot programs to global rollouts.",
-      icon: Layers,
-    },
-    {
-      title: "Accountability",
-      description: "Measure what matters, celebrate responsible risk-taking, and close every learning loop.",
-      icon: Shield,
-    },
-  ];
+    if (!primary) return null;
 
-  const flywheelSignals = [
-    {
-      icon: TrendingUp,
-      title: "Where growth comes from",
-      description: "Growth is earned when the stories of current customers become the playbook for the next wave of relationships.",
-    },
-    {
-      icon: Handshake,
-      title: "New customers follow actions",
-      description: "Your next loyal reader, subscriber, or partner arrives because a past customer shared a proof point that felt personal and actionable.",
-    },
-    {
-      icon: Target,
-      title: "Design the follow-through",
-      description: "Map the journeys, automate the nudges, and deliver experiences that transform curiosity into unwavering trust.",
-    },
-  ];
+    return {
+      primary,
+      secondary,
+      meta: heroSection,
+    };
+  }, [heroSection, mapSectionItemToDisplay]);
 
-  if (articlesLoading || magazinesLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-insightRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading content...</p>
-        </div>
-      </div>
-    );
-  }
+  const heroPrimary = heroDisplay?.primary || mapArticleToDisplay(mainStory);
+  const heroSecondary = heroDisplay?.secondary?.length
+    ? heroDisplay.secondary
+    : secondaryStories
+        .slice(0, 3)
+        .map(mapArticleToDisplay)
+        .filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const categoryBreakdown = useMemo(() => {
+    const breakdown: { [key: string]: any[] } = {};
+    articles.forEach(article => {
+      const cat = categoryOf(article);
+      if (!breakdown[cat]) breakdown[cat] = [];
+      breakdown[cat].push(article);
+    });
+    return breakdown;
+  }, [articles]);
+
+  const curatedFeatureSections = useMemo(() => {
+    return curatedSections.filter((section) => section.layout_type !== "hero");
+  }, [curatedSections]);
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Premium News Ticker */}
-      <div className="bg-insightBlack text-white overflow-hidden border-b border-white/10">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-4 py-3">
-            <Badge className="bg-insightRed text-white hover:bg-insightRed/90 font-semibold uppercase tracking-wider">
-              <Newspaper className="w-3.5 h-3.5 mr-1.5" /> Breaking News
-            </Badge>
-            <div className="relative flex-1 overflow-hidden">
-              <div className="whitespace-nowrap animate-marquee">
-                {[...(headlines.length ? headlines : articles.slice(0, 8))].map((a: any, i: number) => (
-                  <Link 
-                    key={slugOf(a) + i} 
-                    to={`/article/${slugOf(a)}`} 
-                    className="inline-flex items-center text-sm text-white/90 hover:text-white transition-colors mx-8 font-medium"
-                  >
-                    {titleOf(a)}
-                  </Link>
-                ))}
-              </div>
+    <div className="min-h-screen bg-white text-insightBlack">
+      {/* Premium Header Banner */}
+      <section className="bg-insightBlack text-white py-10 border-b border-insightRed/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between flex-wrap gap-6">
+            <div className="space-y-3">
+              <p className="text-xs uppercase tracking-widest text-insightRed font-bold">Premium News & Insights</p>
+              <h1 className="text-5xl md:text-6xl font-black leading-tight max-w-2xl">Breaking Business News</h1>
+              <p className="text-lg text-white/80 leading-relaxed max-w-xl">
+                Your daily source for leadership insights, market trends, and industry updates
+              </p>
+            </div>
+            <div className="hidden lg:flex h-32 w-32 items-center justify-center rounded-lg bg-insightRed/10">
+              <Newspaper className="h-20 w-20 text-insightRed opacity-80" />
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Hero Section - Premium Content Focus */}
-      <section className="bg-gradient-to-b from-gray-50 to-white py-12">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* Main Featured Story */}
-            <div className="lg:col-span-8 space-y-6">
-              {main ? (
-                <article className="group">
-                  <Link to={`/article/${slugOf(main)}`} className="block">
-                    <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-insightBlack">
-                      <div className="aspect-[16/9] bg-gradient-to-br from-gray-900 to-insightBlack flex items-center justify-center">
-                        <img 
-                          src={imgOf(main)} 
-                          alt={titleOf(main)} 
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                        />
-                      </div>
-                      <div className="absolute inset-0 bg-gradient-to-t from-insightBlack/90 via-insightBlack/40 to-transparent" />
-                      
-                      <div className="absolute bottom-0 left-0 right-0 p-8">
-                        <Badge className="bg-insightRed text-white mb-4 font-bold uppercase tracking-wider">
-                          {categoryOf(main)}
-                        </Badge>
-                        <h1 className="text-3xl md:text-5xl font-bold leading-tight text-white mb-4 group-hover:text-insightRed/90 transition-colors">
-                          {titleOf(main)}
-                        </h1>
-                        <p className="text-white/90 text-lg mb-4 line-clamp-2 max-w-3xl">
-                          {excerptOf(main)}
-                        </p>
-                        <div className="flex items-center gap-4 text-white/70 text-sm">
-                          <span className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {dateOf(main)}
-                          </span>
-                          <span>•</span>
-                          <span>{main?.author || "Editorial Team"}</span>
-                        </div>
-                      </div>
+      {/* Search & Filter Bar */}
+      <section className="bg-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex gap-3 flex-wrap mb-6">
+            <div className="flex-1 min-w-[280px] relative">
+              <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400 pointer-events-none" />
+              <Input
+                type="text"
+                placeholder="Search articles, topics, insights..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 py-3 rounded-lg border border-gray-300 focus:border-insightRed focus:ring-2 focus:ring-insightRed/10 transition-all text-base"
+              />
+            </div>
+            {(searchQuery || selectedCategory) && (
+              <Button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("");
+                }}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <X className="h-4 w-4" />
+                Clear
+              </Button>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-widest text-gray-600 font-semibold">Filter by Category</p>
+            <div className="flex gap-2 flex-wrap">
+              {categories.slice(0, 6).map((cat: any) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.name === selectedCategory ? "" : cat.name)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    selectedCategory === cat.name
+                      ? "bg-insightRed text-white shadow-lg shadow-insightRed/30"
+                      : "bg-white border-2 border-gray-200 text-gray-700 hover:border-insightRed hover:text-insightRed"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          {/* Main Column */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* Featured Article with Premium Styling */}
+            {heroPrimary && (
+              <section className="space-y-8">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-1 w-8 bg-insightRed rounded-full" />
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.4em] text-insightRed font-semibold">
+                        {heroDisplay?.meta?.kicker || "Spotlight"}
+                      </p>
+                      <h2 className="text-3xl font-black tracking-tight">
+                        {heroDisplay?.meta?.title || "Feature of the Day"}
+                      </h2>
                     </div>
+                  </div>
+                  {heroDisplay?.meta?.subtitle && (
+                    <p className="text-sm text-gray-600 max-w-2xl leading-relaxed">
+                      {heroDisplay.meta.subtitle}
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-[2fr,1fr]">
+                  <Link to={`/article/${heroPrimary.slug}`} className="group block">
+                    <article className="relative overflow-hidden rounded-3xl shadow-2xl min-h-[420px] bg-black">
+                      <div className="absolute inset-0">
+                        <img
+                          src={heroPrimary.image}
+                          alt={heroPrimary.title}
+                          className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent" />
+                      </div>
+
+                      <div className="relative z-10 flex h-full flex-col justify-end p-10 space-y-5">
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            className="border-0 text-xs font-bold uppercase tracking-widest px-3 py-1 w-fit text-white"
+                            style={{ backgroundColor: heroPrimary.accentColor }}
+                          >
+                            {heroPrimary.badge}
+                          </Badge>
+                          <span className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-white/70">
+                            <Sparkles className="h-4 w-4 text-amber-300" />
+                            {heroDisplay?.meta?.kicker || "Featured"}
+                          </span>
+                        </div>
+                        <div className="space-y-4">
+                          <h3 className="text-3xl md:text-4xl font-black text-white leading-tight text-balance max-w-3xl group-hover:text-amber-300 transition-colors duration-300">
+                            {heroPrimary.title}
+                          </h3>
+                          {heroPrimary.summary && (
+                            <p className="text-base text-white/85 max-w-2xl leading-relaxed line-clamp-3">
+                              {heroPrimary.summary}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-6 text-white/70 text-sm pt-2">
+                          {heroPrimary.date && (
+                            <span className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              <span className="font-medium">{heroPrimary.date}</span>
+                            </span>
+                          )}
+                          <span className="hidden sm:block">•</span>
+                          <span className="font-medium">{heroPrimary.author}</span>
+                        </div>
+                        {heroPrimary.actionLabel && heroPrimary.actionUrl && (
+                          <div>
+                            <Button
+                              variant="secondary"
+                              className="bg-white/10 backdrop-blur hover:bg-white/20 text-white font-bold uppercase tracking-wider"
+                              asChild
+                            >
+                              <Link to={heroPrimary.actionUrl}>
+                                {heroPrimary.actionLabel} <ArrowUpRight className="ml-2 h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </article>
                   </Link>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                    {secondary.map((a: any, i: number) => (
-                      <Link 
-                        key={slugOf(a) + i} 
-                        to={`/article/${slugOf(a)}`} 
-                        className="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-xl transition-all duration-300"
-                      >
-                        <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center overflow-hidden">
-                          <img 
-                            src={imgOf(a)} 
-                            alt={titleOf(a)} 
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  {heroSecondary.length > 0 && (
+                    <div className="flex flex-col gap-4">
+                      {heroSecondary.map((story, index) => (
+                        <Link key={`${story.slug}-${index}`} to={`/article/${story.slug}`} className="group">
+                          <article className="flex gap-4 rounded-2xl border border-gray-200 bg-white/95 p-5 shadow-sm hover:shadow-xl transition-all duration-300">
+                            <div className="relative w-28 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100">
+                              <img
+                                src={story.image}
+                                alt={story.title}
+                                className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+                              />
+                            </div>
+                            <div className="flex-1 space-y-3">
+                              <Badge
+                                variant="outline"
+                                className="border-none text-xs font-semibold uppercase tracking-wide"
+                                style={{ color: story.accentColor, backgroundColor: `${story.accentColor}1a` }}
+                              >
+                                {story.badge}
+                              </Badge>
+                              <h4 className="text-lg font-bold leading-snug line-clamp-2 group-hover:text-insightRed transition-colors">
+                                {story.title}
+                              </h4>
+                              {story.summary && (
+                                <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                                  {story.summary}
+                                </p>
+                              )}
+                              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 font-medium">
+                                {story.date && (
+                                  <span className="flex items-center gap-1.5">
+                                    <Calendar className="h-3.5 w-3.5" />
+                                    {story.date}
+                                  </span>
+                                )}
+                                <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                {story.author}
+                              </div>
+                            </div>
+                          </article>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Latest News Grid */}
+            {secondaryStories.length > 0 && (
+              <section>
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="h-1 w-8 bg-insightRed rounded-full" />
+                  <h2 className="text-3xl font-black tracking-tight">Latest News</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {secondaryStories.map((article: any, index: number) => (
+                    <Link
+                      key={slugOf(article) + index}
+                      to={`/article/${slugOf(article)}`}
+                      className="group"
+                    >
+                      <Card className="h-full overflow-hidden border border-gray-200 hover:border-insightRed shadow-md hover:shadow-2xl transition-all duration-300">
+                        <div className="aspect-[16/10] bg-gray-900 flex items-center justify-center overflow-hidden">
+                          <img
+                            src={imgOf(article)}
+                            alt={titleOf(article)}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         </div>
-                        <div className="p-5">
-                          <Badge variant="outline" className="mb-2 text-xs">
-                            {categoryOf(a)}
-                          </Badge>
-                          <h3 className="font-bold text-lg line-clamp-2 group-hover:text-insightRed transition-colors mb-2">
-                            {titleOf(a)}
-                          </h3>
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-                            {excerptOf(a)}
-                          </p>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {dateOf(a)}
+                        <CardContent className="p-6 space-y-4">
+                          <div className="flex items-center justify-between gap-2">
+                            <Badge variant="outline" className="text-xs font-semibold uppercase tracking-wide">
+                              {categoryOf(article)}
+                            </Badge>
+                            <span className="text-xs text-gray-500 font-medium">{dateOf(article)}</span>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </article>
-              ) : (
-                <div className="text-center py-12 text-gray-500">No featured articles available</div>
-              )}
-            </div>
+                          <h3 className="text-xl font-bold line-clamp-2 group-hover:text-insightRed transition-colors leading-tight">
+                            {titleOf(article)}
+                          </h3>
+                          <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                            {excerptOf(article)}
+                          </p>
+                          <div className="flex items-center text-insightRed text-sm font-bold pt-2 group-hover:gap-2 transition-all">
+                            Read more <ChevronRight className="ml-1 h-4 w-4" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
 
-            {/* Right Sidebar - Magazine & Trending */}
-            <aside className="lg:col-span-4 space-y-6">
-              {latestMagazine && (
-                <div className="bg-gradient-to-br from-insightBlack to-gray-900 rounded-2xl p-6 text-white shadow-2xl">
-                  <div className="flex items-center gap-2 mb-4">
+            {/* Category Sections with Cards */}
+            {categories.length > 0 && (
+              <section className="space-y-12">
+                {categories.slice(0, 3).map((category: any) => {
+                  const categoryArticles = (categoryBreakdown[category.name] || []).slice(0, 4);
+                  if (categoryArticles.length === 0) return null;
+
+                  return (
+                    <div key={category.id} className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-1 w-8 bg-insightRed rounded-full" />
+                          <h3 className="text-3xl font-black tracking-tight">{category.name}</h3>
+                        </div>
+                        <Link
+                          to={`/category/${category.slug}`}
+                          className="text-insightRed hover:text-insightBlack font-bold flex items-center gap-1 text-sm uppercase tracking-wide transition-colors group"
+                        >
+                          View all <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {categoryArticles.map((article: any, idx: number) => (
+                          <Link
+                            key={slugOf(article) + idx}
+                            to={`/article/${slugOf(article)}`}
+                            className="group"
+                          >
+                            <div className="flex gap-5 p-5 border-2 border-gray-200 rounded-xl hover:border-insightRed hover:bg-insightRed/5 transition-all duration-300">
+                              <div className="w-28 h-20 flex-shrink-0 bg-gray-900 rounded-lg overflow-hidden shadow-md">
+                                <img
+                                  src={imgOf(article)}
+                                  alt={titleOf(article)}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                              </div>
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <div className="flex items-center gap-2 text-xs text-gray-600 font-bold uppercase tracking-wide">
+                                  <Calendar className="h-3 w-3" />
+                                  {dateOf(article)}
+                                </div>
+                                <h4 className="font-bold text-base line-clamp-2 group-hover:text-insightRed transition-colors leading-snug">
+                                  {titleOf(article)}
+                                </h4>
+                                <p className="text-sm text-gray-600 line-clamp-1">
+                                  {excerptOf(article)}
+                                </p>
+                              </div>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </section>
+            )}
+
+            {/* No Results State */}
+            {filteredArticles.length === 0 && (
+              <div className="text-center py-16">
+                <Newspaper className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-2xl font-bold text-gray-700 mb-2">No articles found</h3>
+                <p className="text-gray-500 mb-6">Try adjusting your search or filter criteria.</p>
+                <Button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSelectedCategory("");
+                  }}
+                  className="bg-insightRed hover:bg-insightRed/90"
+                >
+                  Clear filters
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* Sidebar */}
+          <aside className="space-y-8">
+            {/* Latest Magazine Card */}
+            {latestMagazine && (
+              <Card className="overflow-hidden border-2 border-insightRed/30 shadow-xl sticky top-24">
+                <div className="bg-gradient-to-br from-insightBlack to-insightBlack/90 text-white p-6 space-y-5">
+                  <div className="flex items-center gap-2">
                     <BookOpen className="h-5 w-5 text-insightRed" />
-                    <h3 className="font-bold text-lg uppercase tracking-wider">Latest Issue</h3>
+                    <h3 className="font-black uppercase tracking-widest text-sm">Latest Issue</h3>
                   </div>
+                  
                   <Link to="/magazine" className="block group">
-                    <div className="relative rounded-xl overflow-hidden mb-4 shadow-2xl">
-                      <img 
-                        src={latestMagazine.cover_image_url || "/placeholder.svg"} 
-                        alt={latestMagazine.title || "Latest Magazine"} 
-                        className="w-full aspect-[3/4] object-cover group-hover:scale-105 transition-transform duration-500"
+                    <div className="aspect-[3/4] bg-gray-300 rounded-xl overflow-hidden mb-5 shadow-2xl">
+                      <img
+                        src={latestMagazine.cover_image_url || "/placeholder.svg"}
+                        alt={latestMagazine.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <h4 className="font-bold text-xl mb-2 group-hover:text-insightRed transition-colors">
+                    <h4 className="text-xl font-black group-hover:text-amber-300 transition-colors line-clamp-2">
                       {latestMagazine.title}
                     </h4>
-                    <p className="text-white/70 text-sm mb-4 line-clamp-2">
+                    <p className="text-sm text-white/70 mt-3 line-clamp-2 leading-relaxed">
                       {latestMagazine.description}
                     </p>
-                    <Button className="w-full bg-insightRed hover:bg-insightRed/90 text-white font-semibold">
-                      Read Magazine <ChevronRight className="ml-2 h-4 w-4" />
+                  </Link>
+                  
+                  <Link to="/magazine" className="block pt-2">
+                    <Button className="w-full bg-insightRed hover:bg-insightRed/90 text-white font-bold uppercase tracking-wider">
+                      Read Magazine
                     </Button>
                   </Link>
                 </div>
-              )}
+              </Card>
+            )}
 
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-lg">
-                <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                  <h3 className="font-bold uppercase tracking-wider text-sm text-insightBlack">
-                    Most Read Today
-                  </h3>
+            {/* Trending Articles */}
+            {trendingArticles.length > 0 && (
+              <Card className="overflow-hidden border-2 border-gray-200 shadow-lg">
+                <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-5 border-b-2 border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-insightRed" />
+                    <h3 className="font-black uppercase tracking-widest text-sm">Trending Now</h3>
+                  </div>
                 </div>
-                <ul className="divide-y divide-gray-100">
-                  {mostRead.slice(0, 5).map((a: any, i: number) => (
-                    <li key={slugOf(a) + i} className="hover:bg-gray-50 transition-colors">
-                      <Link to={`/article/${slugOf(a)}`} className="flex gap-4 p-4 group">
-                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-insightRed/10 text-insightRed font-bold flex items-center justify-center text-sm">
-                          {i + 1}
+                <ul className="divide-y divide-gray-200">
+                  {trendingArticles.slice(0, 6).map((article: any, index: number) => (
+                    <li key={slugOf(article) + index} className="hover:bg-insightRed/5 transition-colors duration-200">
+                      <Link
+                        to={`/article/${slugOf(article)}`}
+                        className="flex gap-4 p-5 group"
+                      >
+                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-insightRed/10 text-insightRed font-bold flex items-center justify-center text-xs font-black">
+                          {index + 1}
                         </span>
-                        <div className="flex-1 min-w-0">
-                          <Badge variant="outline" className="mb-1.5 text-xs">
-                            {categoryOf(a)}
-                          </Badge>
-                          <h4 className="font-semibold text-sm line-clamp-2 group-hover:text-insightRed transition-colors mb-1">
-                            {titleOf(a)}
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <h4 className="text-sm font-bold line-clamp-2 group-hover:text-insightRed transition-colors leading-snug">
+                            {titleOf(article)}
                           </h4>
-                          <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Calendar className="h-3 w-3" />
-                            {dateOf(a)}
-                          </div>
+                          <div className="text-xs text-gray-500 font-medium">{dateOf(article)}</div>
                         </div>
                       </Link>
                     </li>
                   ))}
                 </ul>
-              </div>
-            </aside>
-          </div>
-        </div>
-      </section>
-
-      {/* Editor's Picks */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-insightBlack">Editor's Picks</h2>
-            <Link to="/articles" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto py-2 -mx-4 px-4">
-            {(featured && featured.length ? featured : latestGrid).map((a:any,i:number)=>(
-              <Link key={slugOf(a)+i} to={`/article/${slugOf(a)}`} className="min-w-[260px] max-w-[320px] bg-white rounded-lg shadow group overflow-hidden">
-                <div className="aspect-[16/10] bg-black flex items-center justify-center">
-                  <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-cover" />
-                </div>
-                <div className="p-3">
-                  <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
-                  <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{titleOf(a)}</h3>
-                  <div className="text-xs text-gray-400 mt-2 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Top Stories */}
-      <section className="py-10 bg-gray-50">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-insightBlack">Top Stories</h2>
-            <Link to="/articles" className="text-sm font-semibold text-insightRed hover:text-insightBlack">See all</Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(() => {
-              const sorted = [...articles].filter(Boolean).sort((a:any,b:any)=>new Date(b?.date||0).getTime()-new Date(a?.date||0).getTime());
-              const top = sorted.slice(0,6);
-              return top.map((a:any,i:number)=> (
-                <Link key={slugOf(a)+i} to={`/article/${slugOf(a)}`}>
-                  <Card className="overflow-hidden group hover:shadow-lg transition">
-                    <div className="aspect-[16/10] bg-black flex items-center justify-center">
-                      <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-contain"/>
-                    </div>
-                    <CardContent className="pt-4">
-                      <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
-                      <h3 className="font-semibold line-clamp-2 group-hover:text-insightRed">{titleOf(a)}</h3>
-                      <div className="text-xs text-gray-400 mt-2 flex items-center gap-2"><Calendar className="h-3 w-3"/>{dateOf(a)}</div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))
-            })()}
-          </div>
-        </div>
-      </section>
-
-      {/* Category sections */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {(() => {
-              const sorted = [...articles].filter(Boolean).sort((a:any,b:any)=>new Date(b?.date||0).getTime()-new Date(a?.date||0).getTime());
-              const cats = Array.from(new Set(sorted.map(s=>s.category).filter(Boolean))).slice(0,3);
-              return cats.map((cat:string)=> {
-                const items = sorted.filter(s=>s.category===cat).slice(0,4);
-                return (
-                  <div key={cat} className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-semibold text-lg">{cat}</h4>
-                      <Link to={`/category/${encodeURIComponent(cat)}`} className="text-sm text-insightRed">View all</Link>
-                    </div>
-                    <div className="space-y-3">
-                      {items.map((it:any,i:number)=> (
-                        <Link key={slugOf(it)+i} to={`/article/${slugOf(it)}`} className="flex items-center gap-3 group">
-                          <img src={imgOf(it)} alt={titleOf(it)} className="w-20 h-14 object-contain bg-black rounded"/>
-                          <div>
-                            <h5 className="font-medium line-clamp-2 group-hover:text-insightRed">{titleOf(it)}</h5>
-                            <div className="text-xs text-gray-400">{dateOf(it)}</div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-insightBlack line-clamp-2">{titleOf(story)}</h3>
-                  <p className="text-sm text-gray-600 line-clamp-3 flex-1">{excerptOf(story)}</p>
-                  <div className="text-xs text-gray-400 flex items-center gap-2">
-                    <Calendar className="h-3 w-3" />
-                    {dateOf(story)}
-                  </div>
-                </CardContent>
               </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+            )}
 
-      {/* Leadership Spotlight */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-insightBlack">Leadership Spotlight</h2>
-            <Link to="/leadership" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {leadershipSpotlight.map((leader: any) => (
-              <Card key={leader.id} className="group overflow-hidden border border-gray-200">
-                <div className="h-56 bg-gray-100 flex items-center justify-center">
-                  <img
-                    src={leader.image_url || "/placeholder.svg"}
-                    alt={leader.name}
-                    className="max-h-full max-w-full object-contain"
+            {/* Newsletter Signup */}
+            <Card className="overflow-hidden bg-gradient-to-br from-insightRed to-insightRed/90 text-white border-0 shadow-xl">
+              <CardContent className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black">Newsletter</h3>
+                  <p className="text-sm text-white/90 leading-relaxed">
+                    Get the latest business news delivered to your inbox daily.
+                  </p>
+                </div>
+                <div className="space-y-3 pt-2">
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    className="bg-white/20 border border-white/30 text-white placeholder:text-white/60 rounded-lg font-medium focus:bg-white/30 focus:border-white transition-all"
                   />
+                  <Button className="w-full bg-white text-insightRed hover:bg-gray-100 font-bold uppercase tracking-wider">
+                    Subscribe
+                  </Button>
                 </div>
-                <CardContent className="p-6 space-y-3">
-                  <div className="text-xs uppercase tracking-wide text-insightRed font-semibold">Leadership</div>
-                  <h3 className="text-xl font-semibold text-insightBlack group-hover:text-insightRed transition">
-                    {leader.name}
-                  </h3>
-                  <p className="text-sm text-gray-600">{leader.title}</p>
-                  {leader.company && <p className="text-xs text-gray-500">{leader.company}</p>}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Links */}
+            <Card className="border-2 border-gray-200">
+              <CardContent className="p-6 space-y-4">
+                <h3 className="font-black text-lg uppercase tracking-wide">Quick Links</h3>
+                <nav className="space-y-3">
+                  <Link to="/magazine" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    Magazine
+                  </Link>
+                  <Link to="/articles" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    All Articles
+                  </Link>
+                  <Link to="/leadership" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    Leadership
+                  </Link>
+                  <Link to="/about" className="block text-insightRed hover:text-insightBlack font-bold text-sm uppercase tracking-wider transition-colors group flex items-center gap-2">
+                    <span className="h-1 w-1 bg-insightRed rounded-full" />
+                    About Us
+                  </Link>
+                </nav>
+              </CardContent>
+            </Card>
+          </aside>
         </div>
-      </section>
+      </div>
 
-      {/* Press Releases */}
-      <section className="py-12 bg-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-insightBlack">Press Releases</h2>
-            <Link to="/press-releases" className="text-sm font-semibold text-insightRed hover:text-insightBlack">View all</Link>
-          </div>
-          <div className="lg:col-span-7">
-            <div className="rounded-3xl border border-gray-200 bg-gray-50 p-6 flex flex-col md:flex-row gap-6 items-center">
-              <div className="md:w-72 w-full">
-                <div className="aspect-[3/4] rounded-2xl bg-white shadow-lg flex items-center justify-center overflow-hidden">
-                  <img
-                    src={latestMagazine?.cover_image_url || "/placeholder.svg"}
-                    alt={latestMagazine?.title || "Latest magazine"}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-              <div className="flex-1 space-y-4 text-center md:text-left">
-                <h3 className="text-2xl font-semibold text-insightBlack">
-                  {latestMagazine?.title || "Our premium magazine experience"}
-                </h3>
-                <p className="text-gray-600">
-                  {latestMagazine?.description || "Dive into strategic narratives, leadership dialogues, and architecture diagrams that show how bold ideas become disciplined execution."}
-                </p>
-                <div className="text-xs uppercase tracking-wide text-gray-500">
-                  {latestMagazine?.release_date ? `Published ${dateOf(latestMagazine)}` : "Digital + interactive formats"}
-                </div>
-                <Link to={latestMagazine ? `/magazine/${latestMagazine.slug}` : "/magazine"} className="inline-flex items-center text-insightRed font-semibold">
-                  Open the latest issue
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-16 bg-insightRed text-white">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div>
-            <h3 className="text-3xl font-bold mb-3">Subscribe to {settings.companyName}</h3>
-            <p className="text-white/90 mb-5">Monthly strategies and interviews for leaders. No noise, just signal.</p>
-            <Link to="/magazine">
-              <Button size="lg" className="bg-white text-insightRed hover:bg-gray-100">
-                <BookOpen className="mr-2 h-5 w-5"/> Explore Issues
-              </Button>
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {/* Dark CTA */}
-      <section className="py-20 bg-insightBlack text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6">
-            <h2 className="text-3xl md:text-4xl font-bold">Stay accountable to the future you are building</h2>
-            <p className="text-white/80 text-lg">
-              Subscribe to The CIO Vision and get the weekly Field Notes briefing—strategies tested by operators, distilled for leaders who demand momentum.
+      {/* Newsletter CTA Section */}
+      <section className="bg-insightBlack text-white py-16 border-t border-insightRed/20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-5xl font-black leading-tight">Stay Updated</h2>
+            <p className="text-lg text-white/80 leading-relaxed">
+              Never miss breaking news, industry insights, or exclusive stories. Subscribe to {settings?.companyName || "our"} newsletter today.
             </p>
-            <ul className="space-y-3 text-sm text-white/80">
-              <li className="flex items-start gap-3">
-                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-                  <Users className="h-4 w-4" />
-                </span>
-                Stories that elevate people-first transformation.
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-                  <Layers className="h-4 w-4" />
-                </span>
-                Process maps and accountability scorecards you can deploy immediately.
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
-                  <TrendingUp className="h-4 w-4" />
-                </span>
-                Growth signals sourced from the actions of past customers.
-              </li>
-            </ul>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/magazine">
-                <Button size="lg" className="bg-insightRed text-white hover:bg-insightRed/90">
-                  Subscribe now
-                </Button>
-              </Link>
-              <Link to="/contact" className="inline-flex items-center text-white font-semibold">
-                Partner with our newsroom
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
           </div>
-          <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur p-8 space-y-6">
-            <h3 className="text-2xl font-semibold">Inside this week's Field Notes</h3>
-            <div className="space-y-4 text-sm text-white/80">
-              <div className="border-l-4 border-insightRed pl-4">
-                <p className="font-semibold text-white">Culture as an engineering discipline</p>
-                <p className="text-white/70 mt-1">
-                  Three operating cadences high-growth teams use to turn values into measurable behaviors.
-                </p>
-              </div>
-              <div className="border-l-4 border-insightRed pl-4">
-                <p className="font-semibold text-white">Customer co-creation rituals</p>
-                <p className="text-white/70 mt-1">
-                  Workshops and retrospectives that convert feedback into product roadmaps your teams can rally behind.
-                </p>
-              </div>
-              <div className="border-l-4 border-insightRed pl-4">
-                <p className="font-semibold text-white">Accountability scorecard blueprint</p>
-                <p className="text-white/70 mt-1">
-                  A step-by-step template for tracking commitments across marketing, sales, and delivery squads.
-                </p>
-              </div>
-            </div>
+          <div className="flex gap-3 max-w-sm mx-auto">
+            <Input
+              type="email"
+              placeholder="Enter your email"
+              className="bg-white/10 border border-white/30 text-white placeholder:text-white/50 rounded-lg focus:border-insightRed transition-all"
+            />
+            <Button className="bg-insightRed hover:bg-insightRed/90 text-white font-bold uppercase tracking-wider px-8">
+              Subscribe
+            </Button>
           </div>
         </div>
       </section>

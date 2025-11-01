@@ -59,6 +59,42 @@ export type Database = {
         }
         Relationships: []
       }
+      categories: {
+        Row: {
+          color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          order_index: number
+          slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          order_index?: number
+          slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       client_logos: {
         Row: {
           created_at: string | null
@@ -258,6 +294,115 @@ export type Database = {
             columns: ["featured_article_id"]
             isOneToOne: false
             referencedRelation: "articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_section_items: {
+        Row: {
+          action_label: string | null
+          action_url: string | null
+          article_slug: string | null
+          badge: string | null
+          created_at: string | null
+          featured: boolean
+          id: string
+          image_url: string | null
+          order_index: number
+          section_id: string
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          action_label?: string | null
+          action_url?: string | null
+          article_slug?: string | null
+          badge?: string | null
+          created_at?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          section_id: string
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          action_label?: string | null
+          action_url?: string | null
+          article_slug?: string | null
+          badge?: string | null
+          created_at?: string | null
+          featured?: boolean
+          id?: string
+          image_url?: string | null
+          order_index?: number
+          section_id?: string
+          summary?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_section_items_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "home_sections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_sections: {
+        Row: {
+          accent_color: string | null
+          action_label: string | null
+          action_url: string | null
+          background_image_url: string | null
+          category_id: string | null
+          created_at: string | null
+          id: string
+          internal_name: string
+          kicker: string | null
+          layout_type: string
+          order_index: number
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          accent_color?: string | null
+          action_label?: string | null
+          action_url?: string | null
+          background_image_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          internal_name: string
+          kicker?: string | null
+          layout_type?: string
+          order_index?: number
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          accent_color?: string | null
+          action_label?: string | null
+          action_url?: string | null
+          background_image_url?: string | null
+          category_id?: string | null
+          created_at?: string | null
+          id?: string
+          internal_name?: string
+          kicker?: string | null
+          layout_type?: string
+          order_index?: number
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_sections_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
