@@ -8,6 +8,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { Calendar, ChevronRight, Newspaper, BookOpen, ArrowRight, Users, Briefcase, Layers, Shield, TrendingUp, LineChart, Target, Handshake } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 function imgOf(a: any) { return a?.image_url || "/placeholder.svg"; }
 function titleOf(a: any) { return a?.title || "Untitled"; }
