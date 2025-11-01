@@ -56,6 +56,73 @@ const Home = () => {
     return { supportingStories, insightStories, leadershipSpotlight, pressHighlights };
   }, [articles, featured, leadership, press]);
 
+  const tieredTracks = useMemo(() => {
+    const ordered = [...articles]
+      .filter(Boolean)
+      .sort((a: any, b: any) => new Date(b?.date || 0).getTime() - new Date(a?.date || 0).getTime());
+
+    const tiers = [
+      {
+        title: "C-Suite Visionaries",
+        description: "What enterprise leaders are prioritizing next quarter.",
+        icon: Shield,
+      },
+      {
+        title: "VP Playmakers",
+        description: "Operational wins from the teams turning strategy into motion.",
+        icon: LineChart,
+      },
+      {
+        title: "Director's Toolkit",
+        description: "Execution frameworks and scorecards directors rely on.",
+        icon: Target,
+      },
+      {
+        title: "Founder Files",
+        description: "Stories from entrepreneurs scaling bold ideas responsibly.",
+        icon: Handshake,
+      },
+    ];
+
+    return tiers
+      .map((tier, index) => ({
+        ...tier,
+        stories: ordered.slice(index * 3, index * 3 + 3),
+      }))
+      .filter((tier) => tier.stories.length > 0);
+  }, [articles]);
+
+  const articleCount = articles.length;
+  const leadershipCount = leadership.length;
+  const magazineCount = magazines.length;
+  const pressCount = press.length;
+
+  const impactHighlights = useMemo(
+    () => [
+      {
+        title: "Executive Features",
+        stat: `${Math.max(articleCount, 12)}+`,
+        description: "Profiles on the changemakers re-architecting their industries.",
+      },
+      {
+        title: "Boardroom Voices",
+        stat: `${Math.max(leadershipCount, 6)}+`,
+        description: "Interviews with C-level leaders, investors, and disruptors.",
+      },
+      {
+        title: "Strategy Playbooks",
+        stat: `${Math.max(pressCount, 10)}+`,
+        description: "Frameworks directors and VPs deploy to earn measurable growth.",
+      },
+      {
+        title: "Magazine Issues",
+        stat: `${Math.max(magazineCount, 4)}+`,
+        description: "Premium editions documenting transformation in motion.",
+      },
+    ],
+    [articleCount, leadershipCount, magazineCount, pressCount]
+  );
+
   const growthPillars = [
     {
       title: "People",
