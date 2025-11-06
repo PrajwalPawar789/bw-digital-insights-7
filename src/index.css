@@ -294,10 +294,15 @@
   transition: transform 0.35s ease;
 }
 
-.mag-scroller-item img {
+.mag-scroller-item img,
+.object-fit-middle {
   object-fit: contain;
   background: transparent;
   border-radius: 10px;
+  display: block;
+  margin: auto;
+  height: 100%;
+  width: 100%;
 }
 
 /* overlay label */

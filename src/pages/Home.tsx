@@ -71,15 +71,19 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left rail: Most Read */}
           <aside className="lg:col-span-3 space-y-4">
-            <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-              <div className="px-5 py-3 border-b border-gray-200 font-semibold uppercase tracking-wide text-sm text-insightBlack">Most Read</div>
-              <ul className="divide-y divide-gray-200">
+              <div className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
+              <div className="px-5 py-3 border-b border-gray-200 font-semibold uppercase tracking-wide text-sm text-insightBlack flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-insightRed" />
+                Most Read
+              </div>
+              <ul className="divide-y divide-gray-200 [&>*]:border-b [&>*]:border-gray-200 [&>*:last-child]:border-b-0">
                 {mostRead.map((a: any, i: number) => (
                   <li key={slugOf(a) + i} className="p-4 hover:bg-white transition">
-                    <Link to={`/article/${slugOf(a)}`} className="flex gap-3 group items-start">
-                      <span className="mt-1 inline-block w-6 h-6 rounded-full bg-insightRed/10 text-insightRed text-xs font-bold flex items-center justify-center">{i + 1}</span>
-                      <img src={imgOf(a)} alt={titleOf(a)} className="w-20 h-14 rounded object-contain bg-gray-100 flex-shrink-0" />
-                      <div className="leading-snug">
+                    <Link to={`/article/${slugOf(a)}`} className="flex gap-4 group items-start">
+                      <div className="w-32 h-24 overflow-hidden rounded bg-gray-100 flex-shrink-0">
+                        <img src={imgOf(a)} alt={titleOf(a)} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="leading-snug flex-1">
                         <div className="text-xs text-gray-500 mb-1">{categoryOf(a)}</div>
                         <h4 className="font-semibold group-hover:text-insightRed line-clamp-2">{titleOf(a)}</h4>
                         <div className="text-xs text-gray-500 mt-1">{dateOf(a)}</div>

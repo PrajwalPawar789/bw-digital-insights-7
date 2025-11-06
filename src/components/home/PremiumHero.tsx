@@ -80,7 +80,8 @@ const PremiumHero = ({ latestMagazine, magazineData = [], companyName = "Insight
                 <img
                   src={latestMagazine?.cover_image_url || magazineData?.[0]?.cover_image_url || '/placeholder.svg'}
                   alt={latestMagazine?.title || magazineData?.[0]?.title || 'Latest Issue'}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-fit-middle"
+                  style={{ objectFit: 'contain', objectPosition: 'center' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <Badge className="absolute top-4 left-4 bg-insightRed text-white">Latest Issue</Badge>
