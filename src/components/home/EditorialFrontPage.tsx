@@ -9,7 +9,7 @@ function imgOf(a: any) {
   return a?.image_url || '/placeholder.svg';
 }
 function titleOf(a: any) {
-  return a?.title || 'Untitled';
+  return a?.title || '     ';
 }
 function slugOf(a: any) {
   return a?.slug || '';

@@ -15,15 +15,6 @@ const MagazineDetail = () => {
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [initialPage, setInitialPage] = useState<number | undefined>(undefined);
 
-  // Add console logs for debugging
-  useEffect(() => {
-    console.log("Magazine slug:", slug);
-    console.log("Magazine data:", magazine);
-    console.log("Magazine articles:", magazineArticles);
-    console.log("Loading state:", isLoading);
-    console.log("Error state:", error);
-  }, [slug, magazine, magazineArticles, isLoading, error]);
-
   const toggleFullScreen = () => setFullScreen(!fullScreen);
 
   if (isLoading) {

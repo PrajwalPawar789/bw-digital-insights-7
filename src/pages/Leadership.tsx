@@ -48,7 +48,7 @@ const Leadership = () => {
     <div className="min-h-screen bg-white">
 
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-12 sm:px-6 lg:px-8">
 
         {/* Grid */}
         <section className="mb-12">

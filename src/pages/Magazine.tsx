@@ -256,7 +256,7 @@ const Magazine = () => {
             </div>
 
             <div className="w-full lg:w-1/2">
-              <div className="relative overflow-visible rounded-xl shadow-lg">
+              <div className="relative overflow-visible rounded-xl">
                 <div ref={scrollerRef} onMouseMove={onScrollerMouseMove} onMouseLeave={onScrollerLeave} onScroll={() => updateScales()} className="scroller-strip flex gap-6 overflow-x-auto py-6 px-6 no-scrollbar">
                   {(featuredMagazines.length ? featuredMagazines : allMagazines.slice(0,6)).map((m: any, idx:number) => (
                     <Link key={m.id} to={`/magazine/${m.slug}`} className="mag-scroller-item relative min-w-[220px] w-[220px] shrink-0 group rounded-lg overflow-visible bg-transparent">
@@ -324,26 +324,42 @@ const Magazine = () => {
             </Card>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {currentMagazines.length > 0 ? currentMagazines.map((magazine:any)=> (
-                <Card key={magazine.id} className="group relative overflow-hidden rounded-xl hover:shadow-xl transition">
-                  <div className="aspect-[3/4] bg-white overflow-hidden flex items-center justify-center">
-                    <img src={magazine.cover_image_url || '/placeholder.svg'} alt={magazine.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform" />
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold line-clamp-2 text-insightBlack">{magazine.title}</h3>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs text-gray-400">{magazine.publish_date ? new Date(magazine.publish_date).toLocaleDateString() : ''}</div>
-                        <Badge className="mt-2 bg-insightRed text-white">{magazine.issue_number ? `Issue ${magazine.issue_number}` : 'Latest'}</Badge>
-                      </div>
-                    </div>
-
-                  </CardContent>
-                </Card>
-              )) : (
+            {/* Grid */}
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  {currentMagazines.length > 0 ? currentMagazines.map((magazine:any)=> (
+    <Link
+      key={magazine.id}
+      to={`/magazine/${magazine.slug}`}
+      className="block group"
+    >
+      <Card className="relative overflow-hidden rounded-xl hover:shadow-xl transition">
+        <div className="aspect-[3/4] bg-white overflow-hidden flex items-center justify-center">
+          <img
+            src={magazine.cover_image_url || '/placeholder.svg'}
+            alt={magazine.title}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+          />
+        </div>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold line-clamp-2 text-insightBlack group-hover:text-insightRed transition-colors">
+                {magazine.title}
+              </h3>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-gray-400">
+                {magazine.publish_date ? new Date(magazine.publish_date).toLocaleDateString() : ''}
+              </div>
+              <Badge className="mt-2 bg-insightRed text-white">
+                {magazine.issue_number ? `Issue ${magazine.issue_number}` : 'Latest'}
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  )) : (
                 <Card className="p-12 text-center">
                   <BookOpen className="h-16 w-16 mx-auto mb-4 text-gray-400" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">No magazines found</h3>
